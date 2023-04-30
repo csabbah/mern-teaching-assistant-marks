@@ -6,10 +6,11 @@ const Marks = () => {
 
   // TODO - NEED TO ADD A NEW CLASS ROW (TO RENDER ABOVE UNIT)
   // TODO - UNITS ARE THE SECTIONS IN A CLASS (THERE ARE MULTIPLE UNITS) IN A BIOLODY CLASS
-  // TODO Add the edit function for criterias, projects and units (use contentEditable)
+  // TODO Add the edit function for units
+  // TODO You should be able to add a new project to a unit after the unit has been added
   // ? SERVER SETUP ?------?------?------?------?------?------?------?------?------?------?------?------
   // TODO Update Model (Need a Table and Student Model)
-  // TODO Table model has all the data required to build the data - including units, projects and their criteria
+  // TODO Table model should have all the data required to build the data - including units, projects and their criteria
   // TODO User model has the students name and grades
   // TODO Add the ability to post to DB
   // TODO Add the ability to edit/delete the data after it's been posted to DB
@@ -325,9 +326,8 @@ const Marks = () => {
     }
 
     // TODO Refactor this code
+    const { grades } = studentData;
     function calculateAverage() {
-      const { grades } = studentData;
-
       let KU = [];
       let A = [];
       let TI = [];
@@ -371,7 +371,7 @@ const Marks = () => {
         (sumOfTI ? sumOfTI : 0) +
         (sumOfC ? sumOfC : 0);
 
-      return average.toFixed(2);
+      return parseInt(average.toFixed(2));
     }
 
     // ? Render this last (this is the final mark column)
@@ -379,7 +379,12 @@ const Marks = () => {
       <td
         style={{
           border: tableProperties.border,
-          // backgroundColor: tableProperties.final.failing,
+          backgroundColor:
+            grades.length == 0
+              ? ""
+              : calculateAverage() < 50
+              ? tableProperties.final.failing
+              : calculateAverage() > 80 && tableProperties.final.top,
           width: "7%",
         }}
       >
@@ -513,7 +518,7 @@ const Marks = () => {
         (sumOfTI ? sumOfTI : 0) +
         (sumOfC ? sumOfC : 0);
 
-      return average.toFixed(2);
+      return parseInt(average.toFixed(2));
     }
 
     // ? Render this last (this is the final mark column)
@@ -521,7 +526,10 @@ const Marks = () => {
       <td
         style={{
           border: tableProperties.border,
-          // backgroundColor: tableProperties.final.failing,
+          backgroundColor:
+            calculateAverage() < 50
+              ? tableProperties.final.failing
+              : calculateAverage() > 80 && tableProperties.final.top,
           width: "7%",
         }}
       >
