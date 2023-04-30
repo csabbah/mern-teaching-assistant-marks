@@ -1,8 +1,6 @@
 import React, { useState, useEffect, cloneElement } from "react";
 
 const Marks = () => {
-  // TODO - NEED TO ADD A NEW CLASS ROW (TO RENDER ABOVE UNIT)
-  // TODO - UNITS ARE THE SECTIONS IN A CLASS (THERE ARE MULTIPLE UNITS) IN A BIOLODY CLASS
   // TODO Add the edit function for criterias, projects and units (use contentEditable)
   // ?------?------?------?------?------?------?------?------?------?------?------?------?------
   // TODO Update Model (Need a Table and Student Model)
@@ -149,14 +147,10 @@ const Marks = () => {
 
     return criteriaLabels;
   };
+
+  // TODO In the future, we would render the allStudents data array
   const [allStudents, setAllStudents] = useState([]);
 
-  // TODO Update repetitive code, renderBlankRow and renderStudentGrades are very similar, differentiate between them by adding a param when calling the functions
-
-  // TODO Add the ability to paste a large set of data to populate the table
-
-  // TODO Future update - Try to re-implement on blur for the input field
-  // TODO The issue occurs because you try to clear input field after adding new student
   // ? THE FULL SINGLE DATA ROW
   const renderBlankRow = () => {
     const rowData = [];
@@ -165,30 +159,23 @@ const Marks = () => {
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
+        onBlur={(e) => {
+          setStudentData({
+            ...studentData,
+            id: uniqueId,
+            name: e.target.textContent,
+          });
+        }}
         style={{
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           width: "25%",
         }}
+        contentEditable
+        suppressContentEditableWarning
       >
-        <input
-          onChange={(e) => {
-            setStudentData({
-              ...studentData,
-              id: uniqueId,
-              name: e.target.value,
-            });
-          }}
-          style={{
-            width: "100%",
-            border: "none",
-            backgroundColor: "transparent",
-            outline: "none",
-            textAlign: "center",
-          }}
-          value={studentData.name ? studentData.name : ""}
-        ></input>
+        {studentData.name ? studentData.name : ""}
       </td>
     );
 
@@ -217,53 +204,46 @@ const Marks = () => {
                 borderLeftColor: "rgba(0,0,0,1)",
                 borderRightColor: "rgba(0,0,0,1)",
               }}
+              onBlur={(e) => {
+                const mark = e.target.textContent;
+                if (grade) {
+                  // Update the mark
+                  const updatedGrades = studentData.grades.map((g) => {
+                    if (g.id === grade.id) {
+                      return {
+                        ...g,
+                        mark,
+                      };
+                    }
+                    return g;
+                  });
+                  setStudentData({
+                    ...studentData,
+                    grades: updatedGrades,
+                  });
+                } else {
+                  // Add the grade
+                  setStudentData({
+                    ...studentData,
+                    grades: [
+                      ...studentData.grades,
+                      {
+                        id: criteria.id,
+                        unit: singleUnit.title,
+                        project: project.title,
+                        criteria: criteria.label,
+                        weight: criteria.weight,
+                        letter: criteria.letter,
+                        mark,
+                      },
+                    ],
+                  });
+                }
+              }}
+              contentEditable
+              suppressContentEditableWarning
             >
-              <input
-                onChange={(e) => {
-                  const mark = e.target.value;
-                  if (grade) {
-                    // Update the mark
-                    const updatedGrades = studentData.grades.map((g) => {
-                      if (g.id === grade.id) {
-                        return {
-                          ...g,
-                          mark,
-                        };
-                      }
-                      return g;
-                    });
-                    setStudentData({
-                      ...studentData,
-                      grades: updatedGrades,
-                    });
-                  } else {
-                    // Add the grade
-                    setStudentData({
-                      ...studentData,
-                      grades: [
-                        ...studentData.grades,
-                        {
-                          id: criteria.id,
-                          unit: singleUnit.title,
-                          project: project.title,
-                          criteria: criteria.label,
-                          weight: criteria.weight,
-                          letter: criteria.letter,
-                          mark,
-                        },
-                      ],
-                    });
-                  }
-                }}
-                style={{
-                  width: "100%",
-                  border: "none",
-                  backgroundColor: "transparent",
-                  outline: "none",
-                  textAlign: "center",
-                }}
-                value={grade ? grade.mark : ""}
-              ></input>
+              {grade && grade.mark}
             </td>
           );
         }
@@ -337,9 +317,7 @@ const Marks = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
-  // TODO Update the contentEditable, replace with the input setup in renderBlankRow function
   // TODO Need to update this to allow editing users data
-  // TODO Would need to simply update the allStudents array, we would check the student id and criteria id
   const renderStudentGrades = (student) => {
     const rowData = [];
 

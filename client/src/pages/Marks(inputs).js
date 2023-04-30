@@ -1,8 +1,6 @@
 import React, { useState, useEffect, cloneElement } from "react";
 
 const Marks = () => {
-  // TODO - NEED TO ADD A NEW CLASS ROW (TO RENDER ABOVE UNIT)
-  // TODO - UNITS ARE THE SECTIONS IN A CLASS (THERE ARE MULTIPLE UNITS) IN A BIOLODY CLASS
   // TODO Add the edit function for criterias, projects and units (use contentEditable)
   // ?------?------?------?------?------?------?------?------?------?------?------?------?------
   // TODO Update Model (Need a Table and Student Model)
@@ -149,14 +147,10 @@ const Marks = () => {
 
     return criteriaLabels;
   };
+
+  // TODO In the future, we would render the allStudents data array
   const [allStudents, setAllStudents] = useState([]);
 
-  // TODO Update repetitive code, renderBlankRow and renderStudentGrades are very similar, differentiate between them by adding a param when calling the functions
-
-  // TODO Add the ability to paste a large set of data to populate the table
-
-  // TODO Future update - Try to re-implement on blur for the input field
-  // TODO The issue occurs because you try to clear input field after adding new student
   // ? THE FULL SINGLE DATA ROW
   const renderBlankRow = () => {
     const rowData = [];
@@ -262,7 +256,7 @@ const Marks = () => {
                   outline: "none",
                   textAlign: "center",
                 }}
-                value={grade ? grade.mark : ""}
+                value={grade ? grade.mark : 0}
               ></input>
             </td>
           );
@@ -337,9 +331,7 @@ const Marks = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
-  // TODO Update the contentEditable, replace with the input setup in renderBlankRow function
   // TODO Need to update this to allow editing users data
-  // TODO Would need to simply update the allStudents array, we would check the student id and criteria id
   const renderStudentGrades = (student) => {
     const rowData = [];
 
