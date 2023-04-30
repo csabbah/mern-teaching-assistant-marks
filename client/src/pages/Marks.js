@@ -679,7 +679,10 @@ const Marks = () => {
                       onChange={(e) => {
                         const updated = allCriterias.map((stateCriteria) => {
                           if (stateCriteria.id === criteria.id) {
-                            return { ...stateCriteria, weight: e.target.value };
+                            return {
+                              ...stateCriteria,
+                              weight: parseInt(e.target.value),
+                            };
                           }
                           return stateCriteria;
                         });
@@ -737,7 +740,6 @@ const Marks = () => {
                       backgroundColor: "rgba(0,0,0,0.10)",
                     }}
                   >
-                    <button>Edit</button>
                     <button
                       onClick={() => {
                         deleteProject(i);
@@ -746,13 +748,48 @@ const Marks = () => {
                       Delete
                     </button>
                     <div style={{ display: "flex" }}>
-                      <p style={{ margin: 0, fontSize: 18 }}>{project.title}</p>
+                      <p>Project Title:</p>
+                      <input
+                        defaultValue={project.title}
+                        onChange={(e) => {
+                          const updatedProject = {
+                            ...project,
+                            title: e.target.value.trim(),
+                          };
+                          const updatedProjects = [...projects];
+                          updatedProjects[i] = updatedProject;
+                          setProjects(updatedProjects);
+                        }}
+                      ></input>
                     </div>
+                    <p style={{ margin: 0 }}>Criterias:</p>
                     {project.criterias.map((criteria, i) => {
                       return (
-                        <p key={i} style={{ margin: 0, fontSize: 14 }}>
-                          {criteria.label}({criteria.letter}) {criteria.weight}%
-                        </p>
+                        <>
+                          <p key={i} style={{ margin: 0, fontSize: 14 }}>
+                            {criteria.label}({criteria.letter})
+                          </p>
+                          <input
+                            style={{ width: 50 }}
+                            defaultValue={criteria.weight}
+                            onChange={(e) => {
+                              const updated = project.criterias.map(
+                                (stateCriteria) => {
+                                  if (stateCriteria.id === criteria.id) {
+                                    return {
+                                      ...stateCriteria,
+                                      weight: parseInt(e.target.value),
+                                    };
+                                  }
+                                  return stateCriteria;
+                                }
+                              );
+
+                              project.criterias = updated;
+                            }}
+                          ></input>
+                          %
+                        </>
                       );
                     })}
                   </div>
@@ -853,7 +890,7 @@ const Marks = () => {
         )}
         {units.length >= 1 && (
           <table
-            className="table"
+            className="table table-responsive "
             style={{ border: "1px solid rgba(0,0,0,0.2)" }}
           >
             {renderTableHead()}
