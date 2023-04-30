@@ -1,10 +1,13 @@
 import React, { useState, useEffect, cloneElement } from "react";
 
 const Marks = () => {
+  // TODO - IMPORTANT - Instead of rendering multiple nested for loops across multiple functions...
+  // TODO Take the one with ALL the data and simply render the rows in each nested loop
+
   // TODO - NEED TO ADD A NEW CLASS ROW (TO RENDER ABOVE UNIT)
   // TODO - UNITS ARE THE SECTIONS IN A CLASS (THERE ARE MULTIPLE UNITS) IN A BIOLODY CLASS
   // TODO Add the edit function for criterias, projects and units (use contentEditable)
-  // ?------?------?------?------?------?------?------?------?------?------?------?------?------
+  // ? SERVER SETUP ?------?------?------?------?------?------?------?------?------?------?------?------
   // TODO Update Model (Need a Table and Student Model)
   // TODO Table model has all the data required to build the data - including units, projects and their criteria
   // TODO User model has the students name and grades
@@ -31,6 +34,7 @@ const Marks = () => {
     ],
   };
 
+  // Set the initial unitThemeColor to a default 'white' color
   const [unitThemeColor, setUnitThemeColor] = useState(
     tableProperties.colors[0]
   );
@@ -50,12 +54,20 @@ const Marks = () => {
     weight: 0,
   });
 
-  const [allCriterias, setAllCriterias] = useState([]);
-
-  const deleteCriteria = (criteriaIndex) => {
+  const [criteriaOptions, setCriteriaOptions] = useState([
+    "Knowledge and Understanding",
+    "Communication",
+    "Application",
+    "Thinking and Inquiry",
+  ]);
+  const deleteCriteria = (criteriaIndex, criteriaLabel) => {
     const updatedCriterias = allCriterias.filter((_, i) => i !== criteriaIndex);
     setAllCriterias(updatedCriterias);
+    setCriteriaOptions([...criteriaOptions, criteriaLabel]);
   };
+
+  const [allCriterias, setAllCriterias] = useState([]);
+
   const deleteProject = (projectIndex) => {
     const updateProjects = projects.filter((_, i) => i !== projectIndex);
     setProjects(updateProjects);
@@ -70,10 +82,15 @@ const Marks = () => {
 
   const [displayErr, setDisplayErr] = useState({ reveal: false, msg: "" });
 
-  const renderUnitRow = () => {
+  const renderTableHead = () => {
+    const criteriaLabels = [];
     const allUnits = [];
+    const projects = [];
 
+    // iterate over all units
     for (let i = 0; i < units.length; i++) {
+      const singleUnit = units[i];
+
       let lengthOfCriterias = 0;
       for (let j = 0; j < units[i].projects.length; j++) {
         lengthOfCriterias += units[i].projects[j].criterias.length;
@@ -90,43 +107,23 @@ const Marks = () => {
           <p className="table-unit-title">{units[i].title}</p>
         </th>
       );
-    }
 
-    return allUnits;
-  };
+      // iterate over all the projects in the units
+      for (let j = 0; j < singleUnit.projects.length; j++) {
+        const project = singleUnit.projects[j];
 
-  const renderProjectRow = () => {
-    const projects = [];
-    for (let i = 0; i < units.length; i++) {
-      for (let j = 0; j < units[i].projects.length; j++) {
-        const criterias = units[i].projects[j];
         projects.push(
           <th
             key={j}
-            colSpan={criterias.criterias.length}
+            colSpan={project.criterias.length}
             style={{
               backgroundColor: units[i].themeColor,
               border: tableProperties.border,
             }}
           >
-            {criterias.title}
+            {project.title}
           </th>
         );
-      }
-    }
-    return projects;
-  };
-
-  const renderCriteriaLabelRow = () => {
-    const criteriaLabels = [];
-
-    // iterate over all units
-    for (let i = 0; i < units.length; i++) {
-      const singleUnit = units[i];
-
-      // iterate over all the projects in the units
-      for (let j = 0; j < singleUnit.projects.length; j++) {
-        const project = singleUnit.projects[j];
 
         // iterate over all the criterias in the project
         for (let k = 0; k < project.criterias.length; k++) {
@@ -147,18 +144,75 @@ const Marks = () => {
       }
     }
 
-    return criteriaLabels;
+    return (
+      <thead>
+        <tr>
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+            }}
+          ></th>
+          {allUnits}
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+            }}
+          ></th>
+        </tr>
+        <tr style={{ margin: 0, textAlign: "center" }}>
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+            }}
+          ></th>
+          {projects}
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+            }}
+          ></th>
+        </tr>
+        <tr style={{ margin: 0, textAlign: "center" }}>
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+              color: "#FFFFFF",
+              textTransform: "uppercase",
+            }}
+          >
+            Students
+          </th>
+          {criteriaLabels}
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+              color: "#FFFFFF",
+              textTransform: "uppercase",
+            }}
+          >
+            Final
+          </th>
+        </tr>
+      </thead>
+    );
   };
+
   const [allStudents, setAllStudents] = useState([]);
 
-  // TODO Update repetitive code, renderBlankRow and renderStudentGrades are very similar, differentiate between them by adding a param when calling the functions
+  // TODO Update repetitive code, renderTableBodyBlank and renderTableBodyGrades are very similar, differentiate between them by adding a param when calling the functions
 
   // TODO Add the ability to paste a large set of data to populate the table
 
   // TODO Future update - Try to re-implement on blur for the input field
   // TODO The issue occurs because you try to clear input field after adding new student
   // ? THE FULL SINGLE DATA ROW
-  const renderBlankRow = () => {
+  const renderTableBodyBlank = () => {
     const rowData = [];
     const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
 
@@ -209,7 +263,6 @@ const Marks = () => {
 
           rowData.push(
             <td
-              className={`${criteria.weight}-${criteria.label}-${criteria.letter}-${singleUnit.title}-${project.title}`}
               style={{
                 backgroundColor: singleUnit.themeColor,
                 border: tableProperties.border,
@@ -221,6 +274,7 @@ const Marks = () => {
               <input
                 onChange={(e) => {
                   const mark = e.target.value;
+
                   if (grade) {
                     // Update the mark
                     const updatedGrades = studentData.grades.map((g) => {
@@ -262,7 +316,7 @@ const Marks = () => {
                   outline: "none",
                   textAlign: "center",
                 }}
-                value={grade ? grade.mark : ""}
+                value={grade ? grade.mark : 0}
               ></input>
             </td>
           );
@@ -337,10 +391,10 @@ const Marks = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
-  // TODO Update the contentEditable, replace with the input setup in renderBlankRow function
+  // TODO Update the contentEditable, replace with the input setup in renderTableBodyBlank function
   // TODO Need to update this to allow editing users data
   // TODO Would need to simply update the allStudents array, we would check the student id and criteria id
-  const renderStudentGrades = (student) => {
+  const renderTableBodyGrades = (student) => {
     const rowData = [];
 
     // ? Render this first (this is the student name column)
@@ -479,6 +533,7 @@ const Marks = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
+  // Add project to projects and reset singleProject data
   useEffect(() => {
     if (singleProject.criterias.length > 0) {
       setProjects((prevProjects) => [...prevProjects, singleProject]);
@@ -494,7 +549,7 @@ const Marks = () => {
           e.preventDefault();
         }}
       >
-        {/* ------------ ----------- ---------- // ? ADDING UNIT TITLE */}
+        {/* ------------ ----------- ---------- // ? ADDING UNIT TITLE */}{" "}
         <section className="add-unit-title">
           <h5>Unit title</h5>
           <input
@@ -502,7 +557,7 @@ const Marks = () => {
               setUnitTitle(e.target.value);
             }}
             value={unitTitle}
-            placeholder="Biology Unit"
+            placeholder="Organisms"
           ></input>
         </section>
         {/* ------------ ----------- ---------- // ? ADDING PROJECT TITLE */}
@@ -519,7 +574,8 @@ const Marks = () => {
           </section>
         )}
         {/* ------------ ----------- ---------- // ? ADDING CRITERIA'S */}
-        {singleProject.title && (
+        {/* // TODO RENAME ALL CRITERIA'S TO 'weight' */}
+        {unitTitle && singleProject.title && (
           <section className="add-criteria">
             <h5>Add the criteria's for {singleProject.title}</h5>
             <div style={{ display: "flex", gap: 15, alignItems: "center" }}>
@@ -547,14 +603,9 @@ const Marks = () => {
                   style={{ height: 30 }}
                 >
                   <option value="">Select criteria</option>
-                  <option value="Knowledge and Understanding">
-                    Knowledge and Understanding
-                  </option>
-                  <option value="Communication">Communication</option>
-                  <option value="Application">Application</option>
-                  <option value="Thinking and Inquiry">
-                    Thinking and Inquiry
-                  </option>
+                  {criteriaOptions.map((criteria) => {
+                    return <option value={criteria}>{criteria}</option>;
+                  })}
                 </select>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
@@ -583,7 +634,7 @@ const Marks = () => {
               style={{ marginTop: 10 }}
               onClick={() => {
                 if (
-                  !singleCriteria.label.trim() ||
+                  !singleCriteria.label ||
                   !singleCriteria.letter ||
                   !singleCriteria.weight
                 ) {
@@ -592,6 +643,11 @@ const Marks = () => {
                     label: `Please fill all fields`,
                   });
                 }
+                setCriteriaOptions(
+                  criteriaOptions.filter(
+                    (criteria) => criteria !== singleCriteria.label
+                  )
+                );
                 setAllCriterias([...allCriterias, singleCriteria]); // Pushing new criteria to the array
                 setSingleCriteria({ id: "", label: "", letter: "", weight: 0 });
               }}
@@ -601,7 +657,7 @@ const Marks = () => {
           </section>
         )}
         {/* ------------ ----------- ---------- // ? PREVIEWING/EDITING CRITERIA'S - ADDING PROJECT TO UNIT */}
-        {allCriterias.length >= 1 && (
+        {unitTitle && singleProject.title && allCriterias.length >= 1 && (
           <section className="preview-criteria">
             <h5>The criteria's for {singleProject.title}</h5>
             {allCriterias.length > 0 &&
@@ -617,15 +673,27 @@ const Marks = () => {
                   >
                     <p style={{ margin: 0 }}>{criteria.label}</p>
                     <p style={{ margin: 0 }}>({criteria.letter})</p>
-                    <p style={{ margin: 0 }}>{criteria.weight}%</p>
+                    <input
+                      style={{ width: 50 }}
+                      defaultValue={criteria.weight}
+                      onChange={(e) => {
+                        const updated = allCriterias.map((stateCriteria) => {
+                          if (stateCriteria.id === criteria.id) {
+                            return { ...stateCriteria, weight: e.target.value };
+                          }
+                          return stateCriteria;
+                        });
+                        setAllCriterias(updated);
+                      }}
+                    ></input>
+                    %
                     <button
                       onClick={() => {
-                        deleteCriteria(i);
+                        deleteCriteria(i, criteria.label);
                       }}
                     >
                       Delete
                     </button>
-                    <button>Edit</button>
                   </div>
                 );
               })}
@@ -643,6 +711,12 @@ const Marks = () => {
                   criterias: allCriterias,
                 }));
                 setAllCriterias([]);
+                setCriteriaOptions([
+                  "Knowledge and Understanding",
+                  "Communication",
+                  "Application",
+                  "Thinking and Inquiry",
+                ]);
               }}
             >
               Add Project
@@ -650,7 +724,7 @@ const Marks = () => {
           </section>
         )}
         {/* ------------ ----------- ---------- // ? PREVIEWING/EDITING PROJECTS - ADDING THE UNIT */}
-        {projects.length >= 1 && (
+        {unitTitle && projects.length >= 1 && (
           <section className="preview-projects">
             <h5>Preview/Edit/Delete Projects</h5>
             <p>Projects for {unitTitle}:</p>
@@ -685,7 +759,6 @@ const Marks = () => {
                 );
               })}
             </div>
-            <h5 style={{ marginTop: 40 }}>Add Unit</h5>
             <div
               style={{
                 display: "flex",
@@ -694,7 +767,9 @@ const Marks = () => {
                 marginBottom: 20,
               }}
             >
-              <p style={{ marginBottom: 5 }}>Choose unit theme color</p>
+              <p style={{ marginBottom: 5, marginTop: 25 }}>
+                Choose your theme color
+              </p>
               <div className="color-btns-wrapper">
                 {tableProperties.colors.map((color, i) => {
                   return (
@@ -733,7 +808,7 @@ const Marks = () => {
                 setUnitThemeColor(tableProperties.colors[0]);
               }}
             >
-              Add Unit
+              Add Class
             </button>
           </section>
         )}
@@ -781,80 +856,17 @@ const Marks = () => {
             className="table"
             style={{ border: "1px solid rgba(0,0,0,0.2)" }}
           >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    backgroundColor: "#333",
-                    border: tableProperties.border,
-                  }}
-                ></th>
-                {renderUnitRow()}
-                <th
-                  style={{
-                    backgroundColor: "#333",
-                    border: tableProperties.border,
-                  }}
-                ></th>
-              </tr>
-              <tr style={{ margin: 0, textAlign: "center" }}>
-                <th
-                  style={{
-                    backgroundColor: "#333",
-                    border: tableProperties.border,
-                  }}
-                ></th>
-                {renderProjectRow()}
-                <th
-                  style={{
-                    backgroundColor: "#333",
-                    border: tableProperties.border,
-                  }}
-                ></th>
-              </tr>
-              <tr style={{ margin: 0, textAlign: "center" }}>
-                <th
-                  style={{
-                    backgroundColor: "#333",
-                    border: tableProperties.border,
-                    color: "#FFFFFF",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Students
-                </th>
-                {renderCriteriaLabelRow()}
-                <th
-                  style={{
-                    backgroundColor: "#333",
-                    border: tableProperties.border,
-                    color: "#FFFFFF",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Final
-                </th>
-              </tr>
-            </thead>
+            {renderTableHead()}
             <tbody>
               {/* // ? This will contain the rows that will be added */}
               {allStudents.map((student) => {
-                return renderStudentGrades(student);
+                return renderTableBodyGrades(student);
               })}
               {/* // ? Render the initial empty row first */}
-              {renderBlankRow()}
+              {renderTableBodyBlank()}
               {/* // ? This is the Add student function which renders a new row (pushes to studentRows) */}
               <tr
-                style={{
-                  cursor: "pointer",
-                  userSelect: "none",
-                  width: "100%",
-                  textAlign: "center",
-                  height: "40px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                className="add-student"
                 onClick={() => {
                   setStudentData({ id: 0, name: "", grades: [], finalMark: 0 });
                   setAllStudents([...allStudents, studentData]);
