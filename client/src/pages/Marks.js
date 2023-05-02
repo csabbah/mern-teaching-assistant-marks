@@ -1,6 +1,8 @@
-import React, { useState, useEffect, cloneElement } from "react";
+import React, { useState, useEffect } from "react";
 
 const Marks = () => {
+  // TODO Instead of rendering using multiple single useState variables, make it one object completely
+
   // TODO - IMPORTANT - Instead of rendering multiple nested for loops across multiple functions...
   // TODO Take the one with ALL the data and simply render the rows in each nested loop
 
@@ -8,12 +10,15 @@ const Marks = () => {
   // TODO - UNITS ARE THE SECTIONS IN A CLASS (THERE ARE MULTIPLE UNITS) IN A BIOLODY CLASS
   // TODO Add the edit function for units
   // TODO You should be able to add a new project to a unit after the unit has been added
+  // TODO You should be able to edit classes and units after the table has been generated, maybe on the table itself?
   // ? SERVER SETUP ?------?------?------?------?------?------?------?------?------?------?------?------
   // TODO Update Model (Need a Table and Student Model)
   // TODO Table model should have all the data required to build the data - including units, projects and their criteria
   // TODO User model has the students name and grades
   // TODO Add the ability to post to DB
   // TODO Add the ability to edit/delete the data after it's been posted to DB
+
+  const [classTitle, setClassTitle] = useState("");
 
   const [unitTitle, setUnitTitle] = useState("");
 
@@ -83,6 +88,7 @@ const Marks = () => {
 
   const [displayErr, setDisplayErr] = useState({ reveal: false, msg: "" });
 
+  // TODO Update all headers to be inputs and allow users to update the head data
   const renderTableHead = () => {
     const criteriaLabels = [];
     const allUnits = [];
@@ -99,13 +105,26 @@ const Marks = () => {
       allUnits.push(
         <th
           key={units[i].title}
-          className="table-unit-title-th"
+          className="table-unit-title"
           colSpan={lengthOfCriterias}
           style={{
+            backgroundColor: units[i].themeColor,
             border: tableProperties.border,
           }}
         >
-          <p className="table-unit-title">{units[i].title}</p>
+          <input
+            onChange={(e) => {}}
+            style={{
+              backgroundColor: "transparent",
+              textTransform: "uppercase",
+              letterSpacing: "2px",
+              width: "100%",
+              border: "none",
+              outline: "none",
+              textAlign: "center",
+            }}
+            value={units[i].title}
+          />
         </th>
       );
 
@@ -122,7 +141,17 @@ const Marks = () => {
               border: tableProperties.border,
             }}
           >
-            {project.title}
+            <input
+              onChange={(e) => {}}
+              style={{
+                width: "100%",
+                border: "none",
+                backgroundColor: "transparent",
+                outline: "none",
+                textAlign: "center",
+              }}
+              value={project.title}
+            />
           </th>
         );
 
@@ -138,7 +167,35 @@ const Marks = () => {
                 border: tableProperties.border,
               }}
             >
-              ({criteria.letter})
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <p style={{ margin: 0 }}>{criteria.letter}</p>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <input
+                    onChange={(e) => {}}
+                    style={{
+                      width: 50,
+                      border: "none",
+                      outline: "none",
+                      textAlign: "center",
+                    }}
+                    value={criteria.weight}
+                  />
+                  <p style={{ margin: 0 }}>%</p>
+                </div>
+              </div>
+              <button>X</button>
             </th>
           );
         }
@@ -558,16 +615,29 @@ const Marks = () => {
         }}
       >
         {/* ------------ ----------- ---------- // ? ADDING UNIT TITLE */}{" "}
-        <section className="add-unit-title">
-          <h5>Unit title</h5>
+        <section className="add-class-title">
+          <h5>Class title</h5>
           <input
             onChange={(e) => {
-              setUnitTitle(e.target.value);
+              setClassTitle(e.target.value);
             }}
-            value={unitTitle}
-            placeholder="Organisms"
+            value={classTitle}
+            placeholder="Biology"
           ></input>
         </section>
+        {/* ------------ ----------- ---------- // ? ADDING UNIT TITLE */}{" "}
+        {classTitle && (
+          <section className="add-unit-title">
+            <h5>Unit title</h5>
+            <input
+              onChange={(e) => {
+                setUnitTitle(e.target.value);
+              }}
+              value={unitTitle}
+              placeholder="Organisms"
+            ></input>
+          </section>
+        )}
         {/* ------------ ----------- ---------- // ? ADDING PROJECT TITLE */}
         {unitTitle && (
           <section className="add-project-title">
@@ -898,7 +968,7 @@ const Marks = () => {
         )}
         {units.length >= 1 && (
           <table
-            className="table table-responsive "
+            className="table table-responsive"
             style={{ border: "1px solid rgba(0,0,0,0.2)" }}
           >
             {renderTableHead()}
