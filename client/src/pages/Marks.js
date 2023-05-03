@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 
 const Marks = () => {
+  // TODO IMPORTANT - WHen rendering multiple classes, don't add the classes to the same table, instead, make tabs
+
+  // TODO Add school yeah to the class so you can organize in the future based on semesters
+
+  // TODO Create the function to allow users to send progress reports emails to students
+
+  // TODO When adding new students, if student name is left blank, it should still add the id to the student object (before adding to allStudents)
+
+  // TODO When you add a new class, make sure the grade averages update automatically
+
   // TODO Instead of rendering using multiple single useState variables, make it one object completely
 
   // TODO - IMPORTANT - Instead of rendering multiple nested for loops across multiple functions...
@@ -18,6 +28,7 @@ const Marks = () => {
   // TODO Add the ability to post to DB
   // TODO Add the ability to edit/delete the data after it's been posted to DB
 
+  const [classes, setClasses] = useState([]);
   const [classTitle, setClassTitle] = useState("");
 
   const [unitTitle, setUnitTitle] = useState("");
@@ -90,120 +101,170 @@ const Marks = () => {
 
   // TODO Update all headers to be inputs and allow users to update the head data
   const renderTableHead = () => {
-    const criteriaLabels = [];
+    const allClasses = [];
     const allUnits = [];
     const projects = [];
+    const criteriaLabels = [];
 
-    // iterate over all units
-    for (let i = 0; i < units.length; i++) {
-      const singleUnit = units[i];
+    classes.length > 0 &&
+      classes.map((singleClass) => {
+        let classesColSpan = 0;
 
-      let lengthOfCriterias = 0;
-      for (let j = 0; j < units[i].projects.length; j++) {
-        lengthOfCriterias += units[i].projects[j].criterias.length;
-      }
-      allUnits.push(
-        <th
-          key={units[i].title}
-          className="table-unit-title"
-          colSpan={lengthOfCriterias}
-          style={{
-            backgroundColor: units[i].themeColor,
-            border: tableProperties.border,
-          }}
-        >
-          <input
-            onChange={(e) => {}}
-            style={{
-              backgroundColor: "transparent",
-              textTransform: "uppercase",
-              letterSpacing: "2px",
-              width: "100%",
-              border: "none",
-              outline: "none",
-              textAlign: "center",
-            }}
-            value={units[i].title}
-          />
-        </th>
-      );
+        singleClass.units.map((unit) => {
+          unit.projects.map((project) => {
+            classesColSpan += project.criterias.length;
+          });
+        });
 
-      // iterate over all the projects in the units
-      for (let j = 0; j < singleUnit.projects.length; j++) {
-        const project = singleUnit.projects[j];
-
-        projects.push(
+        allClasses.push(
           <th
-            key={j}
-            colSpan={project.criterias.length}
+            key={singleClass.title}
+            className="table-unit-title"
+            colSpan={classesColSpan}
             style={{
-              backgroundColor: units[i].themeColor,
+              backgroundColor: "#333",
               border: tableProperties.border,
             }}
           >
             <input
               onChange={(e) => {}}
               style={{
+                color: "#FFFFFF",
+                backgroundColor: "transparent",
+                textTransform: "uppercase",
+                letterSpacing: "3px",
+                fontSize: 20,
                 width: "100%",
                 border: "none",
-                backgroundColor: "transparent",
                 outline: "none",
                 textAlign: "center",
               }}
-              value={project.title}
+              value={singleClass.title}
             />
           </th>
         );
+        singleClass.units.map((unit, i) => {
+          let themeColor = unit.themeColor;
 
-        // iterate over all the criterias in the project
-        for (let k = 0; k < project.criterias.length; k++) {
-          const criteria = project.criterias[k];
+          let unitColSpan = 0;
+          unit.projects.map((project) => {
+            unitColSpan += project.criterias.length;
+          });
 
-          criteriaLabels.push(
+          allUnits.push(
             <th
-              key={k}
+              key={unit.title}
+              className="table-unit-title"
+              colSpan={unitColSpan}
               style={{
-                backgroundColor: singleUnit.themeColor,
+                backgroundColor: themeColor,
                 border: tableProperties.border,
               }}
             >
-              <div
+              <input
+                onChange={(e) => {}}
                 style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  backgroundColor: "transparent",
+                  textTransform: "uppercase",
+                  letterSpacing: "2px",
+                  width: "100%",
+                  border: "none",
+                  outline: "none",
+                  textAlign: "center",
                 }}
-              >
-                <p style={{ margin: 0 }}>{criteria.letter}</p>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <input
-                    onChange={(e) => {}}
-                    style={{
-                      width: 50,
-                      border: "none",
-                      outline: "none",
-                      textAlign: "center",
-                    }}
-                    value={criteria.weight}
-                  />
-                  <p style={{ margin: 0 }}>%</p>
-                </div>
-              </div>
-              <button>X</button>
+                value={unit.title}
+              />
             </th>
           );
-        }
-      }
-    }
+
+          unit.projects.map((project, i) => {
+            projects.push(
+              <th
+                key={project.title}
+                className="table-unit-title"
+                colSpan={project.criterias.length}
+                style={{
+                  backgroundColor: themeColor,
+                  border: tableProperties.border,
+                }}
+              >
+                <input
+                  onChange={(e) => {}}
+                  style={{
+                    backgroundColor: "transparent",
+                    textTransform: "uppercase",
+                    letterSpacing: "2px",
+                    width: "100%",
+                    border: "none",
+                    outline: "none",
+                    textAlign: "center",
+                  }}
+                  value={project.title}
+                />
+              </th>
+            );
+
+            project.criterias.map((criteria, i) => {
+              criteriaLabels.push(
+                <th
+                  style={{
+                    backgroundColor: themeColor,
+                    border: tableProperties.border,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <p style={{ margin: 0 }}>{criteria.letter}</p>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <input
+                        onChange={(e) => {}}
+                        style={{
+                          width: 50,
+                          border: "none",
+                          outline: "none",
+                          textAlign: "center",
+                        }}
+                        value={criteria.weight}
+                      />
+                      <p style={{ margin: 0 }}>%</p>
+                    </div>
+                  </div>
+                  <button>X</button>
+                </th>
+              );
+            });
+          });
+        });
+      });
 
     return (
       <thead>
+        <tr>
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+            }}
+          ></th>
+          {allClasses}
+          <th
+            style={{
+              backgroundColor: "#333",
+              border: tableProperties.border,
+            }}
+          ></th>
+        </tr>
         <tr>
           <th
             style={{
@@ -305,79 +366,82 @@ const Marks = () => {
     );
 
     // ? Render this in between (these are all the grade columns)
-    for (let i = 0; i < units.length; i++) {
-      const singleUnit = units[i];
+    for (let m = 0; m < classes.length; m++) {
+      for (let i = 0; i < classes[m].units.length; i++) {
+        const singleUnit = classes[m].units[i];
 
-      // iterate over all the projects in the units
-      for (let j = 0; j < singleUnit.projects.length; j++) {
-        const project = singleUnit.projects[j];
+        // iterate over all the projects in the units
+        for (let j = 0; j < singleUnit.projects.length; j++) {
+          const project = singleUnit.projects[j];
 
-        // iterate over all the criterias in the project
-        for (let k = 0; k < project.criterias.length; k++) {
-          const criteria = project.criterias[k];
-          const grade = studentData.grades.find(
-            (grade) => grade.id === criteria.id
-          );
+          // iterate over all the criterias in the project
+          for (let k = 0; k < project.criterias.length; k++) {
+            const criteria = project.criterias[k];
+            const grade = studentData.grades.find(
+              (grade) => grade.id === criteria.id
+            );
 
-          rowData.push(
-            <td
-              style={{
-                backgroundColor: singleUnit.themeColor,
-                border: tableProperties.border,
-                borderLeftWidth: "1px",
-                borderLeftColor: "rgba(0,0,0,1)",
-                borderRightColor: "rgba(0,0,0,1)",
-              }}
-            >
-              <input
-                onChange={(e) => {
-                  const mark = e.target.value;
-
-                  if (grade) {
-                    // Update the mark
-                    const updatedGrades = studentData.grades.map((g) => {
-                      if (g.id === grade.id) {
-                        return {
-                          ...g,
-                          mark,
-                        };
-                      }
-                      return g;
-                    });
-                    setStudentData({
-                      ...studentData,
-                      grades: updatedGrades,
-                    });
-                  } else {
-                    // Add the grade
-                    setStudentData({
-                      ...studentData,
-                      grades: [
-                        ...studentData.grades,
-                        {
-                          id: criteria.id,
-                          unit: singleUnit.title,
-                          project: project.title,
-                          criteria: criteria.label,
-                          weight: criteria.weight,
-                          letter: criteria.letter,
-                          mark,
-                        },
-                      ],
-                    });
-                  }
-                }}
+            rowData.push(
+              <td
+                key={criteria.id}
                 style={{
-                  width: "100%",
-                  border: "none",
-                  backgroundColor: "transparent",
-                  outline: "none",
-                  textAlign: "center",
+                  backgroundColor: singleUnit.themeColor,
+                  border: tableProperties.border,
+                  borderLeftWidth: "1px",
+                  borderLeftColor: "rgba(0,0,0,1)",
+                  borderRightColor: "rgba(0,0,0,1)",
                 }}
-                value={grade ? grade.mark : 0}
-              ></input>
-            </td>
-          );
+              >
+                <input
+                  onChange={(e) => {
+                    const mark = e.target.value;
+
+                    if (grade) {
+                      // Update the mark
+                      const updatedGrades = studentData.grades.map((g) => {
+                        if (g.id === grade.id) {
+                          return {
+                            ...g,
+                            mark,
+                          };
+                        }
+                        return g;
+                      });
+                      setStudentData({
+                        ...studentData,
+                        grades: updatedGrades,
+                      });
+                    } else {
+                      // Add the grade
+                      setStudentData({
+                        ...studentData,
+                        grades: [
+                          ...studentData.grades,
+                          {
+                            id: criteria.id,
+                            unit: singleUnit.title,
+                            project: project.title,
+                            criteria: criteria.label,
+                            weight: criteria.weight,
+                            letter: criteria.letter,
+                            mark,
+                          },
+                        ],
+                      });
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    border: "none",
+                    backgroundColor: "transparent",
+                    outline: "none",
+                    textAlign: "center",
+                  }}
+                  value={grade ? grade.mark : 0}
+                />
+              </td>
+            );
+          }
         }
       }
     }
@@ -453,9 +517,8 @@ const Marks = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
-  // TODO Update the contentEditable, replace with the input setup in renderTableBodyBlank function
-  // TODO Need to update this to allow editing users data
-  // TODO Would need to simply update the allStudents array, we would check the student id and criteria id
+  // TODO Need to update to allow users to edit student names
+  // TODO Re-use the code that edits previous grades and just update student names
   const renderTableBodyGrades = (student) => {
     const rowData = [];
 
@@ -476,59 +539,75 @@ const Marks = () => {
     );
 
     // ? Render this in between (these are all the grade columns)
-    for (let i = 0; i < units.length; i++) {
-      const singleUnit = units[i];
+    for (let m = 0; m < classes.length; m++) {
+      for (let i = 0; i < classes[m].units.length; i++) {
+        const singleUnit = classes[m].units[i];
 
-      // iterate over all the projects in the units
-      for (let j = 0; j < singleUnit.projects.length; j++) {
-        const project = singleUnit.projects[j];
+        // iterate over all the projects in the units
+        for (let j = 0; j < singleUnit.projects.length; j++) {
+          const project = singleUnit.projects[j];
 
-        // iterate over all the criterias in the project
-        for (let k = 0; k < project.criterias.length; k++) {
-          // const criteria = project.criterias[k];
-          // rowData.push(
-          //   <td
-          //     key={k}
-          //     className={`${criteria.weight}-${criteria.label}-${criteria.letter}-${singleUnit.title}-${project.title}`}
-          //     style={{
-          //       backgroundColor: singleUnit.themeColor,
-          //       border: tableProperties.border,
-          //       borderLeftWidth: "1px",
-          //       borderLeftColor: "rgba(0,0,0,1)",
-          //       borderRightColor: "rgba(0,0,0,1)",
-          //     }}
-          //     onBlur={(e) => {}}
-          //     contentEditable
-          //   >
-          //     {student.grades[k].mark}
-          //   </td>
-          // );
-          const criteria = project.criterias[k];
-          const grade = student.grades.find(
-            (grade) => grade.id === criteria.id
-          );
+          // iterate over all the criterias in the project
+          for (let k = 0; k < project.criterias.length; k++) {
+            const criteria = project.criterias[k];
+            // console.log(student);
+            const grade = student.grades.find(
+              (grade) => grade.id === criteria.id
+            );
 
-          rowData.push(
-            <td
-              style={{
-                backgroundColor: singleUnit.themeColor,
-                border: tableProperties.border,
-                borderLeftWidth: "1px",
-                borderLeftColor: "rgba(0,0,0,1)",
-                borderRightColor: "rgba(0,0,0,1)",
-              }}
-              onBlur={(e) => {}}
-              contentEditable
-            >
-              {grade && grade.mark}
-            </td>
-          );
+            rowData.push(
+              <td
+                key={criteria.id}
+                style={{
+                  backgroundColor: singleUnit.themeColor,
+                  border: tableProperties.border,
+                  borderLeftWidth: "1px",
+                  borderLeftColor: "rgba(0,0,0,1)",
+                  borderRightColor: "rgba(0,0,0,1)",
+                }}
+              >
+                <input
+                  onChange={(e) => {
+                    setAllStudents((prevStudents) =>
+                      prevStudents.map((singleStudent) => {
+                        if (singleStudent.id === student.id) {
+                          const updatedGrades = singleStudent.grades.map(
+                            (gradeObj) => {
+                              if (gradeObj.id === criteria.id) {
+                                return {
+                                  ...gradeObj,
+                                  mark: e.target.value,
+                                };
+                              }
+                              return gradeObj;
+                            }
+                          );
+                          return {
+                            ...singleStudent,
+                            grades: updatedGrades,
+                          };
+                        }
+                        return singleStudent;
+                      })
+                    );
+                  }}
+                  style={{
+                    width: "100%",
+                    border: "none",
+                    backgroundColor: "transparent",
+                    outline: "none",
+                    textAlign: "center",
+                  }}
+                  defaultValue={grade ? grade.mark : 0}
+                ></input>
+              </td>
+            );
+          }
         }
       }
     }
 
     // TODO Refactor this code
-
     function calculateAverage() {
       const { grades } = student;
 
@@ -598,13 +677,23 @@ const Marks = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
+  const [addProject, setAddProject] = useState(false);
+  const [addClass, setAddClass] = useState(false);
+
   // Add project to projects and reset singleProject data
   useEffect(() => {
-    if (singleProject.criterias.length > 0) {
+    if (singleProject.criterias.length > 0 && addProject) {
       setProjects((prevProjects) => [...prevProjects, singleProject]);
       setSingleProject({ title: "", criterias: [] });
+      setAddProject(false);
     }
-  }, [singleProject]);
+    if (units.length > 0 && addClass) {
+      setClasses([...classes, { title: classTitle, units }]);
+      setClassTitle("");
+      setUnits([]);
+      setAddClass(false);
+    }
+  }, [singleProject, units]);
 
   return (
     <div className="container mt-2">
@@ -792,6 +881,7 @@ const Marks = () => {
                   criterias: allCriterias,
                 }));
                 setAllCriterias([]);
+                setAddProject(true);
                 setCriteriaOptions([
                   "Knowledge and Understanding",
                   "Communication",
@@ -918,6 +1008,7 @@ const Marks = () => {
                     projects: projects,
                   },
                 ]);
+                setAddClass(true);
                 setProjects([]);
                 setUnitTitle("");
                 setUnitThemeColor(tableProperties.colors[0]);
@@ -928,45 +1019,54 @@ const Marks = () => {
           </section>
         )}
         {/* ------------ ----------- ---------- // ? PREVIEW/EDITING UNITS */}
-        {units.length >= 1 && (
+        {classes.length >= 1 && (
           <section className="preview-units">
-            <h5>Your Units</h5>
+            <h5>Your Classes</h5>
             <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {units.length > 0 &&
-                units.map((unit, i) => {
-                  return (
-                    <div key={i}>
-                      <h5>{unit.title}</h5>
-                      <h5 style={{ color: unit.themeColor }}>
-                        Your theme color
-                      </h5>
-                      {unit.projects.map((project, i) => {
-                        return (
-                          <div key={i}>
-                            <p style={{ margin: 0, fontSize: 18 }}>
-                              {project.title}
-                            </p>
-                            {project.criterias.map((criteria, i) => {
-                              return (
-                                <p key={i} style={{ margin: 0, fontSize: 14 }}>
-                                  Criteria #{i + 1}: {criteria.label}(
-                                  {criteria.letter}) {criteria.weight}%
-                                </p>
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
+              {classes.length > 0 &&
+                classes.map((singleClass, i) => {
+                  console.log(singleClass);
+                  return singleClass.units.map((unit, i) => {
+                    return (
+                      <div key={i}>
+                        <div>
+                          <h5>{singleClass.title}</h5>
+                          <h5 style={{ color: unit.themeColor }}>
+                            Your theme color
+                          </h5>
+                        </div>
+                        {unit.projects.map((project, i) => {
+                          return (
+                            <div key={i}>
+                              <p style={{ margin: 0, fontSize: 18 }}>
+                                {project.title}
+                              </p>
+                              {project.criterias.map((criteria, i) => {
+                                return (
+                                  <p
+                                    key={i}
+                                    style={{ margin: 0, fontSize: 14 }}
+                                  >
+                                    Criteria #{i + 1}: {criteria.label}(
+                                    {criteria.letter}) {criteria.weight}%
+                                  </p>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  });
                 })}
             </div>
+
             <h5 style={{ marginTop: 30 }}>Generate Table</h5>
             {/* // TODO Add the function to upload to the model  */}
             <button>Generate Table</button>
           </section>
         )}
-        {units.length >= 1 && (
+        {classes.length >= 1 && (
           <table
             className="table table-responsive"
             style={{ border: "1px solid rgba(0,0,0,0.2)" }}
@@ -983,8 +1083,8 @@ const Marks = () => {
               <tr
                 className="add-student"
                 onClick={() => {
-                  setStudentData({ id: 0, name: "", grades: [], finalMark: 0 });
                   setAllStudents([...allStudents, studentData]);
+                  setStudentData({ id: 0, name: "", grades: [], finalMark: 0 });
                 }}
               >
                 <td style={{ border: "none" }}>Add Student +</td>
