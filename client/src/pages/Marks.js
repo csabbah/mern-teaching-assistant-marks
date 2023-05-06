@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const Marks = () => {
   // TODO Create the function to allow users to send progress reports emails to students
-
-  // TODO When adding new students, if student name is left blank, it should still add the id to the student object (before adding to allStudents)
-
-  // TODO When you add a new class, make sure the grade averages update automatically
 
   // TODO Instead of rendering using multiple single useState variables, make it one object completely
 
@@ -53,11 +49,7 @@ const Marks = () => {
 
   const [units, setUnits] = useState([]);
 
-  const [studentData, setStudentData] = useState({
-    id: 0,
-    name: "",
-    grades: [],
-  });
+  const [studentData, setStudentData] = useState({});
 
   const [singleCriteria, setSingleCriteria] = useState({
     id: "",
@@ -86,6 +78,8 @@ const Marks = () => {
     setProjects(updateProjects);
   };
 
+  const inputRef = useRef(null);
+
   const [singleProject, setSingleProject] = useState({
     title: "",
     criterias: [],
@@ -96,6 +90,9 @@ const Marks = () => {
   const [displayErr, setDisplayErr] = useState({ reveal: false, msg: "" });
 
   const [viewingTable, setViewingTable] = useState(0);
+
+  const [decimal, setDecimal] = useState(false);
+  const [missingData, setMissingData] = useState({});
 
   // TODO Update all headers to be inputs and allow users to update the head data
   const renderTable = (singleClass, i) => {
@@ -247,7 +244,6 @@ const Marks = () => {
       <table
         className="table table-responsive"
         style={{
-          border: "1px solid rgba(0,0,0,0.2)",
           display: viewingTable === i ? "unset" : "none",
         }}
       >
@@ -317,6 +313,7 @@ const Marks = () => {
                 textTransform: "uppercase",
               }}
             >
+              <button onClick={() => setDecimal(!decimal)}>Fixed Point</button>
               Final
             </th>
           </tr>
@@ -335,14 +332,36 @@ const Marks = () => {
           <tr
             className="add-student"
             onClick={() => {
-              if (!studentData.name) {
-                return alert("Add student name");
+              if (
+                !studentData[singleClass.id] ||
+                studentData[singleClass.id].name === undefined ||
+                studentData[singleClass.id].name == ""
+              ) {
+                return setMissingData({
+                  ...missingData,
+                  [singleClass.id]: {
+                    reveal: true,
+                    classId: singleClass.id,
+                  },
+                });
               }
-              setAllStudents([...allStudents, studentData]);
-              setStudentData({ id: 0, name: "", grades: [], finalMark: 0 });
+              // Add the student
+              setAllStudents([...allStudents, studentData[singleClass.id]]);
+
+              // Remove the student that was added from studentData (which contains the blankRow data)
+              const updatedStudentData = { ...studentData };
+              delete updatedStudentData[singleClass.id];
+              setStudentData(updatedStudentData);
+              inputRef.current.focus();
             }}
           >
-            <td style={{ border: "none" }}>Add Student +</td>
+            <td style={{ border: "none" }}>
+              <button
+                style={{ backgroundColor: "transparent", border: "none" }}
+              >
+                Add Student
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -396,28 +415,43 @@ const Marks = () => {
       (sumOfTI ? sumOfTI : 0) +
       (sumOfC ? sumOfC : 0);
 
-    return parseInt(average.toFixed(2));
+    return average.toFixed(decimal ? 2 : 0);
   }
 
   // TODO Update repetitive code, renderTableBodyBlank and renderTableBodyGrades are very similar, differentiate between them by adding a param when calling the functions
   // TODO Add the ability to paste a large set of data to populate the table
   // TODO Future update - Try to re-implement on blur for the input field - The issue occurs because you try to clear input field after adding new student
-  //
-  //
-  //
-  //
-  // TODO IMPORTANT ISSUES THAT MUST BE RESOLVED
-  // TODO Calculate average background color - If you add values in one table, it works fine, if you add in the other table, it doesn't
-  // TODO This issue occurs most likely because of the studentData issue below
-  //
-  // TODO If you have multiple tables and you add a student in one table, it clears the studentData
-  // TODO Because the studentData clears, it will erase the active data in the other table
-  // TODO update studentData to be an array and push to it if the class id is unique
-  // TODO This issue is not apparent in the other function since that renders multiple students with different data all together
+
   // ? THE FULL SINGLE DATA ROW
   const renderTableBodyBlank = (singleClass) => {
     const rowData = [];
     const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
+
+    let defaultGrades = [];
+
+    // TODO Only run this once
+    singleClass.units.flatMap((unit) =>
+      unit.projects.flatMap((project) =>
+        project.criterias.map((criteria) => {
+          return defaultGrades.push({
+            classId: singleClass.id,
+            id: criteria.id,
+            unit: unit.title,
+            project: project.title,
+            criteria: criteria.label,
+            weight: criteria.weight,
+            letter: criteria.letter,
+            mark: 0,
+          });
+        })
+      )
+    );
+    let defaultStudent = {
+      id: uniqueId,
+      classId: singleClass.id,
+      name: "-",
+      grades: defaultGrades,
+    };
 
     // ? Render this first (this is the student name column)
     rowData.push(
@@ -427,16 +461,37 @@ const Marks = () => {
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           width: "25%",
+          position: "relative",
         }}
       >
         <input
-          onChange={(e) => {
-            setStudentData({
-              ...studentData,
-              classId: singleClass.id,
-              id: uniqueId,
-              name: e.target.value,
+          ref={inputRef}
+          onFocus={() => {
+            return setMissingData({
+              ...missingData,
+              [singleClass.id]: {
+                reveal: false,
+                classId: singleClass.id,
+              },
             });
+          }}
+          onChange={(e) => {
+            setStudentData((prevStudentData) => ({
+              ...prevStudentData,
+              [singleClass.id]: {
+                ...prevStudentData[singleClass.id],
+                classId: singleClass.id,
+                id: uniqueId,
+                name: e.target.value,
+                grades:
+                  prevStudentData[singleClass.id] &&
+                  prevStudentData[singleClass.id].grades
+                    ? // If grades exist, keep those ones and spread them
+                      [...prevStudentData[singleClass.id].grades]
+                    : // Otherwise, set a default grade
+                      defaultStudent.grades,
+              },
+            }));
           }}
           style={{
             width: "100%",
@@ -446,11 +501,30 @@ const Marks = () => {
             textAlign: "center",
           }}
           value={
-            studentData.name && studentData.classId === singleClass.id
-              ? studentData.name
+            studentData[singleClass.id] && studentData[singleClass.id].name
+              ? studentData[singleClass.id].name
               : ""
           }
         ></input>
+        {missingData[singleClass.id] &&
+          missingData[singleClass.id].reveal &&
+          missingData[singleClass.id].classId === singleClass.id && (
+            <span
+              style={{
+                letterSpacing: 0.2,
+                width: "100%",
+                position: "absolute",
+                bottom: "50%",
+                right: "50%",
+                transform: "translateX(50%) translateY(50%)",
+                color: "red",
+                fontSize: 16,
+                pointerEvents: "none",
+              }}
+            >
+              Missing Student Name
+            </span>
+          )}
       </td>
     );
 
@@ -466,9 +540,13 @@ const Marks = () => {
         for (let k = 0; k < project.criterias.length; k++) {
           const criteria = project.criterias[k];
 
-          const grade = studentData.grades.find(
-            (grade) => grade.id === criteria.id
-          );
+          const grade =
+            (studentData[singleClass.id] &&
+              studentData[singleClass.id].grades &&
+              studentData[singleClass.id].grades.find(
+                (grade) => grade.id === criteria.id
+              )) ||
+            null;
 
           rowData.push(
             <td
@@ -484,10 +562,11 @@ const Marks = () => {
               <input
                 onChange={(e) => {
                   const mark = e.target.value;
-
                   if (grade) {
                     // Update the mark
-                    const updatedGrades = studentData.grades.map((g) => {
+                    const updatedGrades = studentData[
+                      singleClass.id
+                    ].grades.map((g) => {
                       if (g.id === grade.id && g.classId === singleClass.id) {
                         return {
                           ...g,
@@ -496,28 +575,48 @@ const Marks = () => {
                       }
                       return g;
                     });
-                    setStudentData({
-                      ...studentData,
-                      grades: updatedGrades,
-                    });
+
+                    setStudentData((prevStudentData) => ({
+                      ...prevStudentData,
+                      [singleClass.id]: {
+                        ...prevStudentData[singleClass.id],
+                        // id: uniqueId,
+                        // classId: singleClass.id,
+                        // name:
+                        //   prevStudentData[singleClass.id] &&
+                        //   prevStudentData[singleClass.id].name
+                        //     ? prevStudentData[singleClass.id].name
+                        //     : "",
+                        grades: updatedGrades,
+                      },
+                    }));
                   } else {
-                    // Add the grade
-                    setStudentData({
-                      ...studentData,
-                      grades: [
-                        ...studentData.grades,
-                        {
-                          classId: singleClass.id,
-                          id: criteria.id,
-                          unit: singleUnit.title,
-                          project: project.title,
-                          criteria: criteria.label,
-                          weight: criteria.weight,
-                          letter: criteria.letter,
-                          mark,
-                        },
-                      ],
-                    });
+                    setStudentData((prevStudentData) => ({
+                      ...prevStudentData,
+                      [singleClass.id]: {
+                        ...prevStudentData[singleClass.id],
+                        // id: uniqueId,
+                        // classId: singleClass.id,
+                        // name:
+                        //   prevStudentData[singleClass.id] &&
+                        //   prevStudentData[singleClass.id].name
+                        //     ? prevStudentData[singleClass.id].name
+                        //     : "",
+                        grades: [
+                          ...(prevStudentData[singleClass.id]?.grades ?? []),
+                          {
+                            classId: singleClass.id,
+                            id: criteria.id,
+                            unit: singleUnit.title,
+                            project: project.title,
+                            criteria: criteria.label,
+                            weight: criteria.weight,
+                            letter: criteria.letter,
+                            mark,
+                          },
+                        ],
+                      },
+                    }));
                   }
                 }}
                 style={{
@@ -535,7 +634,8 @@ const Marks = () => {
       }
     }
 
-    const { grades } = studentData;
+    const grades =
+      studentData[singleClass.id] && studentData[singleClass.id].grades;
 
     // ? Render this last (this is the final mark column)
     rowData.push(
@@ -543,21 +643,33 @@ const Marks = () => {
         style={{
           border: tableProperties.border,
           backgroundColor:
-            grades.length == 0
+            grades === undefined || grades.length === 0
               ? ""
               : calculateAverage(grades, singleClass) < 50
               ? tableProperties.final.failing
               : calculateAverage(grades, singleClass) > 80 &&
                 tableProperties.final.top,
-          width: "7%",
+          width: "8%",
         }}
       >
-        {calculateAverage(grades, singleClass)}%
+        {grades === undefined || grades.length === 0
+          ? (0).toFixed(decimal ? 2 : 0)
+          : calculateAverage(grades, singleClass)}
+        %
       </td>
     );
 
     // ? Render the full Row
-    return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
+    return (
+      <tr
+        style={{
+          margin: 0,
+          textAlign: "center",
+        }}
+      >
+        {rowData}
+      </tr>
+    );
   };
 
   // TODO Need to update to allow users to edit student names
@@ -592,9 +704,10 @@ const Marks = () => {
         // iterate over all the criterias in the project
         for (let k = 0; k < project.criterias.length; k++) {
           const criteria = project.criterias[k];
-          const grade = student.grades.find(
-            (grade) => grade.id === criteria.id
-          );
+          const grade =
+            student.grades && student.grades.length > 0
+              ? student.grades.find((grade) => grade.id === criteria.id)
+              : null;
 
           rowData.push(
             <td
@@ -650,7 +763,7 @@ const Marks = () => {
       }
     }
 
-    const { grades } = student;
+    const grades = student.grades ? student.grades : null;
 
     // ? Render this last (this is the final mark column)
     rowData.push(
@@ -658,16 +771,19 @@ const Marks = () => {
         style={{
           border: tableProperties.border,
           backgroundColor:
-            grades.length == 0
+            grades === null || grades.length === 0
               ? ""
               : calculateAverage(grades, singleClass) < 50
               ? tableProperties.final.failing
               : calculateAverage(grades, singleClass) > 80 &&
                 tableProperties.final.top,
-          width: "7%",
+          width: "8%",
         }}
       >
-        {calculateAverage(grades, singleClass)}%
+        {grades === null || grades.length === 0
+          ? (0).toFixed(decimal ? 2 : 0)
+          : calculateAverage(grades, singleClass)}
+        %
       </td>
     );
 
