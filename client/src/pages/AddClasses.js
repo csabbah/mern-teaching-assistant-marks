@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 
 const Marks = () => {
+  // ? SERVER SETUP ?------?------?------?------?------?------?------?------?------?------?------?------
+  // TODO Add the ability to post classes and students to DB
+  // TODO Add the ability to view your tables after they have been added (need to make a query)
+  // TODO Add the ability to edit/delete the data after it's been posted to DB
+
   // TODO Create the function to allow users to send progress reports emails to students
 
   // TODO Instead of rendering using multiple single useState variables, make it one object completely
@@ -11,12 +16,6 @@ const Marks = () => {
   // TODO Add the edit function for units
   // TODO You should be able to add a new project to a unit after the unit has been added
   // TODO You should be able to edit classes and units after the table has been generated, maybe on the table itself?
-  // ? SERVER SETUP ?------?------?------?------?------?------?------?------?------?------?------?------
-  // TODO Update Model (Need a Table and Student Model)
-  // TODO Table model should have all the data required to build the data - including units, projects and their criteria
-  // TODO User model has the students name and grades
-  // TODO Add the ability to post to DB
-  // TODO Add the ability to edit/delete the data after it's been posted to DB
 
   const [classes, setClasses] = useState([]);
   // Update these to be one object containing all the information in one
@@ -117,23 +116,10 @@ const Marks = () => {
         style={{
           backgroundColor: "#333",
           border: tableProperties.border,
+          textAlign: "center",
         }}
       >
-        <input
-          onChange={(e) => {}}
-          style={{
-            color: "#FFFFFF",
-            backgroundColor: "transparent",
-            textTransform: "uppercase",
-            letterSpacing: "3px",
-            fontSize: 20,
-            width: "100%",
-            border: "none",
-            outline: "none",
-            textAlign: "center",
-          }}
-          value={`${singleClass.title} - ${singleClass.schoolYear}`}
-        />
+        {`${singleClass.title} - ${singleClass.schoolYear}`}
       </th>
     );
     singleClass.units.map((unit, i) => {
@@ -152,21 +138,11 @@ const Marks = () => {
           style={{
             backgroundColor: themeColor,
             border: tableProperties.border,
+            textAlign: "center",
+            color: "#333",
           }}
         >
-          <input
-            onChange={(e) => {}}
-            style={{
-              backgroundColor: "transparent",
-              textTransform: "uppercase",
-              letterSpacing: "2px",
-              width: "100%",
-              border: "none",
-              outline: "none",
-              textAlign: "center",
-            }}
-            value={unit.title}
-          />
+          {unit.title}
         </th>
       );
 
@@ -179,21 +155,11 @@ const Marks = () => {
             style={{
               backgroundColor: themeColor,
               border: tableProperties.border,
+              textAlign: "center",
+              color: "#333",
             }}
           >
-            <input
-              onChange={(e) => {}}
-              style={{
-                backgroundColor: "transparent",
-                textTransform: "uppercase",
-                letterSpacing: "2px",
-                width: "100%",
-                border: "none",
-                outline: "none",
-                textAlign: "center",
-              }}
-              value={project.title}
-            />
+            {project.title}
           </th>
         );
 
@@ -212,28 +178,10 @@ const Marks = () => {
                   alignItems: "center",
                 }}
               >
-                <p style={{ margin: 0 }}>{criteria.letter}</p>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <input
-                    onChange={(e) => {}}
-                    style={{
-                      width: 50,
-                      border: "none",
-                      outline: "none",
-                      textAlign: "center",
-                    }}
-                    value={criteria.weight}
-                  />
-                  <p style={{ margin: 0 }}>%</p>
-                </div>
+                <p style={{ margin: 0 }}>
+                  {criteria.letter} ({criteria.weight}%)
+                </p>
               </div>
-              <button>X</button>
             </th>
           );
         });
@@ -418,6 +366,9 @@ const Marks = () => {
     return average.toFixed(decimal ? 2 : 0);
   }
 
+  console.log("classes", classes);
+  console.log("students", allStudents);
+
   // TODO Update repetitive code, renderTableBodyBlank and renderTableBodyGrades are very similar, differentiate between them by adding a param when calling the functions
   // TODO Add the ability to paste a large set of data to populate the table
   // TODO Future update - Try to re-implement on blur for the input field - The issue occurs because you try to clear input field after adding new student
@@ -580,13 +531,6 @@ const Marks = () => {
                       ...prevStudentData,
                       [singleClass.id]: {
                         ...prevStudentData[singleClass.id],
-                        // id: uniqueId,
-                        // classId: singleClass.id,
-                        // name:
-                        //   prevStudentData[singleClass.id] &&
-                        //   prevStudentData[singleClass.id].name
-                        //     ? prevStudentData[singleClass.id].name
-                        //     : "",
                         grades: updatedGrades,
                       },
                     }));
@@ -595,13 +539,6 @@ const Marks = () => {
                       ...prevStudentData,
                       [singleClass.id]: {
                         ...prevStudentData[singleClass.id],
-                        // id: uniqueId,
-                        // classId: singleClass.id,
-                        // name:
-                        //   prevStudentData[singleClass.id] &&
-                        //   prevStudentData[singleClass.id].name
-                        //     ? prevStudentData[singleClass.id].name
-                        //     : "",
                         grades: [
                           ...(prevStudentData[singleClass.id]?.grades ?? []),
                           {
@@ -612,7 +549,7 @@ const Marks = () => {
                             criteria: criteria.label,
                             weight: criteria.weight,
                             letter: criteria.letter,
-                            mark,
+                            mark: parseInt(mark),
                           },
                         ],
                       },
@@ -680,16 +617,40 @@ const Marks = () => {
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
-        onBlur={(e) => {}}
         style={{
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           width: "25%",
         }}
-        contentEditable
       >
-        {student.name && student.classId === singleClass.id ? student.name : ""}
+        <input
+          style={{
+            width: "100%",
+            border: "none",
+            backgroundColor: "transparent",
+            outline: "none",
+            textAlign: "center",
+          }}
+          onChange={(e) => {
+            setAllStudents((prevStudents) =>
+              prevStudents.map((singleStudent) => {
+                if (singleStudent.id === student.id) {
+                  return {
+                    ...singleStudent,
+                    name: e.target.value,
+                  };
+                }
+                return singleStudent;
+              })
+            );
+          }}
+          defaultValue={
+            student.name && student.classId === singleClass.id
+              ? student.name
+              : ""
+          }
+        />
       </td>
     );
 

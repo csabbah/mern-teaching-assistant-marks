@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 
 import Auth from "../utils/auth";
 
@@ -10,7 +10,6 @@ const SignupForm = () => {
   const [validated] = useState(false);
 
   const [formState, setFormState] = useState({
-    username: "",
     email: "",
     password: "",
   });
@@ -45,18 +44,6 @@ const SignupForm = () => {
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
         <Form.Group>
-          <Form.Label htmlFor="username">Username</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Your username"
-            name="username"
-            onChange={handleChange}
-            value={formState.username}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group>
           <Form.Label htmlFor="email">Email</Form.Label>
           <Form.Control
             type="email"
@@ -80,9 +67,7 @@ const SignupForm = () => {
           />
         </Form.Group>
         <Button
-          disabled={
-            !(formState.username && formState.email && formState.password)
-          }
+          disabled={!(formState.email && formState.password)}
           type="submit"
           variant="success"
         >

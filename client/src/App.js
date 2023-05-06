@@ -13,7 +13,8 @@ import {
   InMemoryCache,
   createHttpLink,
 } from "@apollo/client";
-import Marks from "./pages/Marks";
+import Marks from "./pages/AddClasses";
+import Classes from "./pages/Classes";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -52,7 +53,8 @@ function App() {
             <Route exact path="/" component={Home} />
             {/* User can only access About route (page) IF they are logged in */}
             {loggedIn && <Route exact path="/about" component={About} />}
-            <Route path="/marks" component={Marks} />
+            <Route path="/add-classes" component={Marks} />
+            <Route path="/your-classes" component={Classes} />
             <Route render={() => <h1 className="display-2">Wrong page!</h1>} />
           </Switch>
         </>

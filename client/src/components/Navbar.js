@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Navbar, Nav, Container, Modal, Tab } from 'react-bootstrap';
-import SignUpForm from './SignupForm';
-import LoginForm from './LoginForm';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Navbar, Nav, Container, Modal, Tab } from "react-bootstrap";
+import SignUpForm from "./SignupForm";
+import LoginForm from "./LoginForm";
 
-import Auth from '../utils/auth';
+import Auth from "../utils/auth";
 
 const AppNavbar = () => {
   // set modal display state
@@ -33,6 +33,12 @@ const AppNavbar = () => {
                   Login/Sign Up
                 </Nav.Link>
               )}
+              <Nav.Link as={Link} to="/add-classes">
+                Add Classes
+              </Nav.Link>
+              <Nav.Link as={Link} to="/your-classes">
+                Your Classes
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
