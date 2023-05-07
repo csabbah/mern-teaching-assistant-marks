@@ -19,6 +19,7 @@ const classSchema = new Schema(
         projects: [
           {
             title: { type: String },
+            // TODO updates from 'criterias' to 'weights' - Need to also update all around the application
             criterias: [
               {
                 label: { type: String },

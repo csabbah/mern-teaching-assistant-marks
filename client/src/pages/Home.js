@@ -20,7 +20,7 @@ const Home = () => {
           Otherwise, it will only be stored locally on the current device,
           unless you clear your browser cache.
         </p>
-        <Link as={Link} to="/marks">
+        <Link as={Link} to="/add-classes">
           Setup your marks here
         </Link>
       </section>

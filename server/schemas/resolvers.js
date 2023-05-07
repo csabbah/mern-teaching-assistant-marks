@@ -1,4 +1,4 @@
-const { User, Note } = require("../models");
+const { User, Class, Student } = require("../models");
 
 const { AuthenticationError } = require("apollo-server-express");
 const { signToken } = require("../utils/auth");
@@ -40,6 +40,19 @@ const resolvers = {
       const token = signToken(user);
 
       return { token, user };
+    },
+    addClass: async (parent, { classToSave }) => {
+      const singleClass = await Class.create(classToSave);
+
+      // TODO Add the function to push to the users classes array
+      return singleClass;
+    },
+    addStudent: async (parent, { studentToSave }) => {
+      const singleStudent = await Student.create(studentToSave);
+
+      // TODO Add the function to push to the users students array
+      // TODO Add the function to push to the associated class
+      return singleStudent;
     },
   },
 };

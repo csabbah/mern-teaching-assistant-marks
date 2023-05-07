@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 
 const Marks = () => {
-  // ? SERVER SETUP ?------?------?------?------?------?------?------?------?------?------?------?------
-  // TODO Add the ability to post classes and students to DB
+  // TODO Make sure to add associated mongoose id into the models when creating them frontend
+  //      TODO ie. Pass the mongoose class id into the student data
+
+  // TODO Add the function in the resolver to push student and class models into the user model
+  // TODO After the resolvers have been added, make them functional in the frontend
+
+  // TODO Create a new 'Students' page that displays all students, the classes they are currently in, their averages and etc.
+
   // TODO Add the ability to view your tables after they have been added (need to make a query)
   // TODO Add the ability to edit/delete the data after it's been posted to DB
 
@@ -15,7 +21,6 @@ const Marks = () => {
 
   // TODO Add the edit function for units
   // TODO You should be able to add a new project to a unit after the unit has been added
-  // TODO You should be able to edit classes and units after the table has been generated, maybe on the table itself?
 
   const [classes, setClasses] = useState([]);
   // Update these to be one object containing all the information in one

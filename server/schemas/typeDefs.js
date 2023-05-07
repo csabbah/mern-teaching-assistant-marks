@@ -8,6 +8,8 @@ const typeDefs = gql`
   type User {
     _id: ID
     email: String
+    classes: [Class]
+    students: [Student]
   }
 
   type Grades {
@@ -30,7 +32,7 @@ const typeDefs = gql`
 
   type Criterias {
     _id: ID
-    labal: String
+    label: String
     letter: String
     weight: Int
   }
@@ -41,7 +43,7 @@ const typeDefs = gql`
     criterias: [Criterias]
   }
 
-  type Units {
+  type Unit {
     _id: ID
     title: String
     themeColor: String
@@ -52,12 +54,58 @@ const typeDefs = gql`
     _id: ID
     schoolYear: String
     title: String
-    units: [Units]
+    units: [Unit]
+  }
+
+  input criteriasInput {
+    _id: ID
+    label: String
+    letter: String
+    weight: Int
+  }
+
+  input projectInput {
+    _id: ID
+    title: String
+    criterias: [criteriasInput]
+  }
+
+  input unitInput {
+    _id: ID
+    title: String
+    themeColor: String
+    projects: [projectInput]
+  }
+
+  input classInput {
+    _id: ID
+    schoolYear: String
+    title: String
+    units: [unitInput]
+  }
+
+  input gradesInput {
+    _id: ID
+    classId: Int
+    criteria: String
+    letter: String
+    mark: Int
+    weight: Int
+    project: String
+    unit: String
+  }
+  input studentInput {
+    _id: ID
+    classId: Int
+    name: String
+    grades: [gradesInput]
   }
 
   type Mutation {
     login(email: String!, password: String!): Auth
     addUser(email: String!, password: String!): Auth
+    addClass(classToSave: classInput): Class
+    addStudent(studentToSave: studentInput): Student
   }
 
   type Auth {
