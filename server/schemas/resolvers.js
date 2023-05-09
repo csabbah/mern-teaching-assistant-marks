@@ -5,12 +5,9 @@ const { signToken } = require("../utils/auth");
 
 const resolvers = {
   Query: {
-    me: async (parent, args, context) => {
-      if (context.user) {
-        const userData = await User.findOne({ _id: context.user._id })
-          .select("-__v -password")
-          .populate("notes");
-
+    user: async (parent, { _id }) => {
+      if (_id) {
+        const userData = await User.findOne({ _id: _id }).populate("classes");
         return userData;
       }
 
@@ -44,8 +41,14 @@ const resolvers = {
     addClass: async (parent, { classToSave }) => {
       const singleClass = await Class.create(classToSave);
 
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id: classToSave.userId },
+        { $addToSet: { classes: singleClass } },
+        { new: true }
+      );
+
       // TODO Add the function to push to the users classes array
-      return singleClass;
+      return updatedUser;
     },
     addStudent: async (parent, { studentToSave }) => {
       const singleStudent = await Student.create(studentToSave);

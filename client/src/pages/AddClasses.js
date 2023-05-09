@@ -1,16 +1,42 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const Marks = () => {
-  // TODO Make sure to add associated mongoose id into the models when creating them frontend
-  //      TODO ie. Pass the mongoose class id into the student data
+import { useMutation } from "@apollo/client";
+import { ADD_CLASS } from "../utils/mutations";
 
-  // TODO Add the function in the resolver to push student and class models into the user model
+import { useHistory } from "react-router-dom";
+
+import Auth from "../utils/auth";
+
+// TODO IMPORTANT - MAKE THIS ENTIRE PAGE A MODAL
+// TODO THAT WAY WHEN YOU HIT ADD CLASS IN YOUR CLASSES IT'S A SMOOTHER EXPERIENCE)
+const Marks = () => {
+  const history = useHistory();
+
+  // ----------------------------- AUTH / QUERY USER - Extract Logged in User's ID
+  let userData = Auth.getProfile();
+  const [userId, setUserId] = useState(userData.data._id);
+
+  const [addClass] = useMutation(ADD_CLASS);
+
+  const handleAddClass = async (singleClass) => {
+    try {
+      await addClass({
+        variables: { classToSave: singleClass },
+      });
+      history.push("/your-classes");
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // TODO Add the function in the resolver to push student model into the user model
   // TODO After the resolvers have been added, make them functional in the frontend
 
-  // TODO Create a new 'Students' page that displays all students, the classes they are currently in, their averages and etc.
+  // TODO Add the ability to view your students after they have been added (need to make a query)
 
-  // TODO Add the ability to view your tables after they have been added (need to make a query)
   // TODO Add the ability to edit/delete the data after it's been posted to DB
+
+  // TODO Create a new 'Students' page that displays all students, the classes they are currently in, their averages and etc.
 
   // TODO Create the function to allow users to send progress reports emails to students
 
@@ -56,7 +82,6 @@ const Marks = () => {
   const [studentData, setStudentData] = useState({});
 
   const [singleCriteria, setSingleCriteria] = useState({
-    id: "",
     label: "",
     letter: "",
     weight: 0,
@@ -97,229 +122,6 @@ const Marks = () => {
 
   const [decimal, setDecimal] = useState(false);
   const [missingData, setMissingData] = useState({});
-
-  // TODO Update all headers to be inputs and allow users to update the head data
-  const renderTable = (singleClass, i) => {
-    const allClasses = [];
-    const allUnits = [];
-    const projects = [];
-    const criteriaLabels = [];
-
-    let classesColSpan = 0;
-
-    singleClass.units.map((unit) => {
-      unit.projects.map((project) => {
-        classesColSpan += project.criterias.length;
-      });
-    });
-
-    allClasses.push(
-      <th
-        key={singleClass.title}
-        className="table-unit-title"
-        colSpan={classesColSpan}
-        style={{
-          backgroundColor: "#333",
-          border: tableProperties.border,
-          textAlign: "center",
-        }}
-      >
-        {`${singleClass.title} - ${singleClass.schoolYear}`}
-      </th>
-    );
-    singleClass.units.map((unit, i) => {
-      let themeColor = unit.themeColor;
-
-      let unitColSpan = 0;
-      unit.projects.map((project) => {
-        unitColSpan += project.criterias.length;
-      });
-
-      allUnits.push(
-        <th
-          key={unit.title}
-          className="table-unit-title"
-          colSpan={unitColSpan}
-          style={{
-            backgroundColor: themeColor,
-            border: tableProperties.border,
-            textAlign: "center",
-            color: "#333",
-          }}
-        >
-          {unit.title}
-        </th>
-      );
-
-      unit.projects.map((project, i) => {
-        projects.push(
-          <th
-            key={project.title}
-            className="table-unit-title"
-            colSpan={project.criterias.length}
-            style={{
-              backgroundColor: themeColor,
-              border: tableProperties.border,
-              textAlign: "center",
-              color: "#333",
-            }}
-          >
-            {project.title}
-          </th>
-        );
-
-        project.criterias.map((criteria, i) => {
-          criteriaLabels.push(
-            <th
-              style={{
-                backgroundColor: themeColor,
-                border: tableProperties.border,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <p style={{ margin: 0 }}>
-                  {criteria.letter} ({criteria.weight}%)
-                </p>
-              </div>
-            </th>
-          );
-        });
-      });
-    });
-
-    return (
-      <table
-        className="table table-responsive"
-        style={{
-          display: viewingTable === i ? "unset" : "none",
-        }}
-      >
-        <thead>
-          <tr>
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-            {allClasses}
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-          </tr>
-          <tr>
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-            {allUnits}
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-          </tr>
-          <tr style={{ margin: 0, textAlign: "center" }}>
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-            {projects}
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-          </tr>
-          <tr style={{ margin: 0, textAlign: "center" }}>
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-                color: "#FFFFFF",
-                textTransform: "uppercase",
-              }}
-            >
-              Students
-            </th>
-            {criteriaLabels}
-            <th
-              style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-                color: "#FFFFFF",
-                textTransform: "uppercase",
-              }}
-            >
-              <button onClick={() => setDecimal(!decimal)}>Fixed Point</button>
-              Final
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* // ? This will contain the rows that will be added */}
-          {allStudents.map((student) => {
-            return (
-              student.classId === singleClass.id &&
-              renderTableBodyGrades(student, singleClass)
-            );
-          })}
-          {/* // ? Render the initial empty row first */}
-          {renderTableBodyBlank(singleClass)}
-          {/* // ? This is the Add student function which renders a new row (pushes to studentRows) */}
-          <tr
-            className="add-student"
-            onClick={() => {
-              if (
-                !studentData[singleClass.id] ||
-                studentData[singleClass.id].name === undefined ||
-                studentData[singleClass.id].name == ""
-              ) {
-                return setMissingData({
-                  ...missingData,
-                  [singleClass.id]: {
-                    reveal: true,
-                    classId: singleClass.id,
-                  },
-                });
-              }
-              // Add the student
-              setAllStudents([...allStudents, studentData[singleClass.id]]);
-
-              // Remove the student that was added from studentData (which contains the blankRow data)
-              const updatedStudentData = { ...studentData };
-              delete updatedStudentData[singleClass.id];
-              setStudentData(updatedStudentData);
-              inputRef.current.focus();
-            }}
-          >
-            <td style={{ border: "none" }}>
-              <button
-                style={{ backgroundColor: "transparent", border: "none" }}
-              >
-                Add Student
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    );
-  };
 
   const [allStudents, setAllStudents] = useState([]);
 
@@ -370,9 +172,6 @@ const Marks = () => {
 
     return average.toFixed(decimal ? 2 : 0);
   }
-
-  console.log("classes", classes);
-  console.log("students", allStudents);
 
   // TODO Update repetitive code, renderTableBodyBlank and renderTableBodyGrades are very similar, differentiate between them by adding a param when calling the functions
   // TODO Add the ability to paste a large set of data to populate the table
@@ -758,7 +557,7 @@ const Marks = () => {
   };
 
   const [addProject, setAddProject] = useState(false);
-  const [addClass, setAddClass] = useState(false);
+  const [addSingleClass, setAddSingleClass] = useState(false);
 
   // Add project to projects and reset singleProject data
   useEffect(() => {
@@ -767,15 +566,21 @@ const Marks = () => {
       setSingleProject({ title: "", criterias: [] });
       setAddProject(false);
     }
-    if (units.length > 0 && addClass) {
+    if (units.length > 0 && addSingleClass) {
       const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
-      setClasses([
-        ...classes,
-        { id: uniqueId, title: classTitle, units, schoolYear },
-      ]);
+      let singleClass = {
+        title: classTitle,
+        units,
+        schoolYear,
+        userId,
+      };
+      handleAddClass(singleClass);
+
+      setClasses([...classes, singleClass]);
+
       setClassTitle("");
       setUnits([]);
-      setAddClass(false);
+      setAddSingleClass(false);
     }
   }, [singleProject, units]);
 
@@ -848,7 +653,6 @@ const Marks = () => {
                     const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
                     setSingleCriteria({
                       ...singleCriteria,
-                      id: uniqueId,
                       label: e.target.value,
                       letter:
                         e.target.value == "Knowledge and Understanding"
@@ -1099,7 +903,7 @@ const Marks = () => {
                     projects: projects,
                   },
                 ]);
-                setAddClass(true);
+                setAddSingleClass(true);
                 setProjects([]);
                 setUnitTitle("");
                 setUnitThemeColor(tableProperties.colors[0]);
@@ -1151,26 +955,8 @@ const Marks = () => {
                   });
                 })}
             </div>
-
-            <h5 style={{ marginTop: 30 }}>Generate Table</h5>
-            {/* // TODO Add the function to upload to the model  */}
-            <button>Generate Table</button>
           </section>
         )}
-        <div style={{ display: "flex", gap: 15 }}>
-          {classes.map((singleClass, i) => (
-            <button
-              onClick={() => {
-                setViewingTable(i);
-              }}
-              style={{ width: 100 }}
-            >
-              {singleClass.title}
-            </button>
-          ))}
-        </div>
-        {classes.map(renderTable)}
-        {/* ------------ ----------- ---------- // ? GENERATED TABLE */}
       </form>
     </div>
   );

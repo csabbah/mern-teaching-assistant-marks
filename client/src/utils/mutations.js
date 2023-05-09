@@ -28,20 +28,22 @@ export const ADD_CLASS = gql`
   mutation addClass($classToSave: classInput) {
     addClass(classToSave: $classToSave) {
       _id
-      schoolYear
-      title
-      units {
-        _id
-        themeColor
+      classes {
+        schoolYear
         title
-        projects {
+        units {
           _id
+          themeColor
           title
-          criterias {
+          projects {
             _id
-            label
-            letter
-            weight
+            title
+            criterias {
+              _id
+              label
+              letter
+              weight
+            }
           }
         }
       }

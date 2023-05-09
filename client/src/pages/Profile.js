@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 import { useQuery } from "@apollo/client";
-import { GET_ME } from "../utils/queries";
+import { GET_USER } from "../utils/queries";
 
 import Auth from "../utils/auth";
 
-const About = () => {
+const Profile = () => {
   let userData = Auth.getProfile();
   // Execute useQuery method to return full user data (Using the extracted user _id above)
-  const { loading, data } = useQuery(GET_ME, {
+  const { loading, data } = useQuery(GET_USER, {
     variables: { id: userData.data._id },
   });
 
@@ -25,7 +25,7 @@ const About = () => {
     console.log(data);
   }
 
-  return <div style={{ paddingLeft: "15px" }}>About Page</div>;
+  return <div style={{ paddingLeft: "15px" }}>Profile Page</div>;
 };
 
-export default About;
+export default Profile;
