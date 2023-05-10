@@ -6,13 +6,11 @@ import { GET_USER } from "../utils/queries";
 import Auth from "../utils/auth";
 import { useHistory } from "react-router-dom";
 
+import { useMutation } from "@apollo/client";
+import { ADD_STUDENT, DELETE_STUDENT } from "../utils/mutations";
+
 const Classes = () => {
   const history = useHistory();
-
-  const [missingData, setMissingData] = useState({});
-  const inputRef = useRef(null);
-  const [studentData, setStudentData] = useState({});
-  const [allStudents, setAllStudents] = useState([]);
 
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(Auth.getProfile().data._id);
@@ -27,9 +25,38 @@ const Classes = () => {
     },
   });
 
-  useEffect(() => {
-    setUserData(data?.user);
-  }, [loading]);
+  const [addStudent] = useMutation(ADD_STUDENT);
+  const handleAddClass = async (singleStudent) => {
+    try {
+      const updatedUserData = await addStudent({
+        variables: { studentToSave: { ...singleStudent, userId } },
+      });
+
+      setAllStudents(
+        updatedUserData.data.addStudent.classes[viewingTable].students
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const [deleteStudent] = useMutation(DELETE_STUDENT);
+  // TODO When you delete a student, update query so it returns the userData object
+  // TODO that way we can update the userData object
+  const handleDeleteStudent = async (studentId, classId) => {
+    try {
+      await deleteStudent({
+        variables: { userId, studentId, classId },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const [allStudents, setAllStudents] = useState([]);
+  const [missingData, setMissingData] = useState({});
+  const inputRef = useRef(null);
+  const [studentData, setStudentData] = useState({});
 
   let tableProperties = {
     border: "1px solid #333",
@@ -53,7 +80,57 @@ const Classes = () => {
 
   const [decimal, setDecimal] = useState(false);
 
+  useEffect(() => {
+    setUserData(data?.user);
+
+    // ? Upon first page load do 2 things
+    if (userData) {
+      // ? First, for each class, assign a default value to the studentData object so we don't miss any values
+      userData.classes.map((singleClass) => {
+        renderDefaultStudent(singleClass);
+      });
+    }
+  }, [loading, userData]);
+
+  // ? Every time we switch tables, update allStudents state to ensure we have the correct students per table
+  useEffect(() => {
+    userData && setAllStudents(userData.classes[viewingTable].students);
+  }, [loading, viewingTable]);
+
+  // ? Update all StudentData objects with default data (to ensure all grades are included by default)
+  const renderDefaultStudent = (singleClass) => {
+    let defaultGrades = [];
+
+    singleClass.units.flatMap((unit) =>
+      unit.projects.flatMap((project) =>
+        project.criterias.map((criteria) => {
+          return defaultGrades.push({
+            classId: singleClass._id,
+            criteriaId: criteria._id,
+            unit: unit.title,
+            project: project.title,
+            criteria: criteria.label,
+            weight: parseInt(criteria.weight),
+            letter: criteria.letter,
+            mark: 0,
+          });
+        })
+      )
+    );
+
+    setStudentData((prevStudentData) => ({
+      ...prevStudentData,
+      [singleClass._id]: {
+        ...prevStudentData[singleClass._id],
+        classId: singleClass._id,
+        name: "",
+        grades: defaultGrades,
+      },
+    }));
+  };
+
   // TODO Update all headers to be inputs and allow users to update the head data
+  // TODO Each cell now has a unique _id (in the resolver, maybe we can explicitly search for that unique id and update the value)
   const renderTable = (singleClass, i) => {
     const allClasses = [];
     const allUnits = [];
@@ -253,8 +330,9 @@ const Classes = () => {
                   },
                 });
               }
-              // Add the student
-              setAllStudents([...allStudents, studentData[singleClass._id]]);
+
+              // Push student to DB
+              handleAddClass(studentData[singleClass._id]);
 
               // Remove the student that was added from studentData (which contains the blankRow data)
               const updatedStudentData = { ...studentData };
@@ -327,37 +405,9 @@ const Classes = () => {
   // TODO Update repetitive code, renderTableBodyBlank and renderTableBodyGrades are very similar, differentiate between them by adding a param when calling the functions
   // TODO Add the ability to paste a large set of data to populate the table
   // TODO Future update - Try to re-implement on blur for the input field - The issue occurs because you try to clear input field after adding new student
-
   // ? THE FULL SINGLE DATA ROW
   const renderTableBodyBlank = (singleClass) => {
     const rowData = [];
-    const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
-
-    let defaultGrades = [];
-
-    // TODO Only run this once
-    singleClass.units.flatMap((unit) =>
-      unit.projects.flatMap((project) =>
-        project.criterias.map((criteria) => {
-          return defaultGrades.push({
-            classId: singleClass._id,
-            id: criteria.id,
-            unit: unit.title,
-            project: project.title,
-            criteria: criteria.label,
-            weight: criteria.weight,
-            letter: criteria.letter,
-            mark: 0,
-          });
-        })
-      )
-    );
-    let defaultStudent = {
-      id: uniqueId,
-      classId: singleClass._id,
-      name: "-",
-      grades: defaultGrades,
-    };
 
     // ? Render this first (this is the student name column)
     rowData.push(
@@ -387,15 +437,7 @@ const Classes = () => {
               [singleClass._id]: {
                 ...prevStudentData[singleClass._id],
                 classId: singleClass._id,
-                id: uniqueId,
                 name: e.target.value,
-                grades:
-                  prevStudentData[singleClass._id] &&
-                  prevStudentData[singleClass._id].grades
-                    ? // If grades exist, keep those ones and spread them
-                      [...prevStudentData[singleClass._id].grades]
-                    : // Otherwise, set a default grade
-                      defaultStudent.grades,
               },
             }));
           }}
@@ -450,13 +492,13 @@ const Classes = () => {
             (studentData[singleClass._id] &&
               studentData[singleClass._id].grades &&
               studentData[singleClass._id].grades.find(
-                (grade) => grade.id === criteria.id
+                (grade) => grade.criteriaId === criteria._id
               )) ||
             null;
 
           rowData.push(
             <td
-              key={criteria.id}
+              key={criteria._id}
               style={{
                 backgroundColor: singleUnit.themeColor,
                 border: tableProperties.border,
@@ -473,10 +515,13 @@ const Classes = () => {
                     const updatedGrades = studentData[
                       singleClass._id
                     ].grades.map((g) => {
-                      if (g.id === grade.id && g.classId === singleClass._id) {
+                      if (
+                        g.criteriaId === grade.criteriaId &&
+                        g.classId === singleClass._id
+                      ) {
                         return {
                           ...g,
-                          mark,
+                          mark: parseInt(mark),
                         };
                       }
                       return g;
@@ -498,7 +543,7 @@ const Classes = () => {
                           ...(prevStudentData[singleClass._id]?.grades ?? []),
                           {
                             classId: singleClass._id,
-                            id: criteria.id,
+                            criteriaId: criteria._id,
                             unit: singleUnit.title,
                             project: project.title,
                             criteria: criteria.label,
@@ -528,7 +573,6 @@ const Classes = () => {
 
     const grades =
       studentData[singleClass._id] && studentData[singleClass._id].grades;
-
     // ? Render this last (this is the final mark column)
     rowData.push(
       <td
@@ -564,8 +608,9 @@ const Classes = () => {
     );
   };
 
-  // TODO Need to update to allow users to edit student names
-  // TODO Re-use the code that edits previous grades and just update student names
+  // TODO Add the function to update the data in the DB
+  // TODO IMPORTANT THE CODE TO UPDATE THE DATA IS ALREADY SETUP WITH THE 'allStudents' STATE
+  // TODO WE JUST NEED TO UPLOAD THE ENTIRE ALLSTUDENTS TO 'students' ARRAY INSIDE ASSOCIATED CLASS MODEL
   const renderTableBodyGrades = (student, singleClass) => {
     const rowData = [];
 
@@ -573,6 +618,7 @@ const Classes = () => {
     rowData.push(
       <td
         style={{
+          position: "relative",
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
@@ -590,7 +636,7 @@ const Classes = () => {
           onChange={(e) => {
             setAllStudents((prevStudents) =>
               prevStudents.map((singleStudent) => {
-                if (singleStudent.id === student.id) {
+                if (singleStudent._id === student._id) {
                   return {
                     ...singleStudent,
                     name: e.target.value,
@@ -606,6 +652,14 @@ const Classes = () => {
               : ""
           }
         />
+        <button
+          onClick={() => {
+            handleDeleteStudent(student._id, singleClass._id);
+          }}
+          style={{ position: "absolute", left: 0 }}
+        >
+          X
+        </button>
       </td>
     );
 
@@ -622,12 +676,14 @@ const Classes = () => {
           const criteria = project.criterias[k];
           const grade =
             student.grades && student.grades.length > 0
-              ? student.grades.find((grade) => grade.id === criteria.id)
+              ? student.grades.find(
+                  (grade) => grade.criteriaId === criteria._id
+                )
               : null;
 
           rowData.push(
             <td
-              key={criteria.id}
+              key={criteria._id}
               style={{
                 backgroundColor: singleUnit.themeColor,
                 border: tableProperties.border,
@@ -640,16 +696,16 @@ const Classes = () => {
                 onChange={(e) => {
                   setAllStudents((prevStudents) =>
                     prevStudents.map((singleStudent) => {
-                      if (singleStudent.id === student.id) {
+                      if (singleStudent._id === student._id) {
                         const updatedGrades = singleStudent.grades.map(
                           (gradeObj) => {
                             if (
-                              gradeObj.id === criteria.id &&
+                              gradeObj.criteriaId === criteria._id &&
                               gradeObj.classId
                             ) {
                               return {
                                 ...gradeObj,
-                                mark: e.target.value,
+                                mark: parseInt(e.target.value),
                               };
                             }
                             return gradeObj;

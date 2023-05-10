@@ -44,14 +44,47 @@ const userSchema = new Schema(
             ],
           },
         ],
+        students: [
+          {
+            classId: { type: String },
+            name: { type: String },
+            grades: [
+              {
+                classId: { type: String },
+                criteriaId: { type: String },
+                // TODO Update from 'criteria' to 'weightLabel' - Need to also update all around the application
+                criteria: { type: String },
+                letter: { type: String },
+                mark: { type: Number },
+                project: { type: String },
+                unit: { type: String },
+                weight: { type: Number },
+              },
+            ],
+          },
+        ],
       },
     ],
     students: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Student",
+        classId: { type: String },
+        name: { type: String },
+        grades: [
+          {
+            classId: { type: String },
+            criteriaId: { type: String },
+            // TODO Update from 'criteria' to 'weightLabel' - Need to also update all around the application
+            criteria: { type: String },
+            letter: { type: String },
+            mark: { type: Number },
+            project: { type: String },
+            unit: { type: String },
+            weight: { type: Number },
+          },
+        ],
       },
     ],
+    // TODO Add a new students array so that in the future, you can access all the students easier
   },
   // set this to use virtual below
   {

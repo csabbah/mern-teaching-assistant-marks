@@ -14,7 +14,8 @@ const typeDefs = gql`
 
   type Grades {
     _id: ID
-    classId: Int
+    classId: String
+    criteriaId: String
     criteria: String
     letter: String
     mark: Int
@@ -25,7 +26,7 @@ const typeDefs = gql`
 
   type Student {
     _id: ID
-    classId: Int
+    classId: String
     name: String
     grades: [Grades]
   }
@@ -55,6 +56,7 @@ const typeDefs = gql`
     schoolYear: String
     title: String
     units: [Unit]
+    students: [Student]
   }
 
   input criteriasInput {
@@ -82,8 +84,8 @@ const typeDefs = gql`
   }
 
   input gradesInput {
-    _id: ID
-    classId: Int
+    classId: String
+    criteriaId: String
     criteria: String
     letter: String
     mark: Int
@@ -92,9 +94,9 @@ const typeDefs = gql`
     unit: String
   }
   input studentInput {
-    _id: ID
-    classId: Int
+    classId: String
     name: String
+    userId: String
     grades: [gradesInput]
   }
 
@@ -102,7 +104,8 @@ const typeDefs = gql`
     login(email: String!, password: String!): Auth
     addUser(email: String!, password: String!): Auth
     addClass(classToSave: classInput): User
-    addStudent(studentToSave: studentInput): Student
+    addStudent(studentToSave: studentInput): User
+    deleteStudent(studentId: String, classId: String, userId: String): Student
   }
 
   type Auth {

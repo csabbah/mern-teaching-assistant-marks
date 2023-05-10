@@ -5,6 +5,22 @@ export const GET_USER = gql`
     user(_id: $id) {
       _id
       email
+      students {
+        _id
+        name
+        classId
+        grades {
+          _id
+          classId
+          criteria
+          criteriaId
+          letter
+          mark
+          project
+          unit
+          weight
+        }
+      }
       classes {
         _id
         schoolYear
@@ -22,6 +38,22 @@ export const GET_USER = gql`
               letter
               weight
             }
+          }
+        }
+        students {
+          _id
+          name
+          classId
+          grades {
+            _id
+            classId
+            criteria
+            criteriaId
+            letter
+            mark
+            project
+            unit
+            weight
           }
         }
       }

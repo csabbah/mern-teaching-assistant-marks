@@ -7,7 +7,8 @@ const resolvers = {
   Query: {
     user: async (parent, { _id }) => {
       if (_id) {
-        const userData = await User.findOne({ _id: _id }).populate("classes");
+        const userData = await User.findOne({ _id: _id });
+
         return userData;
       }
 
@@ -47,15 +48,63 @@ const resolvers = {
         { new: true }
       );
 
-      // TODO Add the function to push to the users classes array
       return updatedUser;
     },
     addStudent: async (parent, { studentToSave }) => {
       const singleStudent = await Student.create(studentToSave);
 
-      // TODO Add the function to push to the users students array
-      // TODO Add the function to push to the associated class
-      return singleStudent;
+      // TODO When you add the student to the class and that class object is inside the user model...
+      // TODO Shouldn't the new student be visible within the users classes array? - Maybe there's an issue with the mutation in the frontend?
+      // TODO Or Maybe we are not referencing (i.e. 'type: Ref') the class model in the user model? (I don't think this is the case)
+      // ? Push student to the corresponding class
+      await Class.findByIdAndUpdate(
+        { _id: studentToSave.classId },
+        { $addToSet: { students: singleStudent } },
+        { new: true }
+      );
+
+      // ? Push student to the corresponding class INSIDE the users classes array
+      const updatedUser = await User.findOneAndUpdate(
+        { "classes._id": studentToSave.classId },
+        { $push: { "classes.$.students": singleStudent } },
+        { new: true }
+      );
+
+      await User.findByIdAndUpdate(
+        { _id: studentToSave.userId },
+        { $addToSet: { students: singleStudent } },
+        { new: true }
+      );
+
+      return updatedUser;
+    },
+
+    // TODO When you delete a student, update query so it returns the userData object
+    // TODO that way we can update the userData object
+    deleteStudent: async (parent, { studentId, classId, userId }) => {
+      const deletedStudent = await Student.findByIdAndDelete(studentId);
+
+      if (!deletedStudent) {
+        throw new Error("Student not found");
+      }
+
+      await Class.findByIdAndUpdate(
+        { _id: classId },
+        { $pull: { students: { _id: studentId } } },
+        { new: true }
+      );
+
+      await User.findOneAndUpdate(
+        { _id: userId },
+        {
+          $pull: {
+            students: { _id: studentId },
+            "classes.$[].students": { _id: studentId },
+          },
+        }
+      );
+
+      return deletedStudent;
     },
   },
 };

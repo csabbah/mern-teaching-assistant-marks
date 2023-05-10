@@ -69,17 +69,42 @@ export const ADD_STUDENT = gql`
   mutation addStudent($studentToSave: studentInput) {
     addStudent(studentToSave: $studentToSave) {
       _id
-      name
-      classId
-      grades {
+      email
+      classes {
         _id
-        classId
-        criteria
-        letter
-        mark
-        project
-        unit
-        weight
+        schoolYear
+        title
+        units {
+          _id
+          themeColor
+          title
+          projects {
+            _id
+            title
+            criterias {
+              _id
+              label
+              letter
+              weight
+            }
+          }
+        }
+        students {
+          _id
+          name
+          classId
+          grades {
+            _id
+            classId
+            criteria
+            criteriaId
+            letter
+            mark
+            project
+            unit
+            weight
+          }
+        }
       }
     }
   }
@@ -100,3 +125,15 @@ export const ADD_STUDENT = gql`
 //     ]
 //   }
 // }
+
+export const DELETE_STUDENT = gql`
+  mutation deleteStudent(
+    $studentId: String
+    $classId: String
+    $userId: String
+  ) {
+    deleteStudent(studentId: $studentId, classId: $classId, userId: $userId) {
+      _id
+    }
+  }
+`;
