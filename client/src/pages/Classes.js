@@ -11,6 +11,7 @@ import {
   ADD_STUDENT,
   DELETE_STUDENT,
   UPDATE_STUDENT_GRADE,
+  UPDATE_STUDENT_NAME,
 } from "../utils/mutations";
 
 const Classes = () => {
@@ -34,6 +35,17 @@ const Classes = () => {
     try {
       await updateStudentGrade({
         variables: { studentId, gradeId, mark },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const [updateStudentName] = useMutation(UPDATE_STUDENT_NAME);
+  const handleUpdateStudentName = async (studentId, name) => {
+    try {
+      await updateStudentName({
+        variables: { studentId, name },
       });
     } catch (err) {
       console.log(err);
@@ -665,12 +677,14 @@ const Classes = () => {
                 if (singleStudent._id === student._id) {
                   return {
                     ...singleStudent,
-                    name: e.target.value,
+                    name: e.target.value.trim(),
                   };
                 }
+
                 return singleStudent;
               })
             );
+            handleUpdateStudentName(student._id, e.target.value.trim());
           }}
           defaultValue={
             student.name && student.classId === singleClass._id

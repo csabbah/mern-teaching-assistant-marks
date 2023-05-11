@@ -119,3 +119,11 @@ export const UPDATE_STUDENT_GRADE = gql`
     }
   }
 `;
+
+export const UPDATE_STUDENT_NAME = gql`
+  mutation updateStudentName($studentId: String, $name: String) {
+    updateStudentName(studentId: $studentId, name: $name) {
+      _id
+    }
+  }
+`;

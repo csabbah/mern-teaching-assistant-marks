@@ -105,6 +105,48 @@ const resolvers = {
       return deletedStudent;
     },
 
+    updateStudentName: async (parent, { studentId, name }) => {
+      // Update the student model itself
+      const updatedStudent = await Student.findOneAndUpdate(
+        { _id: studentId },
+        { $set: { name } },
+        { new: true }
+      );
+
+      if (!updatedStudent) {
+        throw new Error("Student or grade not found");
+      }
+
+      // Update the student's grade in the `users.students` array
+      await User.updateMany(
+        { "students._id": studentId },
+        { $set: { "students.$.name": name } },
+        { new: true }
+      );
+
+      // Update the student's grade in the `users.classes.students` array
+      await User.updateMany(
+        { "classes.students._id": studentId },
+        {
+          $set: {
+            "classes.$[].students.$[student].name": name,
+          },
+        },
+        {
+          arrayFilters: [{ "student._id": studentId }],
+        }
+      );
+
+      // Update the student's grade in the `classes.students` array
+      await Class.updateMany(
+        { "students._id": studentId },
+        { $set: { "students.$.name": name } },
+        { new: true }
+      );
+
+      return updatedStudent;
+    },
+
     updateStudentGrade: async (parent, { studentId, gradeId, mark }) => {
       // Update the student model itself
       const updatedStudent = await Student.findOneAndUpdate(

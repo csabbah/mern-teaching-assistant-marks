@@ -107,6 +107,7 @@ const typeDefs = gql`
     addStudent(studentToSave: studentInput): User
     deleteStudent(studentId: String, classId: String, userId: String): Student
     updateStudentGrade(studentId: String, mark: Int, gradeId: String): Student
+    updateStudentName(studentId: String, name: String): Student
   }
 
   type Auth {
