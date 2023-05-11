@@ -79,8 +79,6 @@ const resolvers = {
       return updatedUser;
     },
 
-    // TODO When you delete a student, update query so it returns the userData object
-    // TODO that way we can update the userData object
     deleteStudent: async (parent, { studentId, classId, userId }) => {
       const deletedStudent = await Student.findByIdAndDelete(studentId);
 
@@ -105,6 +103,51 @@ const resolvers = {
       );
 
       return deletedStudent;
+    },
+
+    updateStudentGrade: async (parent, { studentId, gradeId, mark }) => {
+      // Update the student model itself
+      const updatedStudent = await Student.findOneAndUpdate(
+        { _id: studentId, "grades._id": gradeId },
+        { $set: { "grades.$.mark": mark } },
+        { new: true }
+      );
+
+      if (!updatedStudent) {
+        throw new Error("Student or grade not found");
+      }
+
+      // Update the student's grade in the `users.students` array
+      await User.updateMany(
+        { "students._id": studentId },
+        { $set: { "students.$.grades.$[grade].mark": mark } },
+        { arrayFilters: [{ "grade._id": gradeId }] }
+      );
+
+      // Update the student's grade in the `users.classes.students` array
+      await User.updateMany(
+        { "classes.students._id": studentId },
+        {
+          $set: {
+            "classes.$[].students.$[student].grades.$[grade].mark": mark,
+          },
+        },
+        {
+          arrayFilters: [
+            { "student._id": studentId },
+            { "grade._id": gradeId },
+          ],
+        }
+      );
+
+      // Update the student's grade in the `classes.students` array
+      await Class.updateMany(
+        { "students._id": studentId },
+        { $set: { "students.$.grades.$[grade].mark": mark } },
+        { arrayFilters: [{ "grade._id": gradeId }] }
+      );
+
+      return updatedStudent;
     },
   },
 };

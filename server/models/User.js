@@ -84,7 +84,6 @@ const userSchema = new Schema(
         ],
       },
     ],
-    // TODO Add a new students array so that in the future, you can access all the students easier
   },
   // set this to use virtual below
   {

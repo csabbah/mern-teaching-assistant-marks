@@ -7,7 +7,11 @@ import Auth from "../utils/auth";
 import { useHistory } from "react-router-dom";
 
 import { useMutation } from "@apollo/client";
-import { ADD_STUDENT, DELETE_STUDENT } from "../utils/mutations";
+import {
+  ADD_STUDENT,
+  DELETE_STUDENT,
+  UPDATE_STUDENT_GRADE,
+} from "../utils/mutations";
 
 const Classes = () => {
   const history = useHistory();
@@ -25,6 +29,17 @@ const Classes = () => {
     },
   });
 
+  const [updateStudentGrade] = useMutation(UPDATE_STUDENT_GRADE);
+  const handleUpdateStudentGrade = async (studentId, gradeId, mark) => {
+    try {
+      await updateStudentGrade({
+        variables: { studentId, gradeId, mark },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const [addStudent] = useMutation(ADD_STUDENT);
   const handleAddClass = async (singleStudent) => {
     try {
@@ -41,13 +56,17 @@ const Classes = () => {
   };
 
   const [deleteStudent] = useMutation(DELETE_STUDENT);
-  // TODO When you delete a student, update query so it returns the userData object
-  // TODO that way we can update the userData object
+
   const handleDeleteStudent = async (studentId, classId) => {
     try {
       await deleteStudent({
         variables: { userId, studentId, classId },
       });
+
+      const updatedStudents = allStudents.filter(
+        (student) => student._id !== studentId
+      );
+      setAllStudents(updatedStudents);
     } catch (err) {
       console.log(err);
     }
@@ -83,9 +102,9 @@ const Classes = () => {
   useEffect(() => {
     setUserData(data?.user);
 
-    // ? Upon first page load do 2 things
+    // ? Upon first page load...
     if (userData) {
-      // ? First, for each class, assign a default value to the studentData object so we don't miss any values
+      // ? For each class, assign a default value to the studentData object so we don't miss any values
       userData.classes.map((singleClass) => {
         renderDefaultStudent(singleClass);
       });
@@ -203,6 +222,7 @@ const Classes = () => {
         project.criterias.map((criteria, i) => {
           criteriaLabels.push(
             <th
+              key={criteria._id}
               style={{
                 backgroundColor: themeColor,
                 border: tableProperties.border,
@@ -227,6 +247,7 @@ const Classes = () => {
 
     return (
       <table
+        key={i}
         className="table table-responsive"
         style={{
           display: viewingTable === i ? "unset" : "none",
@@ -305,12 +326,14 @@ const Classes = () => {
         </thead>
         <tbody>
           {/* // ? This will contain the rows that will be added */}
-          {allStudents.map((student) => {
-            return (
-              student.classId === singleClass._id &&
-              renderTableBodyGrades(student, singleClass)
-            );
-          })}
+          {allStudents
+            // ? Only render the students that are in the class we are viewing
+            .filter((student) => student.classId === singleClass._id)
+            .map((student) => (
+              <React.Fragment key={student._id}>
+                {renderTableBodyGrades(student, singleClass)}
+              </React.Fragment>
+            ))}
           {/* // ? Render the initial empty row first */}
           {renderTableBodyBlank(singleClass)}
           {/* // ? This is the Add student function which renders a new row (pushes to studentRows) */}
@@ -412,6 +435,7 @@ const Classes = () => {
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
+        key={0}
         style={{
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
@@ -576,6 +600,7 @@ const Classes = () => {
     // ? Render this last (this is the final mark column)
     rowData.push(
       <td
+        key={1}
         style={{
           border: tableProperties.border,
           backgroundColor:
@@ -617,6 +642,7 @@ const Classes = () => {
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
+        key={student.name}
         style={{
           position: "relative",
           fontSize: 15,
@@ -633,7 +659,7 @@ const Classes = () => {
             outline: "none",
             textAlign: "center",
           }}
-          onChange={(e) => {
+          onBlur={(e) => {
             setAllStudents((prevStudents) =>
               prevStudents.map((singleStudent) => {
                 if (singleStudent._id === student._id) {
@@ -693,22 +719,24 @@ const Classes = () => {
               }}
             >
               <input
-                onChange={(e) => {
+                onBlur={(e) => {
                   setAllStudents((prevStudents) =>
                     prevStudents.map((singleStudent) => {
                       if (singleStudent._id === student._id) {
                         const updatedGrades = singleStudent.grades.map(
-                          (gradeObj) => {
-                            if (
-                              gradeObj.criteriaId === criteria._id &&
-                              gradeObj.classId
-                            ) {
+                          (studentGrade) => {
+                            if (studentGrade.criteriaId === criteria._id) {
+                              handleUpdateStudentGrade(
+                                singleStudent._id,
+                                studentGrade._id,
+                                parseInt(e.target.value)
+                              );
                               return {
-                                ...gradeObj,
+                                ...studentGrade,
                                 mark: parseInt(e.target.value),
                               };
                             }
-                            return gradeObj;
+                            return studentGrade;
                           }
                         );
                         return {
@@ -740,6 +768,7 @@ const Classes = () => {
     // ? Render this last (this is the final mark column)
     rowData.push(
       <td
+        key={student.name + student._id}
         style={{
           border: tableProperties.border,
           backgroundColor:
@@ -793,7 +822,7 @@ const Classes = () => {
         <p style={{ textAlign: "center" }}>Your Classes</p>
         <div style={{ display: "flex", gap: 15, marginBottom: 10 }}>
           {userData.classes.map((singleClass, i) => (
-            <>
+            <div key={i}>
               <button
                 onClick={() => {
                   setViewingTable(i);
@@ -804,6 +833,7 @@ const Classes = () => {
               </button>
               {i === userData.classes.length - 1 && (
                 <button
+                  style={{ marginLeft: 15 }}
                   onClick={() => {
                     history.push("/add-classes");
                   }}
@@ -811,7 +841,7 @@ const Classes = () => {
                   Add Class +
                 </button>
               )}
-            </>
+            </div>
           ))}
         </div>
       </div>

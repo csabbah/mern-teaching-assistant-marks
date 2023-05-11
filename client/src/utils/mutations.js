@@ -50,20 +50,6 @@ export const ADD_CLASS = gql`
     }
   }
 `;
-// {
-//   "classToSave": {
-//     "title": "Biology",
-//     "schoolYear": "03/21/2023",
-//     "units": [{
-//       "title": "Organisms",
-//       "themeColor":"rgba(255,0,0,0.2)",
-//       "projects": [{
-//         "title": "Test 1",
-//         "criterias":[{"label": "Application", "letter":"A", "weight": 20}]
-//       }]
-//     }]
-//   }
-// }
 
 export const ADD_STUDENT = gql`
   mutation addStudent($studentToSave: studentInput) {
@@ -109,22 +95,6 @@ export const ADD_STUDENT = gql`
     }
   }
 `;
-// {
-//   "studentToSave": {
-//     "name": "Jack",
-//     "classId": 322332523,
-//     "grades": [{
-//       "classId": 322332523,
-//       "criteria": "Application",
-//       "letter": "A",
-//       "mark": 32,
-//       "project": "Test 1",
-//       "unit": "Biology",
-//       "weight": 20
-//     }
-//     ]
-//   }
-// }
 
 export const DELETE_STUDENT = gql`
   mutation deleteStudent(
@@ -133,6 +103,18 @@ export const DELETE_STUDENT = gql`
     $userId: String
   ) {
     deleteStudent(studentId: $studentId, classId: $classId, userId: $userId) {
+      _id
+    }
+  }
+`;
+
+export const UPDATE_STUDENT_GRADE = gql`
+  mutation updateStudentGrade(
+    $studentId: String
+    $gradeId: String
+    $mark: Int
+  ) {
+    updateStudentGrade(studentId: $studentId, gradeId: $gradeId, mark: $mark) {
       _id
     }
   }
