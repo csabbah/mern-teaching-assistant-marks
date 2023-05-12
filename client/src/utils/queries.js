@@ -5,22 +5,13 @@ export const GET_USER = gql`
     user(_id: $id) {
       _id
       email
-      students {
-        _id
-        name
-        classId
-        grades {
-          _id
-          classId
-          criteria
-          criteriaId
-          letter
-          mark
-          project
-          unit
-          weight
-        }
-      }
+    }
+  }
+`;
+
+export const GET_DATA = gql`
+  query fullData($id: ID!) {
+    fullData(_id: $id) {
       classes {
         _id
         schoolYear
@@ -40,22 +31,43 @@ export const GET_USER = gql`
             }
           }
         }
-        students {
+      }
+      students {
+        _id
+        name
+        classId
+        grades {
           _id
-          name
           classId
-          grades {
-            _id
-            classId
-            criteria
-            criteriaId
-            letter
-            mark
-            project
-            unit
-            weight
-          }
+          criteria
+          criteriaId
+          letter
+          mark
+          project
+          unit
+          weight
         }
+      }
+    }
+  }
+`;
+
+export const GET_STUDENTS = gql`
+  query students($id: ID) {
+    students(_id: $id) {
+      _id
+      name
+      classId
+      grades {
+        _id
+        classId
+        criteria
+        criteriaId
+        letter
+        mark
+        project
+        unit
+        weight
       }
     }
   }

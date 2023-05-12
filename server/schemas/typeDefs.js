@@ -1,15 +1,19 @@
 const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
+  type classesQueryResult {
+    classes: [Class]
+    students: [Student]
+  }
+
   type Query {
     user(_id: ID!): User
+    fullData(_id: ID!): classesQueryResult
   }
 
   type User {
     _id: ID
     email: String
-    classes: [Class]
-    students: [Student]
   }
 
   type Grades {
@@ -26,6 +30,7 @@ const typeDefs = gql`
 
   type Student {
     _id: ID
+    userId: String
     classId: String
     name: String
     grades: [Grades]
@@ -55,8 +60,8 @@ const typeDefs = gql`
     _id: ID
     schoolYear: String
     title: String
+    userId: String
     units: [Unit]
-    students: [Student]
   }
 
   input criteriasInput {
@@ -94,18 +99,18 @@ const typeDefs = gql`
     unit: String
   }
   input studentInput {
+    userId: String
     classId: String
     name: String
-    userId: String
     grades: [gradesInput]
   }
 
   type Mutation {
     login(email: String!, password: String!): Auth
     addUser(email: String!, password: String!): Auth
-    addClass(classToSave: classInput): User
-    addStudent(studentToSave: studentInput): User
-    deleteStudent(studentId: String, classId: String, userId: String): Student
+    addClass(classToSave: classInput): Class
+    addStudent(studentToSave: studentInput): Student
+    deleteStudent(studentId: String): Student
     updateStudentGrade(studentId: String, mark: Int, gradeId: String): Student
     updateStudentName(studentId: String, name: String): Student
   }

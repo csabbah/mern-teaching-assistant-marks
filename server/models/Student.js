@@ -2,6 +2,7 @@ const { Schema, model } = require("mongoose");
 
 const studentSchema = new Schema(
   {
+    userId: { type: String },
     classId: { type: String },
     name: { type: String },
     grades: [

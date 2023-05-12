@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import { useQuery } from "@apollo/client";
-import { GET_USER } from "../utils/queries";
+import { GET_DATA } from "../utils/queries";
 
 import Auth from "../utils/auth";
 import { useHistory } from "react-router-dom";
@@ -17,17 +17,11 @@ import {
 const Classes = () => {
   const history = useHistory();
 
-  const [userData, setUserData] = useState(null);
+  const [fullData, setFullData] = useState([]);
   const [userId, setUserId] = useState(Auth.getProfile().data._id);
-  const { loading, error, data } = useQuery(GET_USER, {
-    // This property and the 'network-only' value ensures it always fetches the latest data from the apollo server.
-    // In short, it ensures if you attempt to login again during the same session that the data is unique based on the account
-    fetchPolicy: "network-only",
+
+  const { loading, data, refetch } = useQuery(GET_DATA, {
     variables: { id: userId },
-    onCompleted: (data) => {
-      // Upon successful data fetch, update state object
-      setUserData(data.user);
-    },
   });
 
   const [updateStudentGrade] = useMutation(UPDATE_STUDENT_GRADE);
@@ -53,15 +47,18 @@ const Classes = () => {
   };
 
   const [addStudent] = useMutation(ADD_STUDENT);
-  const handleAddClass = async (singleStudent) => {
+  const handleAddStudent = async (singleStudent) => {
     try {
-      const updatedUserData = await addStudent({
+      const studentAdded = await addStudent({
         variables: { studentToSave: { ...singleStudent, userId } },
       });
 
-      setAllStudents(
-        updatedUserData.data.addStudent.classes[viewingTable].students
-      );
+      setAllStudents([...allStudents, studentAdded.data.addStudent]);
+
+      // Re-apply the default grades to empty body blank
+      fullData.classes.map((singleClass) => {
+        renderDefaultStudent(singleClass);
+      });
     } catch (err) {
       console.log(err);
     }
@@ -69,10 +66,10 @@ const Classes = () => {
 
   const [deleteStudent] = useMutation(DELETE_STUDENT);
 
-  const handleDeleteStudent = async (studentId, classId) => {
+  const handleDeleteStudent = async (studentId) => {
     try {
       await deleteStudent({
-        variables: { userId, studentId, classId },
+        variables: { userId, studentId },
       });
 
       const updatedStudents = allStudents.filter(
@@ -112,21 +109,19 @@ const Classes = () => {
   const [decimal, setDecimal] = useState(false);
 
   useEffect(() => {
-    setUserData(data?.user);
+    refetch();
+
+    setFullData(data?.fullData);
+    setAllStudents(data?.fullData.students);
 
     // ? Upon first page load...
-    if (userData) {
+    if (fullData && fullData.classes) {
       // ? For each class, assign a default value to the studentData object so we don't miss any values
-      userData.classes.map((singleClass) => {
+      fullData.classes.map((singleClass) => {
         renderDefaultStudent(singleClass);
       });
     }
-  }, [loading, userData]);
-
-  // ? Every time we switch tables, update allStudents state to ensure we have the correct students per table
-  useEffect(() => {
-    userData && setAllStudents(userData.classes[viewingTable].students);
-  }, [loading, viewingTable]);
+  }, [loading, fullData, refetch]);
 
   // ? Update all StudentData objects with default data (to ensure all grades are included by default)
   const renderDefaultStudent = (singleClass) => {
@@ -365,9 +360,8 @@ const Classes = () => {
                   },
                 });
               }
-
               // Push student to DB
-              handleAddClass(studentData[singleClass._id]);
+              handleAddStudent(studentData[singleClass._id]);
 
               // Remove the student that was added from studentData (which contains the blankRow data)
               const updatedStudentData = { ...studentData };
@@ -645,9 +639,6 @@ const Classes = () => {
     );
   };
 
-  // TODO Add the function to update the data in the DB
-  // TODO IMPORTANT THE CODE TO UPDATE THE DATA IS ALREADY SETUP WITH THE 'allStudents' STATE
-  // TODO WE JUST NEED TO UPLOAD THE ENTIRE ALLSTUDENTS TO 'students' ARRAY INSIDE ASSOCIATED CLASS MODEL
   const renderTableBodyGrades = (student, singleClass) => {
     const rowData = [];
 
@@ -694,7 +685,7 @@ const Classes = () => {
         />
         <button
           onClick={() => {
-            handleDeleteStudent(student._id, singleClass._id);
+            handleDeleteStudent(student._id);
           }}
           style={{ position: "absolute", left: 0 }}
         >
@@ -806,7 +797,7 @@ const Classes = () => {
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
   };
 
-  if (loading) {
+  if (loading || !fullData || !fullData.students || !fullData.classes) {
     return (
       <div
         style={{
@@ -835,7 +826,7 @@ const Classes = () => {
       <div>
         <p style={{ textAlign: "center" }}>Your Classes</p>
         <div style={{ display: "flex", gap: 15, marginBottom: 10 }}>
-          {userData.classes.map((singleClass, i) => (
+          {fullData.classes.map((singleClass, i) => (
             <div key={i}>
               <button
                 onClick={() => {
@@ -845,7 +836,7 @@ const Classes = () => {
               >
                 {singleClass.title}
               </button>
-              {i === userData.classes.length - 1 && (
+              {i === fullData.classes.length - 1 && (
                 <button
                   style={{ marginLeft: 15 }}
                   onClick={() => {
@@ -859,7 +850,7 @@ const Classes = () => {
           ))}
         </div>
       </div>
-      <div>{userData.classes.map(renderTable)}</div>
+      <div>{fullData.classes.map(renderTable)}</div>
     </div>
   );
 };

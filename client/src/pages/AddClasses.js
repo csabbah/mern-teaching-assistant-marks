@@ -175,14 +175,13 @@ const Marks = () => {
       setAddProject(false);
     }
     if (units.length > 0 && addSingleClass) {
-      const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
       let singleClass = {
         title: classTitle,
         units,
         schoolYear,
         userId,
       };
-      console.log(singleClass);
+
       handleAddClass(singleClass);
 
       setClasses([...classes, singleClass]);

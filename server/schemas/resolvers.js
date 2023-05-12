@@ -14,6 +14,15 @@ const resolvers = {
 
       throw new AuthenticationError("Not logged in");
     },
+    fullData: async (parent, { _id }) => {
+      if (_id) {
+        const studentData = await Student.find({ userId: _id });
+        const classData = await Class.find({ userId: _id });
+        return { classes: classData, students: studentData };
+      }
+
+      throw new AuthenticationError("Not logged in");
+    },
   },
   Mutation: {
     login: async (parent, { email, password }) => {
@@ -42,65 +51,20 @@ const resolvers = {
     addClass: async (parent, { classToSave }) => {
       const singleClass = await Class.create(classToSave);
 
-      const updatedUser = await User.findByIdAndUpdate(
-        { _id: classToSave.userId },
-        { $addToSet: { classes: singleClass } },
-        { new: true }
-      );
-
-      return updatedUser;
+      return singleClass;
     },
     addStudent: async (parent, { studentToSave }) => {
       const singleStudent = await Student.create(studentToSave);
 
-      // TODO When you add the student to the class and that class object is inside the user model...
-      // TODO Shouldn't the new student be visible within the users classes array? - Maybe there's an issue with the mutation in the frontend?
-      // TODO Or Maybe we are not referencing (i.e. 'type: Ref') the class model in the user model? (I don't think this is the case)
-      // ? Push student to the corresponding class
-      await Class.findByIdAndUpdate(
-        { _id: studentToSave.classId },
-        { $addToSet: { students: singleStudent } },
-        { new: true }
-      );
-
-      // ? Push student to the corresponding class INSIDE the users classes array
-      const updatedUser = await User.findOneAndUpdate(
-        { "classes._id": studentToSave.classId },
-        { $push: { "classes.$.students": singleStudent } },
-        { new: true }
-      );
-
-      await User.findByIdAndUpdate(
-        { _id: studentToSave.userId },
-        { $addToSet: { students: singleStudent } },
-        { new: true }
-      );
-
-      return updatedUser;
+      return singleStudent;
     },
 
-    deleteStudent: async (parent, { studentId, classId, userId }) => {
+    deleteStudent: async (parent, { studentId }) => {
       const deletedStudent = await Student.findByIdAndDelete(studentId);
 
       if (!deletedStudent) {
         throw new Error("Student not found");
       }
-
-      await Class.findByIdAndUpdate(
-        { _id: classId },
-        { $pull: { students: { _id: studentId } } },
-        { new: true }
-      );
-
-      await User.findOneAndUpdate(
-        { _id: userId },
-        {
-          $pull: {
-            students: { _id: studentId },
-            "classes.$[].students": { _id: studentId },
-          },
-        }
-      );
 
       return deletedStudent;
     },
@@ -117,33 +81,6 @@ const resolvers = {
         throw new Error("Student or grade not found");
       }
 
-      // Update the student's grade in the `users.students` array
-      await User.updateMany(
-        { "students._id": studentId },
-        { $set: { "students.$.name": name } },
-        { new: true }
-      );
-
-      // Update the student's grade in the `users.classes.students` array
-      await User.updateMany(
-        { "classes.students._id": studentId },
-        {
-          $set: {
-            "classes.$[].students.$[student].name": name,
-          },
-        },
-        {
-          arrayFilters: [{ "student._id": studentId }],
-        }
-      );
-
-      // Update the student's grade in the `classes.students` array
-      await Class.updateMany(
-        { "students._id": studentId },
-        { $set: { "students.$.name": name } },
-        { new: true }
-      );
-
       return updatedStudent;
     },
 
@@ -158,36 +95,6 @@ const resolvers = {
       if (!updatedStudent) {
         throw new Error("Student or grade not found");
       }
-
-      // Update the student's grade in the `users.students` array
-      await User.updateMany(
-        { "students._id": studentId },
-        { $set: { "students.$.grades.$[grade].mark": mark } },
-        { arrayFilters: [{ "grade._id": gradeId }] }
-      );
-
-      // Update the student's grade in the `users.classes.students` array
-      await User.updateMany(
-        { "classes.students._id": studentId },
-        {
-          $set: {
-            "classes.$[].students.$[student].grades.$[grade].mark": mark,
-          },
-        },
-        {
-          arrayFilters: [
-            { "student._id": studentId },
-            { "grade._id": gradeId },
-          ],
-        }
-      );
-
-      // Update the student's grade in the `classes.students` array
-      await Class.updateMany(
-        { "students._id": studentId },
-        { $set: { "students.$.grades.$[grade].mark": mark } },
-        { arrayFilters: [{ "grade._id": gradeId }] }
-      );
 
       return updatedStudent;
     },
