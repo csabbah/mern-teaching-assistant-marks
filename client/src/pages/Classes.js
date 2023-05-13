@@ -25,10 +25,15 @@ const Classes = () => {
   });
 
   const [updateStudentGrade] = useMutation(UPDATE_STUDENT_GRADE);
-  const handleUpdateStudentGrade = async (studentId, gradeId, mark) => {
+  const handleUpdateStudentGrade = async (
+    studentId,
+    gradeId,
+    mark,
+    finalMark
+  ) => {
     try {
       await updateStudentGrade({
-        variables: { studentId, gradeId, mark },
+        variables: { studentId, gradeId, mark, finalMark },
       });
     } catch (err) {
       console.log(err);
@@ -82,6 +87,7 @@ const Classes = () => {
   };
 
   const [allStudents, setAllStudents] = useState([]);
+
   const [missingData, setMissingData] = useState({});
   const inputRef = useRef(null);
   const [studentData, setStudentData] = useState({});
@@ -89,9 +95,9 @@ const Classes = () => {
   let tableProperties = {
     border: "1px solid #333",
     final: {
-      top: "rgba(255, 255, 0, 0.3)",
-      passing: "rgba(255, 255, 255, 0.3)",
-      failing: "rgba(255, 0, 0, 0.3)",
+      top: "rgba(255, 255, 0, 0.2)",
+      passing: "rgba(255, 255, 255, 0.2)",
+      failing: "rgba(255, 0, 0, 0.2)",
     },
     brightnessRange: "100",
     colors: [
@@ -233,6 +239,11 @@ const Classes = () => {
               style={{
                 backgroundColor: themeColor,
                 border: tableProperties.border,
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+              onClick={() => {
+                handleSort(criteria.letter, singleClass);
               }}
             >
               <div
@@ -242,8 +253,14 @@ const Classes = () => {
                   alignItems: "center",
                 }}
               >
-                <p style={{ margin: 0 }}>
-                  {criteria.letter} ({criteria.weight}%)
+                <p
+                  className="gradeLetter"
+                  style={{ position: "relative", margin: 0 }}
+                >
+                  {criteria.letter}{" "}
+                  <span className="gradeWeight" style={{ fontSize: 15 }}>
+                    ({criteria.weight}%)
+                  </span>
                 </p>
               </div>
             </th>
@@ -296,15 +313,49 @@ const Classes = () => {
               style={{
                 backgroundColor: "#333",
                 border: tableProperties.border,
+                position: "relative",
               }}
-            ></th>
+            >
+              <input
+                className="studentSearchInput"
+                onChange={(e) => setStudentQuery(e.target.value)}
+                value={studentQuery}
+                style={{
+                  position: "absolute",
+                  bottom: "50%",
+                  left: "50%",
+                  transform: "translateX(-50%) translateY(50%)",
+                  width: "95%",
+                  height: 40,
+                  paddingLeft: 10,
+                  border: "none",
+                  color: "white",
+                  backgroundColor: "#777",
+                }}
+                placeholder="Search student"
+              ></input>
+            </th>
             {projects}
             <th
               style={{
                 backgroundColor: "#333",
                 border: tableProperties.border,
               }}
-            ></th>
+            >
+              <button
+                style={{
+                  border: "none",
+                  backgroundColor: "#999",
+                  padding: "4px 13px",
+                  color: "#ffffff",
+                  borderRadius: 5,
+                  fontSize: 15,
+                }}
+                onClick={() => setDecimal(!decimal)}
+              >
+                Decimal
+              </button>
+            </th>
           </tr>
           <tr style={{ margin: 0, textAlign: "center" }}>
             <th
@@ -313,7 +364,10 @@ const Classes = () => {
                 border: tableProperties.border,
                 color: "#FFFFFF",
                 textTransform: "uppercase",
+                cursor: "pointer",
+                userSelect: "none",
               }}
+              onClick={() => handleSort("studentName", singleClass)}
             >
               Students
             </th>
@@ -324,9 +378,11 @@ const Classes = () => {
                 border: tableProperties.border,
                 color: "#FFFFFF",
                 textTransform: "uppercase",
+                cursor: "pointer",
+                userSelect: "none",
               }}
+              onClick={() => handleSort("finalMark", singleClass)}
             >
-              <button onClick={() => setDecimal(!decimal)}>Fixed Point</button>
               Final
             </th>
           </tr>
@@ -335,7 +391,21 @@ const Classes = () => {
           {/* // ? This will contain the rows that will be added */}
           {allStudents
             // ? Only render the students that are in the class we are viewing
-            .filter((student) => student.classId === singleClass._id)
+            // ? And render students that match the search query
+            .filter((student) => {
+              // Check if the student belongs to the current class
+              if (student.classId !== singleClass._id) {
+                return false;
+              }
+              // Check if the user query is empty or matches the student name
+              if (
+                !studentQuery ||
+                student.name.toLowerCase().includes(studentQuery.toLowerCase())
+              ) {
+                return true;
+              }
+              return false;
+            })
             .map((student) => (
               <React.Fragment key={student._id}>
                 {renderTableBodyGrades(student, singleClass)}
@@ -530,7 +600,6 @@ const Classes = () => {
             <td
               key={criteria._id}
               style={{
-                backgroundColor: singleUnit.themeColor,
                 border: tableProperties.border,
                 borderLeftWidth: "1px",
                 borderLeftColor: "rgba(0,0,0,1)",
@@ -562,6 +631,9 @@ const Classes = () => {
                       [singleClass._id]: {
                         ...prevStudentData[singleClass._id],
                         grades: updatedGrades,
+                        finalMark: parseInt(
+                          calculateAverage(updatedGrades, singleClass)
+                        ),
                       },
                     }));
                   } else {
@@ -582,6 +654,12 @@ const Classes = () => {
                             mark: parseInt(mark),
                           },
                         ],
+                        finalMark: parseInt(
+                          calculateAverage(
+                            prevStudentData[singleClass._id]?.grades ?? [],
+                            singleClass
+                          )
+                        ),
                       },
                     }));
                   }
@@ -609,13 +687,6 @@ const Classes = () => {
         key={1}
         style={{
           border: tableProperties.border,
-          backgroundColor:
-            grades === undefined || grades.length === 0
-              ? ""
-              : calculateAverage(grades, singleClass) < 50
-              ? tableProperties.final.failing
-              : calculateAverage(grades, singleClass) > 80 &&
-                tableProperties.final.top,
           width: "8%",
         }}
       >
@@ -651,7 +722,7 @@ const Classes = () => {
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
-          width: "25%",
+          width: "30%",
         }}
       >
         <input
@@ -687,7 +758,17 @@ const Classes = () => {
           onClick={() => {
             handleDeleteStudent(student._id);
           }}
-          style={{ position: "absolute", left: 0 }}
+          style={{
+            position: "absolute",
+            left: 10,
+            bottom: "50%",
+            transform: "translateY(50%)",
+            border: "none",
+            backgroundColor: "red",
+            padding: "3px 9px",
+            color: "#ffffff",
+            borderRadius: 5,
+          }}
         >
           X
         </button>
@@ -716,39 +797,56 @@ const Classes = () => {
             <td
               key={criteria._id}
               style={{
-                backgroundColor: singleUnit.themeColor,
+                // backgroundColor: singleUnit.themeColor,
+                backgroundColor:
+                  grade.mark < 50
+                    ? tableProperties.final.failing
+                    : grade.mark > 80
+                    ? tableProperties.final.top
+                    : singleUnit.themeColor,
                 border: tableProperties.border,
                 borderLeftWidth: "1px",
                 borderLeftColor: "rgba(0,0,0,1)",
                 borderRightColor: "rgba(0,0,0,1)",
+                width: "9%",
               }}
             >
               <input
                 onBlur={(e) => {
+                  let singleGradeId = "";
                   setAllStudents((prevStudents) =>
                     prevStudents.map((singleStudent) => {
                       if (singleStudent._id === student._id) {
                         const updatedGrades = singleStudent.grades.map(
                           (studentGrade) => {
                             if (studentGrade.criteriaId === criteria._id) {
-                              handleUpdateStudentGrade(
-                                singleStudent._id,
-                                studentGrade._id,
-                                parseInt(e.target.value)
-                              );
+                              singleGradeId = studentGrade._id;
                               return {
                                 ...studentGrade,
                                 mark: parseInt(e.target.value),
                               };
                             }
+
                             return studentGrade;
                           }
                         );
+
+                        handleUpdateStudentGrade(
+                          singleStudent._id,
+                          singleGradeId,
+                          parseInt(e.target.value),
+                          parseInt(calculateAverage(updatedGrades, singleClass))
+                        );
+
                         return {
                           ...singleStudent,
                           grades: updatedGrades,
+                          finalMark: parseInt(
+                            calculateAverage(updatedGrades, singleClass)
+                          ),
                         };
                       }
+
                       return singleStudent;
                     })
                   );
@@ -783,7 +881,7 @@ const Classes = () => {
               ? tableProperties.final.failing
               : calculateAverage(grades, singleClass) > 80 &&
                 tableProperties.final.top,
-          width: "8%",
+          width: "12%",
         }}
       >
         {grades === null || grades.length === 0
@@ -795,6 +893,50 @@ const Classes = () => {
 
     // ? Render the full Row
     return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
+  };
+
+  const [studentQuery, setStudentQuery] = useState("");
+  const [sorted, setSorted] = useState(true);
+  const handleSort = (name, singleClass) => {
+    setSorted((prevSorted) => !prevSorted); // Toggle the sorting order
+
+    setAllStudents((prevAllStudents) => {
+      const classStudents = prevAllStudents.filter(
+        (student) => student.classId === singleClass._id
+      );
+
+      const sortedStudents = classStudents.sort((a, b) => {
+        // Sorting logic based on the grade letter
+        if (name === "studentName") {
+          return sorted
+            ? a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            : b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+        } else if (name === "finalMark") {
+          return sorted ? a.finalMark - b.finalMark : b.finalMark - a.finalMark;
+        } else {
+          const aGrade = a.grades.find((grade) => grade.letter === name);
+          const bGrade = b.grades.find((grade) => grade.letter === name);
+
+          if (aGrade && bGrade) {
+            if (aGrade.mark === bGrade.mark) {
+              // Stable sorting when grade letter and mark are the same
+              return classStudents.indexOf(a) - classStudents.indexOf(b);
+            }
+            return sorted
+              ? aGrade.mark - bGrade.mark
+              : bGrade.mark - aGrade.mark;
+          }
+          return 0;
+        }
+      });
+
+      // Replace the students with sorted students specific to the class ID
+      return prevAllStudents.map((student) =>
+        student.classId === singleClass._id
+          ? sortedStudents.shift() // Pop the sorted student for the specific class
+          : student
+      );
+    });
   };
 
   if (loading || !fullData || !fullData.students || !fullData.classes) {
@@ -831,14 +973,31 @@ const Classes = () => {
               <button
                 onClick={() => {
                   setViewingTable(i);
+                  setSorted(false);
+                  setStudentQuery((prevQuery) => {
+                    return (prevQuery = "");
+                  });
                 }}
-                style={{ width: 100 }}
+                style={{
+                  border: "none",
+                  backgroundColor: "#555",
+                  padding: "4px 10px",
+                  color: "#ffffff",
+                  borderRadius: 5,
+                }}
               >
                 {singleClass.title}
               </button>
               {i === fullData.classes.length - 1 && (
                 <button
-                  style={{ marginLeft: 15 }}
+                  style={{
+                    marginLeft: 15,
+                    border: "none",
+                    backgroundColor: "#555",
+                    padding: "4px 10px",
+                    color: "#ffffff",
+                    borderRadius: 5,
+                  }}
                   onClick={() => {
                     history.push("/add-classes");
                   }}

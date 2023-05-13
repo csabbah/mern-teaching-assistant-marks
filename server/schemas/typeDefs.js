@@ -34,6 +34,7 @@ const typeDefs = gql`
     classId: String
     name: String
     grades: [Grades]
+    finalMark: Int
   }
 
   type Criterias {
@@ -103,6 +104,7 @@ const typeDefs = gql`
     classId: String
     name: String
     grades: [gradesInput]
+    finalMark: Int
   }
 
   type Mutation {
@@ -111,7 +113,12 @@ const typeDefs = gql`
     addClass(classToSave: classInput): Class
     addStudent(studentToSave: studentInput): Student
     deleteStudent(studentId: String): Student
-    updateStudentGrade(studentId: String, mark: Int, gradeId: String): Student
+    updateStudentGrade(
+      studentId: String
+      mark: Int
+      finalMark: Int
+      gradeId: String
+    ): Student
     updateStudentName(studentId: String, name: String): Student
   }
 

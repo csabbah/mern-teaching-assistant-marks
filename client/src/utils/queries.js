@@ -47,6 +47,7 @@ export const GET_DATA = gql`
           unit
           weight
         }
+        finalMark
       }
     }
   }

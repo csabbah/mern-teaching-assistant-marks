@@ -84,11 +84,14 @@ const resolvers = {
       return updatedStudent;
     },
 
-    updateStudentGrade: async (parent, { studentId, gradeId, mark }) => {
+    updateStudentGrade: async (
+      parent,
+      { studentId, gradeId, mark, finalMark }
+    ) => {
       // Update the student model itself
       const updatedStudent = await Student.findOneAndUpdate(
         { _id: studentId, "grades._id": gradeId },
-        { $set: { "grades.$.mark": mark } },
+        { $set: { "grades.$.mark": mark }, finalMark: finalMark },
         { new: true }
       );
 

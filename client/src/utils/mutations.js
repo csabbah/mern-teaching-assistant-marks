@@ -66,6 +66,7 @@ export const ADD_STUDENT = gql`
         unit
         weight
       }
+      finalMark
     }
   }
 `;
@@ -83,8 +84,14 @@ export const UPDATE_STUDENT_GRADE = gql`
     $studentId: String
     $gradeId: String
     $mark: Int
+    $finalMark: Int
   ) {
-    updateStudentGrade(studentId: $studentId, gradeId: $gradeId, mark: $mark) {
+    updateStudentGrade(
+      studentId: $studentId
+      gradeId: $gradeId
+      mark: $mark
+      finalMark: $finalMark
+    ) {
       _id
     }
   }

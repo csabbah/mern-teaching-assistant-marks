@@ -18,6 +18,7 @@ const studentSchema = new Schema(
         weight: { type: Number },
       },
     ],
+    finalMark: { type: Number },
   },
   {
     toJSON: {
