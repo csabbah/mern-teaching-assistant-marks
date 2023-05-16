@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const Students = () => {
+  useEffect(() => {
+    document.title = "Hersh - Your Students";
+  }, []);
+
   return (
     <div>
       Students

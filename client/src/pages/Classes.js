@@ -15,6 +15,8 @@ import {
 } from "../utils/mutations";
 
 const Classes = () => {
+  // TODO Render all students in the students page with their associated data
+
   const history = useHistory();
 
   const [fullData, setFullData] = useState([]);
@@ -113,6 +115,10 @@ const Classes = () => {
   const [viewingTable, setViewingTable] = useState(0);
 
   const [decimal, setDecimal] = useState(false);
+
+  useEffect(() => {
+    document.title = "Hersh - Your Classes";
+  }, []);
 
   useEffect(() => {
     refetch();
@@ -257,9 +263,14 @@ const Classes = () => {
                   className="gradeLetter"
                   style={{ position: "relative", margin: 0 }}
                 >
-                  {criteria.letter}{" "}
+                  {criteria.letter}
+                  {sorted && sortedBy === criteria.letter
+                    ? `\u2191`
+                    : !sorted && sortedBy === criteria.letter
+                    ? `\u2193`
+                    : ""}{" "}
                   <span className="gradeWeight" style={{ fontSize: 15 }}>
-                    ({criteria.weight}%)
+                    <div>Weight {criteria.weight}%</div>
                   </span>
                 </p>
               </div>
@@ -346,14 +357,19 @@ const Classes = () => {
                 style={{
                   border: "none",
                   backgroundColor: "#999",
-                  padding: "4px 13px",
+                  padding: "4px 0px",
                   color: "#ffffff",
                   borderRadius: 5,
                   fontSize: 15,
+                  width: 60,
                 }}
                 onClick={() => setDecimal(!decimal)}
               >
-                Decimal
+                {!decimal ? (
+                  <h5 style={{ margin: 0, alignSelf: "center" }}>00</h5>
+                ) : (
+                  <h5 style={{ margin: 0 }}>0</h5>
+                )}
               </button>
             </th>
           </tr>
@@ -370,6 +386,11 @@ const Classes = () => {
               onClick={() => handleSort("studentName", singleClass)}
             >
               Students
+              {sorted && sortedBy === "studentName"
+                ? `\u2193`
+                : !sorted && sortedBy === "studentName"
+                ? `\u2191`
+                : ""}{" "}
             </th>
             {criteriaLabels}
             <th
@@ -384,6 +405,11 @@ const Classes = () => {
               onClick={() => handleSort("finalMark", singleClass)}
             >
               Final
+              {sorted && sortedBy === "finalMark"
+                ? `\u2191`
+                : !sorted && sortedBy === "finalMark"
+                ? `\u2193`
+                : ""}{" "}
             </th>
           </tr>
         </thead>
@@ -687,7 +713,7 @@ const Classes = () => {
         key={1}
         style={{
           border: tableProperties.border,
-          width: "8%",
+          width: 100,
         }}
       >
         {grades === undefined || grades.length === 0
@@ -722,7 +748,7 @@ const Classes = () => {
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
-          width: "30%",
+          width: "25%",
         }}
       >
         <input
@@ -808,7 +834,7 @@ const Classes = () => {
                 borderLeftWidth: "1px",
                 borderLeftColor: "rgba(0,0,0,1)",
                 borderRightColor: "rgba(0,0,0,1)",
-                width: "9%",
+                width: "12%",
               }}
             >
               <input
@@ -897,8 +923,10 @@ const Classes = () => {
 
   const [studentQuery, setStudentQuery] = useState("");
   const [sorted, setSorted] = useState(true);
+  const [sortedBy, setSortedBy] = useState("");
   const handleSort = (name, singleClass) => {
     setSorted((prevSorted) => !prevSorted); // Toggle the sorting order
+    setSortedBy(name);
 
     setAllStudents((prevAllStudents) => {
       const classStudents = prevAllStudents.filter(
@@ -948,7 +976,7 @@ const Classes = () => {
           justifyContent: "center",
           alignItems: "center",
         }}
-        className="container mt-2"
+        className="container mt-5"
       >
         <p>Loading...</p>
       </div>
@@ -963,50 +991,78 @@ const Classes = () => {
         justifyContent: "center",
         alignItems: "center",
       }}
-      className="container mt-2"
+      className="container mt-5"
     >
       <div>
-        <p style={{ textAlign: "center" }}>Your Classes</p>
+        <h4 style={{ textAlign: "center" }}>Your Classes</h4>
+        {fullData.classes.length === 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <h5 style={{ margin: 0 }}>No Classes add yet</h5>
+            <button
+              style={{
+                marginLeft: 5,
+                border: "none",
+                backgroundColor: "#555",
+                padding: "4px 10px",
+                color: "#ffffff",
+                borderRadius: 5,
+              }}
+              onClick={() => {
+                history.push("/add-classes");
+              }}
+            >
+              Add Class +
+            </button>
+          </div>
+        )}
         <div style={{ display: "flex", gap: 15, marginBottom: 10 }}>
-          {fullData.classes.map((singleClass, i) => (
-            <div key={i}>
-              <button
-                onClick={() => {
-                  setViewingTable(i);
-                  setSorted(false);
-                  setStudentQuery((prevQuery) => {
-                    return (prevQuery = "");
-                  });
-                }}
-                style={{
-                  border: "none",
-                  backgroundColor: "#555",
-                  padding: "4px 10px",
-                  color: "#ffffff",
-                  borderRadius: 5,
-                }}
-              >
-                {singleClass.title}
-              </button>
-              {i === fullData.classes.length - 1 && (
+          {fullData.classes.map((singleClass, i) => {
+            return (
+              <div key={i}>
                 <button
+                  onClick={() => {
+                    setViewingTable(i);
+                    setSorted(false);
+                    setSortedBy("");
+                    setStudentQuery((prevQuery) => {
+                      return (prevQuery = "");
+                    });
+                  }}
                   style={{
-                    marginLeft: 15,
                     border: "none",
                     backgroundColor: "#555",
                     padding: "4px 10px",
                     color: "#ffffff",
                     borderRadius: 5,
                   }}
-                  onClick={() => {
-                    history.push("/add-classes");
-                  }}
                 >
-                  Add Class +
+                  {singleClass.title}
                 </button>
-              )}
-            </div>
-          ))}
+                {i === fullData.classes.length - 1 && (
+                  <button
+                    style={{
+                      marginLeft: 15,
+                      border: "none",
+                      backgroundColor: "#555",
+                      padding: "4px 10px",
+                      color: "#ffffff",
+                      borderRadius: 5,
+                    }}
+                    onClick={() => {
+                      history.push("/add-classes");
+                    }}
+                  >
+                    Add Class +
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
       <div>{fullData.classes.map(renderTable)}</div>

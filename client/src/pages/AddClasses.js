@@ -167,6 +167,10 @@ const Marks = () => {
   const [addProject, setAddProject] = useState(false);
   const [addSingleClass, setAddSingleClass] = useState(false);
 
+  useEffect(() => {
+    document.title = "Hersh - Add class";
+  }, []);
+
   // Add project to projects and reset singleProject data
   useEffect(() => {
     if (singleProject.criterias.length > 0 && addProject) {
@@ -193,7 +197,7 @@ const Marks = () => {
   }, [singleProject, units]);
 
   return (
-    <div className="container mt-2">
+    <div className="container mt-5">
       <form
         style={{ display: "flex", flexDirection: "column", gap: 20 }}
         onSubmit={(e) => {
