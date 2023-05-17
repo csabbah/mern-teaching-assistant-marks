@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import About from "./pages/Profile";
 
 import { setContext } from "@apollo/client/link/context";
 
@@ -15,7 +14,7 @@ import {
 } from "@apollo/client";
 import Marks from "./pages/AddClasses";
 import Classes from "./pages/Classes";
-import Students from "./pages/Students";
+import Dashboard from "./pages/Dashboard";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -53,10 +52,9 @@ function App() {
           <Switch>
             <Route exact path="/" component={Home} />
             {/* User can only access About route (page) IF they are logged in */}
-            {loggedIn && <Route exact path="/profile" component={About} />}
             {loggedIn && <Route path="/add-classes" component={Marks} />}
             {loggedIn && <Route path="/your-classes" component={Classes} />}
-            {loggedIn && <Route path="/your-students" component={Students} />}
+            {loggedIn && <Route path="/dashboard" component={Dashboard} />}
             <Route render={() => <h1 className="display-2">Wrong page!</h1>} />
           </Switch>
         </>

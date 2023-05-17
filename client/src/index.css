@@ -1,5 +1,19 @@
+@font-face {
+  font-family: "PoppinsBold";
+  src: url(../../client/public/Poppins/Poppins-Bold.ttf);
+}
+@font-face {
+  font-family: "PoppinsMedium";
+  src: url(../../client/public/Poppins/Poppins-Medium.ttf);
+}
+
+@font-face {
+  font-family: "PoppinsSemiBold";
+  src: url(../../client/public/Poppins/Poppins-SemiBold.ttf);
+}
+
 body {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: "PoppinsSemiBold", Verdana, Geneva, Tahoma, sans-serif;
   color: #333;
   background-color: rgba(0, 0, 0, 0.025);
 }
@@ -10,7 +24,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: "PoppinsBold", Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .add-class-title {
@@ -171,4 +185,15 @@ tr:hover {
 .gradeLetter:hover .gradeWeight {
   opacity: 1;
   transition: 0.2s all ease-in-out;
+}
+
+.deleteBtn {
+  background-color: #ff2e2e;
+}
+.deleteBtn:hover {
+  background-color: #ff5c5c;
+}
+
+.deleteStudent {
+  filter: invert(100%);
 }

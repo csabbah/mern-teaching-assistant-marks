@@ -16,7 +16,7 @@ const AppNavbar = () => {
         <Navbar bg="dark" variant="dark" expand="lg">
           <Container fluid>
             <Navbar.Brand as={Link} to={"your-classes"}>
-              Hershy's Grade Book
+              Hershy's Book
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="navbar" />
             <Navbar.Collapse id="navbar">
@@ -27,11 +27,8 @@ const AppNavbar = () => {
                   <Nav.Link as={Link} to="/your-classes">
                     Your Classes
                   </Nav.Link>
-                  <Nav.Link as={Link} to="/your-students">
-                    Your Students
-                  </Nav.Link>
-                  <Nav.Link as={Link} to="/profile">
-                    Profile
+                  <Nav.Link as={Link} to="/dashboard">
+                    Dashboard
                   </Nav.Link>
                   <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
                 </>

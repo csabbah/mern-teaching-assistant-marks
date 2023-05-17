@@ -29,7 +29,7 @@ const resolvers = {
       const user = await User.findOne({ email });
 
       if (!user) {
-        throw new AuthenticationError("Incorrect credentials");
+        throw new AuthenticationError("Email does not exist");
       }
 
       const correctPw = await user.isCorrectPassword(password);

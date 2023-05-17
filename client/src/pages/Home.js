@@ -10,8 +10,13 @@ import { LOGIN_USER, ADD_USER } from "../utils/mutations";
 const Home = () => {
   const [formState, setFormState] = useState({ email: "", password: "" });
 
-  const [login] = useMutation(LOGIN_USER);
   const [displayErr, setDisplayErr] = useState({ reveal: false, msg: "" });
+
+  const [login] = useMutation(LOGIN_USER, {
+    onError: (e) => {
+      setDisplayErr({ reveal: true, msg: e.message });
+    },
+  });
 
   // submit form
   const handleLoginSubmit = async (event) => {
@@ -23,9 +28,7 @@ const Home = () => {
       });
 
       Auth.login(data.login.token);
-    } catch (error) {
-      setDisplayErr({ reveal: true, msg: error.message });
-    }
+    } catch (error) {}
   };
 
   const [addUser] = useMutation(ADD_USER);
@@ -33,23 +36,31 @@ const Home = () => {
   const handleSignUpSubmit = async (event) => {
     event.preventDefault();
 
+    if (formState.password.length < 6) {
+      return setDisplayErr({
+        reveal: true,
+        msg: "Password must be longer than 5 letters",
+      });
+    }
+
     try {
       const { data } = await addUser({
         variables: { ...formState },
       });
       Auth.login(data.addUser.token);
     } catch (error) {
-      setDisplayErr({ reveal: true, msg: error.message });
+      setDisplayErr({ reveal: true, msg: "Email already exists" });
     }
   };
 
   // update state based on form input changes
   const handleChange = (event) => {
+    setDisplayErr({ reveal: false, msg: "" });
     const { name, value } = event.target;
 
     setFormState({
       ...formState,
-      [name]: value,
+      [name]: value.trim(),
     });
   };
 
@@ -63,7 +74,7 @@ const Home = () => {
   useEffect(() => {
     loggedIn && history.push("/your-classes");
 
-    document.title = "Hersh - Home";
+    document.title = "Hershy - Home";
   }, []);
 
   return (
@@ -76,9 +87,24 @@ const Home = () => {
         alignItems: "center",
       }}
     >
-      <p style={{ position: "absolute", top: 20, left: 20 }}>
-        Hershy's Grade Book
-      </p>
+      <p style={{ position: "absolute", top: 20, left: 20 }}>Hershy's Book</p>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          position: "absolute",
+          cursor: "pointer",
+          userSelect: "none",
+          bottom: 20,
+          left: 20,
+          gap: 15,
+        }}
+      >
+        <p style={{ margin: 0 }}>Privacy</p>
+        <p style={{ margin: 0 }}>Help</p>
+        <p style={{ margin: 0 }}>About us</p>
+        <p style={{ margin: 0 }}>Our Socials</p>
+      </div>
       <div className="px-3 w-100">
         <div
           style={{
@@ -94,7 +120,7 @@ const Home = () => {
         {showSignIn ? (
           <form onSubmit={handleLoginSubmit} className="row">
             <div className="col-sm-12 col-lg-6 col-xl-5">
-              <label for="inputEmail4" className="form-label">
+              <label htmlFor="inputEmail4" className="form-label">
                 Email
               </label>
               <input
@@ -106,9 +132,14 @@ const Home = () => {
                 className="form-control"
                 id="inputEmail4"
               />
+              {displayErr.reveal && (
+                <p style={{ color: "red", fontSize: 15 }} className="mt-2 mb-0">
+                  {displayErr.msg}
+                </p>
+              )}
             </div>
             <div className="col-sm-12 col-lg-6 col-xl-5 mt-sm-0 mt-3">
-              <label for="inputPassword4" className="form-label">
+              <label htmlFor="inputPassword4" className="form-label">
                 Password
               </label>
               <input
@@ -131,7 +162,10 @@ const Home = () => {
               </button>
               <p style={{ userSelect: "none", marginTop: 15 }}>
                 <span
-                  onClick={() => setShowSignIn(false)}
+                  onClick={() => {
+                    setShowSignIn(false);
+                    setDisplayErr({ reveal: false, msg: "" });
+                  }}
                   style={{ color: "blue", cursor: "pointer" }}
                 >
                   Go Back
@@ -142,7 +176,7 @@ const Home = () => {
         ) : (
           <form onSubmit={handleSignUpSubmit} className="row">
             <div className="col-sm-12 col-lg-6 col-xl-5">
-              <label for="inputEmail4" className="form-label">
+              <label htmlFor="inputEmail4" className="form-label">
                 Email
               </label>
               <input
@@ -154,9 +188,14 @@ const Home = () => {
                 className="form-control"
                 id="inputEmail4"
               />
+              {displayErr.reveal && (
+                <p style={{ color: "red", fontSize: 15 }} className="mt-2 mb-0">
+                  {displayErr.msg}
+                </p>
+              )}
             </div>
             <div className="col-sm-12 col-lg-6 col-xl-5 mt-sm-0 mt-3">
-              <label for="inputPassword4" className="form-label">
+              <label htmlFor="inputPassword4" className="form-label">
                 Password
               </label>
               <input
@@ -180,7 +219,10 @@ const Home = () => {
               <p style={{ userSelect: "none", marginTop: 15 }}>
                 Already a member?{" "}
                 <span
-                  onClick={() => setShowSignIn(true)}
+                  onClick={() => {
+                    setShowSignIn(true);
+                    setDisplayErr({ reveal: false, msg: "" });
+                  }}
                   style={{
                     color: "blue",
                     cursor: "pointer",

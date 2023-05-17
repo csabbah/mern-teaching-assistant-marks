@@ -15,8 +15,6 @@ import {
 } from "../utils/mutations";
 
 const Classes = () => {
-  // TODO Render all students in the students page with their associated data
-
   const history = useHistory();
 
   const [fullData, setFullData] = useState([]);
@@ -72,7 +70,6 @@ const Classes = () => {
   };
 
   const [deleteStudent] = useMutation(DELETE_STUDENT);
-
   const handleDeleteStudent = async (studentId) => {
     try {
       await deleteStudent({
@@ -94,8 +91,14 @@ const Classes = () => {
   const inputRef = useRef(null);
   const [studentData, setStudentData] = useState({});
 
+  // TODO Add a new Report column on the right which is simply a button (same style as the delete)
+  // TODO Create a local storage function that saves the borderWidth size and extracts it
+  // TODO Not worth pushing this data to database
+  const [borderWidth, setBorderWIdth] = useState(1);
+
   let tableProperties = {
-    border: "1px solid #333",
+    defaultColor: "#333",
+    border: `${borderWidth}px solid #333`,
     final: {
       top: "rgba(255, 255, 0, 0.2)",
       passing: "rgba(255, 255, 255, 0.2)",
@@ -117,7 +120,7 @@ const Classes = () => {
   const [decimal, setDecimal] = useState(false);
 
   useEffect(() => {
-    document.title = "Hersh - Your Classes";
+    document.title = "Hershy - Your Classes";
   }, []);
 
   useEffect(() => {
@@ -167,6 +170,7 @@ const Classes = () => {
     }));
   };
 
+  // TODO Add pagination if number of students exceeds 10 (Also add the options to view all students (without pagination))
   // TODO Update all headers to be inputs and allow users to update the head data
   // TODO Each cell now has a unique _id (in the resolver, maybe we can explicitly search for that unique id and update the value)
   const renderTable = (singleClass, i) => {
@@ -187,11 +191,11 @@ const Classes = () => {
       <th
         key={singleClass.title}
         className="table-unit-title"
-        colSpan={classesColSpan}
+        // 2 is to account for the 2 empty spaces on the left and right of the row
+        colSpan={3 + classesColSpan}
         style={{
-          backgroundColor: "#333",
+          backgroundColor: tableProperties.defaultColor,
           border: tableProperties.border,
-          textAlign: "center",
         }}
       >
         {`${singleClass.title} - ${singleClass.schoolYear}`}
@@ -214,7 +218,7 @@ const Classes = () => {
             backgroundColor: themeColor,
             border: tableProperties.border,
             textAlign: "center",
-            color: "#333",
+            color: tableProperties.defaultColor,
           }}
         >
           {unit.title}
@@ -231,7 +235,7 @@ const Classes = () => {
               backgroundColor: themeColor,
               border: tableProperties.border,
               textAlign: "center",
-              color: "#333",
+              color: tableProperties.defaultColor,
             }}
           >
             {project.title}
@@ -269,7 +273,10 @@ const Classes = () => {
                     : !sorted && sortedBy === criteria.letter
                     ? `\u2193`
                     : ""}{" "}
-                  <span className="gradeWeight" style={{ fontSize: 15 }}>
+                  <span
+                    className="gradeWeight"
+                    style={{ pointerEvents: "none", fontSize: 15 }}
+                  >
                     <div>Weight {criteria.weight}%</div>
                   </span>
                 </p>
@@ -289,40 +296,33 @@ const Classes = () => {
         }}
       >
         <thead>
+          <tr>{allClasses}</tr>
           <tr>
             <th
               style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
               }}
             ></th>
-            {allClasses}
             <th
               style={{
-                backgroundColor: "#333",
-                border: tableProperties.border,
-              }}
-            ></th>
-          </tr>
-          <tr>
-            <th
-              style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
               }}
             ></th>
             {allUnits}
             <th
               style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
               }}
             ></th>
           </tr>
           <tr style={{ margin: 0, textAlign: "center" }}>
             <th
+              colSpan={2}
               style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
                 position: "relative",
               }}
@@ -349,7 +349,7 @@ const Classes = () => {
             {projects}
             <th
               style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
               }}
             >
@@ -376,7 +376,17 @@ const Classes = () => {
           <tr style={{ margin: 0, textAlign: "center" }}>
             <th
               style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
+                border: tableProperties.border,
+                color: "#FFFFFF",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            ></th>
+            <th
+              style={{
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
                 color: "#FFFFFF",
                 textTransform: "uppercase",
@@ -395,7 +405,7 @@ const Classes = () => {
             {criteriaLabels}
             <th
               style={{
-                backgroundColor: "#333",
+                backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
                 color: "#FFFFFF",
                 textTransform: "uppercase",
@@ -439,41 +449,6 @@ const Classes = () => {
             ))}
           {/* // ? Render the initial empty row first */}
           {renderTableBodyBlank(singleClass)}
-          {/* // ? This is the Add student function which renders a new row (pushes to studentRows) */}
-          <tr
-            className="add-student"
-            onClick={() => {
-              if (
-                !studentData[singleClass._id] ||
-                studentData[singleClass._id].name === undefined ||
-                studentData[singleClass._id].name == ""
-              ) {
-                return setMissingData({
-                  ...missingData,
-                  [singleClass._id]: {
-                    reveal: true,
-                    classId: singleClass._id,
-                  },
-                });
-              }
-              // Push student to DB
-              handleAddStudent(studentData[singleClass._id]);
-
-              // Remove the student that was added from studentData (which contains the blankRow data)
-              const updatedStudentData = { ...studentData };
-              delete updatedStudentData[singleClass._id];
-              setStudentData(updatedStudentData);
-              inputRef.current.focus();
-            }}
-          >
-            <td style={{ border: "none" }}>
-              <button
-                style={{ backgroundColor: "transparent", border: "none" }}
-              >
-                Add Student
-              </button>
-            </td>
-          </tr>
         </tbody>
       </table>
     );
@@ -534,6 +509,49 @@ const Classes = () => {
   const renderTableBodyBlank = (singleClass) => {
     const rowData = [];
 
+    // ? This is the Add student function which renders a new row (pushes to studentRows) */
+    rowData.push(
+      <td
+        key={0}
+        style={{
+          width: 50,
+          cursor: "pointer",
+          fontSize: 15,
+          // backgroundColor: tableProperties.final.failing,
+          border: tableProperties.border,
+          position: "relative",
+        }}
+        onClick={() => {
+          if (
+            !studentData[singleClass._id] ||
+            studentData[singleClass._id].name === undefined ||
+            studentData[singleClass._id].name == ""
+          ) {
+            return setMissingData({
+              ...missingData,
+              [singleClass._id]: {
+                reveal: true,
+                classId: singleClass._id,
+              },
+            });
+          }
+          // Push student to DB
+          handleAddStudent(studentData[singleClass._id]);
+
+          // Remove the student that was added from studentData (which contains the blankRow data)
+          const updatedStudentData = { ...studentData };
+          delete updatedStudentData[singleClass._id];
+          setStudentData(updatedStudentData);
+          inputRef.current.focus();
+        }}
+      >
+        <img
+          alt="add student button"
+          style={{ width: 15, height: 15 }}
+          src="/add.png"
+        ></img>
+      </td>
+    );
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
@@ -542,7 +560,6 @@ const Classes = () => {
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
-          width: "25%",
           position: "relative",
         }}
       >
@@ -585,7 +602,6 @@ const Classes = () => {
           missingData[singleClass._id].classId === singleClass._id && (
             <span
               style={{
-                letterSpacing: 0.2,
                 width: "100%",
                 position: "absolute",
                 bottom: "50%",
@@ -627,9 +643,6 @@ const Classes = () => {
               key={criteria._id}
               style={{
                 border: tableProperties.border,
-                borderLeftWidth: "1px",
-                borderLeftColor: "rgba(0,0,0,1)",
-                borderRightColor: "rgba(0,0,0,1)",
               }}
             >
               <input
@@ -739,6 +752,30 @@ const Classes = () => {
   const renderTableBodyGrades = (student, singleClass) => {
     const rowData = [];
 
+    rowData.push(
+      <th
+        className="deleteBtn"
+        style={{
+          width: 50,
+          border: tableProperties.border,
+          color: "#FFFFFF",
+          textTransform: "uppercase",
+          cursor: "pointer",
+          userSelect: "none",
+        }}
+        onClick={() => {
+          handleDeleteStudent(student._id);
+        }}
+      >
+        <img
+          className="deleteStudent"
+          alt="delete student button"
+          style={{ width: 13, height: 13 }}
+          src="/delete.png"
+        ></img>
+      </th>
+    );
+
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
@@ -748,7 +785,6 @@ const Classes = () => {
           fontSize: 15,
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
-          width: "25%",
         }}
       >
         <input
@@ -780,24 +816,6 @@ const Classes = () => {
               : ""
           }
         />
-        <button
-          onClick={() => {
-            handleDeleteStudent(student._id);
-          }}
-          style={{
-            position: "absolute",
-            left: 10,
-            bottom: "50%",
-            transform: "translateY(50%)",
-            border: "none",
-            backgroundColor: "red",
-            padding: "3px 9px",
-            color: "#ffffff",
-            borderRadius: 5,
-          }}
-        >
-          X
-        </button>
       </td>
     );
 
@@ -831,9 +849,7 @@ const Classes = () => {
                     ? tableProperties.final.top
                     : singleUnit.themeColor,
                 border: tableProperties.border,
-                borderLeftWidth: "1px",
-                borderLeftColor: "rgba(0,0,0,1)",
-                borderRightColor: "rgba(0,0,0,1)",
+
                 width: "12%",
               }}
             >
@@ -994,11 +1010,15 @@ const Classes = () => {
       className="container mt-5"
     >
       <div>
-        <h4 style={{ textAlign: "center" }}>Your Classes</h4>
+        {fullData.classes.length !== 0 && (
+          <h4 style={{ textAlign: "center" }}>Your Classes</h4>
+        )}
         {fullData.classes.length === 0 && (
           <div
             style={{
+              gap: 10,
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
             }}
           >
@@ -1020,11 +1040,36 @@ const Classes = () => {
             </button>
           </div>
         )}
-        <div style={{ display: "flex", gap: 15, marginBottom: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "10px 0",
+          }}
+        >
+          <p style={{ margin: 0, fontSize: 14 }}>
+            Adjust border {borderWidth}px
+          </p>
+          <input
+            style={{ cursor: "pointer" }}
+            onChange={(e) => {
+              setBorderWIdth(e.target.value);
+            }}
+            type="range"
+            min="0"
+            step={0.5}
+            max="3"
+            value={borderWidth}
+          ></input>
+        </div>
+
+        <div style={{ display: "flex", gap: 15 }}>
           {fullData.classes.map((singleClass, i) => {
             return (
-              <div key={i}>
-                <button
+              <div style={{ display: "flex", alignItems: "center" }} key={i}>
+                <p
                   onClick={() => {
                     setViewingTable(i);
                     setSorted(false);
@@ -1034,18 +1079,26 @@ const Classes = () => {
                     });
                   }}
                   style={{
-                    border: "none",
-                    backgroundColor: "#555",
-                    padding: "4px 10px",
-                    color: "#ffffff",
-                    borderRadius: 5,
+                    fontSize: 18,
+                    cursor: "pointer",
+                    userSelect: "none",
+                    borderBottom:
+                      viewingTable === i
+                        ? "2px solid rgba(1,75,255,0.5)"
+                        : "2px solid transparent",
+                    color:
+                      viewingTable === i
+                        ? "rgba(1,75,255,0.8)"
+                        : tableProperties.defaultColor,
                   }}
                 >
                   {singleClass.title}
-                </button>
+                </p>
                 {i === fullData.classes.length - 1 && (
-                  <button
+                  <p
                     style={{
+                      cursor: "pointer",
+                      userSelect: "none",
                       marginLeft: 15,
                       border: "none",
                       backgroundColor: "#555",
@@ -1058,14 +1111,16 @@ const Classes = () => {
                     }}
                   >
                     Add Class +
-                  </button>
+                  </p>
                 )}
               </div>
             );
           })}
         </div>
       </div>
-      <div>{fullData.classes.map(renderTable)}</div>
+      <div style={{ boxShadow: "0 0 5px 1px rgba(0,0,0,0.2)" }}>
+        {fullData.classes.map(renderTable)}
+      </div>
     </div>
   );
 };

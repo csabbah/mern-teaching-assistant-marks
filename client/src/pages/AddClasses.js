@@ -168,7 +168,7 @@ const Marks = () => {
   const [addSingleClass, setAddSingleClass] = useState(false);
 
   useEffect(() => {
-    document.title = "Hersh - Add class";
+    document.title = "Hershy - Add class";
   }, []);
 
   // Add project to projects and reset singleProject data
