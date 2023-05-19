@@ -91,16 +91,18 @@ const Classes = () => {
   const inputRef = useRef(null);
   const [studentData, setStudentData] = useState({});
 
+  // TODO Add the download pdf functionality
+  //      TODO Export a single PDF of the entire table
+  //      TODO Export a report for a single student
+  //      TODO The download pdf button is really close to the project title if the table is small
+
   // TODO RE-DO THE ENTIRE TABLE WIDTH PROPERTIES FOR EACH COLUMN
   // TODO Horizontal spacing needs to be refined, also the table columns need to be adjusted
   //      TODO Student names should always be long enough
   // TODO Create a local storage function that saves the borderWidth size and extracts it
   //      TODO Not worth pushing this data to database
-  // TODO Add the download pdf functionality
-  // TODO The download pdf button is really close to the project title if the table is small
+
   // TODO Fixed the position of the decimal button? Make the whole cell touchable
-  // TODO Get rid of the border right and left widths, the full row should only have borders on the edges
-  // TODO     As well as top and bottom
   const [borderWidth, setBorderWIdth] = useState(1);
   const [horizontalPadding, setHorizontalPadding] = useState(5);
   const [verticalPadding, setVerticalPadding] = useState(5);
@@ -112,8 +114,11 @@ const Classes = () => {
     border: `${borderWidth}px solid #333`,
     final: {
       top: "rgba(255, 255, 0, 0.2)",
+      topDark: "rgba(255, 255, 0, 0.35)",
       passing: "rgba(255, 255, 255, 0.2)",
+      passingDark: "rgba(255, 255, 255, 0.35)",
       failing: "rgba(255, 0, 0, 0.2)",
+      failingDark: "rgba(255, 0, 0, 0.35)",
     },
     brightnessRange: "100",
     colors: [
@@ -207,7 +212,7 @@ const Classes = () => {
         colSpan={4 + classesColSpan}
         style={{
           backgroundColor: tableProperties.defaultColor,
-          border: tableProperties.border,
+          border: `${borderWidth}px solid #333`,
         }}
       >
         <div
@@ -230,12 +235,12 @@ const Classes = () => {
             }}
             className="downloadBtn"
           >
-            <p style={{ margin: 0, fontSize: 16 }}>Download report</p>
+            <p style={{ margin: 0, fontSize: 14 }}>Download report</p>
             <img
               alt="download pdf button"
               style={{
-                width: parseInt(selectedFontSize) + 6,
-                height: parseInt(selectedFontSize) + 6,
+                width: 18,
+                height: 18,
                 filter: "invert(100%)",
               }}
               src="/pdf.png"
@@ -385,10 +390,9 @@ const Classes = () => {
                   bottom: "50%",
                   left: "50%",
                   transform: "translateX(-50%) translateY(50%)",
-                  width: "95%",
+                  width: "100%",
                   height: "100%",
-                  maxHeight: 30,
-                  paddingLeft: 10,
+                  paddingLeft: 5,
                   border: "none",
                   color: "white",
                   backgroundColor: "#777",
@@ -510,9 +514,9 @@ const Classes = () => {
               }
               return false;
             })
-            .map((student) => (
+            .map((student, i) => (
               <React.Fragment key={student._id}>
-                {renderTableBodyGrades(student, singleClass)}
+                {renderTableBodyGrades(student, singleClass, i)}
               </React.Fragment>
             ))}
           {/* // ? Render the initial empty row first */}
@@ -629,8 +633,8 @@ const Classes = () => {
         key={i + 1}
         style={{
           fontSize: parseInt(selectedFontSize),
-          // backgroundColor: tableProperties.final.failing,
-          border: tableProperties.border,
+          borderBottom: `${borderWidth}px solid #333`,
+          borderTop: `${borderWidth}px solid #333`,
           position: "relative",
         }}
       >
@@ -714,7 +718,8 @@ const Classes = () => {
             <td
               key={criteria._id}
               style={{
-                border: tableProperties.border,
+                borderBottom: `${borderWidth}px solid #333`,
+                borderTop: `${borderWidth}px solid #333`,
               }}
             >
               <input
@@ -798,7 +803,9 @@ const Classes = () => {
       <td
         key={i + 2}
         style={{
-          border: tableProperties.border,
+          borderBottom: `${borderWidth}px solid #333`,
+          borderTop: `${borderWidth}px solid #333`,
+          borderRight: `${borderWidth}px solid #333`,
           width: 100,
           fontSize: parseInt(selectedFontSize),
         }}
@@ -823,7 +830,9 @@ const Classes = () => {
     );
   };
 
-  const renderTableBodyGrades = (student, singleClass) => {
+  const renderTableBodyGrades = (student, singleClass, index) => {
+    const isEvenRow = index % 2 === 0;
+
     const rowData = [];
 
     rowData.push(
@@ -831,7 +840,7 @@ const Classes = () => {
         className="deleteBtn"
         style={{
           width: "5%",
-          padding: "5px 7px",
+          padding: "5px 8px",
           border: tableProperties.border,
           color: "#FFFFFF",
           textTransform: "uppercase",
@@ -846,8 +855,8 @@ const Classes = () => {
           className="deleteStudent"
           alt="delete student button"
           style={{
-            width: parseInt(selectedFontSize),
-            height: parseInt(selectedFontSize),
+            width: 14,
+            height: 14,
           }}
           src="/delete.png"
         ></img>
@@ -859,7 +868,7 @@ const Classes = () => {
         className="pdfBtn"
         style={{
           width: "5%",
-          padding: "5px 7px",
+          padding: "5px 8px",
           border: tableProperties.border,
           color: "#FFFFFF",
           textTransform: "uppercase",
@@ -886,8 +895,8 @@ const Classes = () => {
         style={{
           position: "relative",
           fontSize: parseInt(selectedFontSize),
-          // backgroundColor: tableProperties.final.failing,
-          border: tableProperties.border,
+          borderBottom: `${borderWidth}px solid #333`,
+          borderTop: `${borderWidth}px solid #333`,
         }}
       >
         <input
@@ -944,14 +953,18 @@ const Classes = () => {
             <td
               key={criteria._id}
               style={{
-                // backgroundColor: singleUnit.themeColor,
                 backgroundColor:
                   grade.mark < 50
-                    ? tableProperties.final.failing
+                    ? isEvenRow
+                      ? tableProperties.final.failingDark
+                      : tableProperties.final.failing
                     : grade.mark > 80
-                    ? tableProperties.final.top
+                    ? isEvenRow
+                      ? tableProperties.final.topDark
+                      : tableProperties.final.top
                     : singleUnit.themeColor,
-                border: tableProperties.border,
+                borderBottom: `${borderWidth}px solid #333`,
+                borderTop: `${borderWidth}px solid #333`,
                 width: "5%",
               }}
             >
@@ -1018,16 +1031,22 @@ const Classes = () => {
       <td
         key={student.name + student._id}
         style={{
-          border: tableProperties.border,
+          borderBottom: `${borderWidth}px solid #333`,
+          borderTop: `${borderWidth}px solid #333`,
+          borderRight: `${borderWidth}px solid #333`,
           backgroundColor:
             grades === null || grades.length === 0
               ? ""
               : calculateAverage(grades, singleClass) < 50
-              ? tableProperties.final.failing
-              : calculateAverage(grades, singleClass) > 80 &&
-                tableProperties.final.top,
+              ? isEvenRow
+                ? tableProperties.final.failingDark
+                : tableProperties.final.failing
+              : calculateAverage(grades, singleClass) > 80
+              ? isEvenRow
+                ? tableProperties.final.topDark
+                : tableProperties.final.top
+              : "",
           padding: tableProperties.padding,
-
           fontSize: parseInt(selectedFontSize),
         }}
       >
@@ -1039,7 +1058,16 @@ const Classes = () => {
     );
 
     // ? Render the full Row
-    return <tr style={{ margin: 0, textAlign: "center" }}>{rowData}</tr>;
+    return (
+      <tr
+        style={{
+          margin: 0,
+          textAlign: "center",
+        }}
+      >
+        {rowData}
+      </tr>
+    );
   };
 
   const [studentQuery, setStudentQuery] = useState("");
