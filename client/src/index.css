@@ -172,13 +172,15 @@ tr:hover {
   user-select: none;
   opacity: 0;
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.7);
-  padding: 8px 20px;
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #333;
+  padding: 2px 15px;
   border-radius: 10px;
   left: 50%;
+  bottom: -30px;
   transform: translateX(-50%) translateY(-100%);
-  backdrop-filter: blur(4px);
-  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(6px);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.1);
   transition: 0.2s all ease-in-out;
 }
 
@@ -193,7 +195,37 @@ tr:hover {
 .deleteBtn:hover {
   background-color: #ff5c5c;
 }
+.pdfBtn {
+  background-color: #ffa42e;
+}
+.pdfBtn:hover {
+  background-color: #ffbe5c;
+}
 
 .deleteStudent {
   filter: invert(100%);
+}
+
+.downloadBtn,
+.finalHead,
+.studentHead,
+.decimalBtn {
+  filter: brightness(1);
+  transform: scale(1);
+}
+
+.downloadBtn:hover,
+.finalHead:hover,
+.studentHead:hover,
+.decimalBtn:hover {
+  filter: brightness(0.75);
+  transform: scale(0.98);
+}
+
+.addClassBtn {
+  transform: scale(1);
+}
+
+.addClassBtn:hover {
+  transform: scale(0.95);
 }

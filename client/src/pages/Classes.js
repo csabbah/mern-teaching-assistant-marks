@@ -91,13 +91,24 @@ const Classes = () => {
   const inputRef = useRef(null);
   const [studentData, setStudentData] = useState({});
 
-  // TODO Add a new Report column on the right which is simply a button (same style as the delete)
+  // TODO RE-DO THE ENTIRE TABLE WIDTH PROPERTIES FOR EACH COLUMN
+  // TODO Horizontal spacing needs to be refined, also the table columns need to be adjusted
+  //      TODO Student names should always be long enough
   // TODO Create a local storage function that saves the borderWidth size and extracts it
-  // TODO Not worth pushing this data to database
+  //      TODO Not worth pushing this data to database
+  // TODO Add the download pdf functionality
+  // TODO The download pdf button is really close to the project title if the table is small
+  // TODO Fixed the position of the decimal button? Make the whole cell touchable
+  // TODO Get rid of the border right and left widths, the full row should only have borders on the edges
+  // TODO     As well as top and bottom
   const [borderWidth, setBorderWIdth] = useState(1);
+  const [horizontalPadding, setHorizontalPadding] = useState(5);
+  const [verticalPadding, setVerticalPadding] = useState(5);
+  const [selectedFontSize, setSelectedFontSize] = useState(15);
 
   let tableProperties = {
     defaultColor: "#333",
+    padding: `${verticalPadding}px ${horizontalPadding}px`,
     border: `${borderWidth}px solid #333`,
     final: {
       top: "rgba(255, 255, 0, 0.2)",
@@ -191,14 +202,46 @@ const Classes = () => {
       <th
         key={singleClass.title}
         className="table-unit-title"
-        // 2 is to account for the 2 empty spaces on the left and right of the row
-        colSpan={3 + classesColSpan}
+        // 4 is to account for the 2 empty spaces on the left and right of the row
+        // as well as the 2 items on the left, the delete and mail icon
+        colSpan={4 + classesColSpan}
         style={{
           backgroundColor: tableProperties.defaultColor,
           border: tableProperties.border,
         }}
       >
-        {`${singleClass.title} - ${singleClass.schoolYear}`}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            margin: "5px 8px",
+          }}
+        >
+          <p
+            style={{ margin: 0, fontSize: parseInt(selectedFontSize) + 5 }}
+          >{`${singleClass.title} - ${singleClass.schoolYear}`}</p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+            className="downloadBtn"
+          >
+            <p style={{ margin: 0, fontSize: 16 }}>Download report</p>
+            <img
+              alt="download pdf button"
+              style={{
+                width: parseInt(selectedFontSize) + 6,
+                height: parseInt(selectedFontSize) + 6,
+                filter: "invert(100%)",
+              }}
+              src="/pdf.png"
+            ></img>
+          </div>
+        </div>
       </th>
     );
     singleClass.units.map((unit, i) => {
@@ -219,6 +262,8 @@ const Classes = () => {
             border: tableProperties.border,
             textAlign: "center",
             color: tableProperties.defaultColor,
+            padding: tableProperties.padding,
+            fontSize: parseInt(selectedFontSize) + 3,
           }}
         >
           {unit.title}
@@ -236,6 +281,8 @@ const Classes = () => {
               border: tableProperties.border,
               textAlign: "center",
               color: tableProperties.defaultColor,
+              padding: tableProperties.padding,
+              fontSize: parseInt(selectedFontSize) + 2,
             }}
           >
             {project.title}
@@ -251,6 +298,8 @@ const Classes = () => {
                 border: tableProperties.border,
                 cursor: "pointer",
                 userSelect: "none",
+                padding: tableProperties.padding,
+                fontSize: parseInt(selectedFontSize),
               }}
               onClick={() => {
                 handleSort(criteria.letter, singleClass);
@@ -261,23 +310,29 @@ const Classes = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
+                  position: "relative",
                 }}
               >
                 <p
                   className="gradeLetter"
                   style={{ position: "relative", margin: 0 }}
                 >
-                  {criteria.letter}
-                  {sorted && sortedBy === criteria.letter
-                    ? `\u2191`
-                    : !sorted && sortedBy === criteria.letter
-                    ? `\u2193`
-                    : ""}{" "}
+                  <p className="criteriaHead" style={{ margin: 0 }}>
+                    {criteria.letter}
+                    {sorted && sortedBy === criteria.letter
+                      ? `\u2191`
+                      : !sorted && sortedBy === criteria.letter
+                      ? `\u2193`
+                      : ""}{" "}
+                  </p>
                   <span
                     className="gradeWeight"
-                    style={{ pointerEvents: "none", fontSize: 15 }}
+                    style={{
+                      pointerEvents: "none",
+                      fontSize: parseInt(selectedFontSize),
+                    }}
                   >
-                    <div>Weight {criteria.weight}%</div>
+                    <span>Weight {criteria.weight}%</span>
                   </span>
                 </p>
               </div>
@@ -290,7 +345,6 @@ const Classes = () => {
     return (
       <table
         key={i}
-        className="table table-responsive"
         style={{
           display: viewingTable === i ? "unset" : "none",
         }}
@@ -299,12 +353,7 @@ const Classes = () => {
           <tr>{allClasses}</tr>
           <tr>
             <th
-              style={{
-                backgroundColor: tableProperties.defaultColor,
-                border: tableProperties.border,
-              }}
-            ></th>
-            <th
+              colSpan={3}
               style={{
                 backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
@@ -320,7 +369,7 @@ const Classes = () => {
           </tr>
           <tr style={{ margin: 0, textAlign: "center" }}>
             <th
-              colSpan={2}
+              colSpan={3}
               style={{
                 backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
@@ -337,11 +386,13 @@ const Classes = () => {
                   left: "50%",
                   transform: "translateX(-50%) translateY(50%)",
                   width: "95%",
-                  height: 40,
+                  height: "100%",
+                  maxHeight: 30,
                   paddingLeft: 10,
                   border: "none",
                   color: "white",
                   backgroundColor: "#777",
+                  fontSize: parseInt(selectedFontSize),
                 }}
                 placeholder="Search student"
               ></input>
@@ -354,54 +405,66 @@ const Classes = () => {
               }}
             >
               <button
+                className="decimalBtn"
                 style={{
                   border: "none",
-                  backgroundColor: "#999",
-                  padding: "4px 0px",
+                  backgroundColor: "transparent",
                   color: "#ffffff",
-                  borderRadius: 5,
-                  fontSize: 15,
-                  width: 60,
                 }}
                 onClick={() => setDecimal(!decimal)}
               >
                 {!decimal ? (
-                  <h5 style={{ margin: 0, alignSelf: "center" }}>00</h5>
+                  <h5
+                    style={{
+                      fontSize: parseInt(selectedFontSize),
+                      margin: 0,
+                      alignSelf: "center",
+                    }}
+                  >
+                    00
+                  </h5>
                 ) : (
-                  <h5 style={{ margin: 0 }}>0</h5>
+                  <h5
+                    style={{ fontSize: parseInt(selectedFontSize), margin: 0 }}
+                  >
+                    0
+                  </h5>
                 )}
               </button>
             </th>
           </tr>
           <tr style={{ margin: 0, textAlign: "center" }}>
             <th
+              colSpan={2}
               style={{
                 backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
-                color: "#FFFFFF",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                userSelect: "none",
               }}
             ></th>
             <th
               style={{
+                width: 100,
                 backgroundColor: tableProperties.defaultColor,
                 border: tableProperties.border,
                 color: "#FFFFFF",
                 textTransform: "uppercase",
                 cursor: "pointer",
                 userSelect: "none",
+                fontSize: parseInt(selectedFontSize),
               }}
               onClick={() => handleSort("studentName", singleClass)}
             >
-              Students
-              {sorted && sortedBy === "studentName"
-                ? `\u2193`
-                : !sorted && sortedBy === "studentName"
-                ? `\u2191`
-                : ""}{" "}
+              <p className="studentHead" style={{ margin: 0 }}>
+                {" "}
+                Students
+                {sorted && sortedBy === "studentName"
+                  ? `\u2191`
+                  : !sorted && sortedBy === "studentName"
+                  ? `\u2193`
+                  : ""}{" "}
+              </p>
             </th>
+
             {criteriaLabels}
             <th
               style={{
@@ -411,15 +474,20 @@ const Classes = () => {
                 textTransform: "uppercase",
                 cursor: "pointer",
                 userSelect: "none",
+                fontSize: parseInt(selectedFontSize),
+                padding: "2px 5px",
               }}
               onClick={() => handleSort("finalMark", singleClass)}
             >
-              Final
-              {sorted && sortedBy === "finalMark"
-                ? `\u2191`
-                : !sorted && sortedBy === "finalMark"
-                ? `\u2193`
-                : ""}{" "}
+              <p className="finalHead" style={{ margin: 0 }}>
+                {" "}
+                Final
+                {sorted && sortedBy === "finalMark"
+                  ? `\u2191`
+                  : !sorted && sortedBy === "finalMark"
+                  ? `\u2193`
+                  : ""}{" "}
+              </p>
             </th>
           </tr>
         </thead>
@@ -448,7 +516,7 @@ const Classes = () => {
               </React.Fragment>
             ))}
           {/* // ? Render the initial empty row first */}
-          {renderTableBodyBlank(singleClass)}
+          {renderTableBodyBlank(singleClass, i)}
         </tbody>
       </table>
     );
@@ -506,20 +574,22 @@ const Classes = () => {
   // TODO Add the ability to paste a large set of data to populate the table
   // TODO Future update - Try to re-implement on blur for the input field - The issue occurs because you try to clear input field after adding new student
   // ? THE FULL SINGLE DATA ROW
-  const renderTableBodyBlank = (singleClass) => {
+  const renderTableBodyBlank = (singleClass, i) => {
     const rowData = [];
 
     // ? This is the Add student function which renders a new row (pushes to studentRows) */
     rowData.push(
       <td
-        key={0}
+        key={i}
+        colSpan={2}
         style={{
           width: 50,
           cursor: "pointer",
-          fontSize: 15,
+          fontSize: parseInt(selectedFontSize),
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           position: "relative",
+          padding: tableProperties.padding,
         }}
         onClick={() => {
           if (
@@ -552,12 +622,13 @@ const Classes = () => {
         ></img>
       </td>
     );
+
     // ? Render this first (this is the student name column)
     rowData.push(
       <td
-        key={0}
+        key={i + 1}
         style={{
-          fontSize: 15,
+          fontSize: parseInt(selectedFontSize),
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           position: "relative",
@@ -590,6 +661,7 @@ const Classes = () => {
             backgroundColor: "transparent",
             outline: "none",
             textAlign: "center",
+            fontSize: parseInt(selectedFontSize),
           }}
           value={
             studentData[singleClass._id] && studentData[singleClass._id].name
@@ -608,7 +680,7 @@ const Classes = () => {
                 right: "50%",
                 transform: "translateX(50%) translateY(50%)",
                 color: "red",
-                fontSize: 16,
+                fontSize: parseInt(selectedFontSize) - 2,
                 pointerEvents: "none",
               }}
             >
@@ -709,6 +781,7 @@ const Classes = () => {
                   backgroundColor: "transparent",
                   outline: "none",
                   textAlign: "center",
+                  fontSize: parseInt(selectedFontSize) - 1,
                 }}
                 value={grade ? grade.mark : 0}
               />
@@ -723,10 +796,11 @@ const Classes = () => {
     // ? Render this last (this is the final mark column)
     rowData.push(
       <td
-        key={1}
+        key={i + 2}
         style={{
           border: tableProperties.border,
           width: 100,
+          fontSize: parseInt(selectedFontSize),
         }}
       >
         {grades === undefined || grades.length === 0
@@ -756,7 +830,8 @@ const Classes = () => {
       <th
         className="deleteBtn"
         style={{
-          width: 50,
+          width: "5%",
+          padding: "5px 7px",
           border: tableProperties.border,
           color: "#FFFFFF",
           textTransform: "uppercase",
@@ -770,8 +845,36 @@ const Classes = () => {
         <img
           className="deleteStudent"
           alt="delete student button"
-          style={{ width: 13, height: 13 }}
+          style={{
+            width: parseInt(selectedFontSize),
+            height: parseInt(selectedFontSize),
+          }}
           src="/delete.png"
+        ></img>
+      </th>
+    );
+
+    rowData.push(
+      <th
+        className="pdfBtn"
+        style={{
+          width: "5%",
+          padding: "5px 7px",
+          border: tableProperties.border,
+          color: "#FFFFFF",
+          textTransform: "uppercase",
+          cursor: "pointer",
+          userSelect: "none",
+        }}
+        onClick={() => {}}
+      >
+        <img
+          alt="download pdf button"
+          style={{
+            width: parseInt(selectedFontSize) + 8,
+            height: parseInt(selectedFontSize) + 8,
+          }}
+          src="/pdf.png"
         ></img>
       </th>
     );
@@ -782,7 +885,7 @@ const Classes = () => {
         key={student.name}
         style={{
           position: "relative",
-          fontSize: 15,
+          fontSize: parseInt(selectedFontSize),
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
         }}
@@ -849,8 +952,7 @@ const Classes = () => {
                     ? tableProperties.final.top
                     : singleUnit.themeColor,
                 border: tableProperties.border,
-
-                width: "12%",
+                width: "5%",
               }}
             >
               <input
@@ -899,6 +1001,7 @@ const Classes = () => {
                   backgroundColor: "transparent",
                   outline: "none",
                   textAlign: "center",
+                  fontSize: parseInt(selectedFontSize) - 1,
                 }}
                 defaultValue={grade ? grade.mark : 0}
               ></input>
@@ -923,7 +1026,9 @@ const Classes = () => {
               ? tableProperties.final.failing
               : calculateAverage(grades, singleClass) > 80 &&
                 tableProperties.final.top,
-          width: "12%",
+          padding: tableProperties.padding,
+
+          fontSize: parseInt(selectedFontSize),
         }}
       >
         {grades === null || grades.length === 0
@@ -1011,7 +1116,99 @@ const Classes = () => {
     >
       <div>
         {fullData.classes.length !== 0 && (
-          <h4 style={{ textAlign: "center" }}>Your Classes</h4>
+          <div>
+            <h4 style={{ textAlign: "center" }}>Your Classes</h4>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "10px 0",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: 15 }}>Adjust border</p>
+                <input
+                  style={{ cursor: "pointer" }}
+                  onChange={(e) => {
+                    setBorderWIdth(e.target.value);
+                  }}
+                  type="range"
+                  min="0"
+                  step={0.5}
+                  max="3"
+                  value={borderWidth}
+                ></input>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "10px 0",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: 15 }}>Horizontal spacing</p>
+                <input
+                  style={{ cursor: "pointer" }}
+                  onChange={(e) => {
+                    setHorizontalPadding(e.target.value);
+                  }}
+                  type="range"
+                  min="5"
+                  step={1}
+                  max="15"
+                  value={horizontalPadding}
+                ></input>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "10px 0",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: 15 }}>Vertical spacing</p>
+                <input
+                  style={{ cursor: "pointer" }}
+                  onChange={(e) => {
+                    setVerticalPadding(e.target.value);
+                  }}
+                  type="range"
+                  min="3"
+                  step={1}
+                  max="9"
+                  value={verticalPadding}
+                ></input>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "10px 0",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: 15 }}>Font size</p>
+                <input
+                  style={{ cursor: "pointer" }}
+                  onChange={(e) => {
+                    setSelectedFontSize(e.target.value);
+                  }}
+                  type="range"
+                  min="13"
+                  step={1}
+                  max="16"
+                  value={selectedFontSize}
+                ></input>
+              </div>
+            </div>
+          </div>
         )}
         {fullData.classes.length === 0 && (
           <div
@@ -1040,36 +1237,26 @@ const Classes = () => {
             </button>
           </div>
         )}
+
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
             justifyContent: "center",
+            gap: 15,
             margin: "10px 0",
           }}
         >
-          <p style={{ margin: 0, fontSize: 14 }}>
-            Adjust border {borderWidth}px
-          </p>
-          <input
-            style={{ cursor: "pointer" }}
-            onChange={(e) => {
-              setBorderWIdth(e.target.value);
-            }}
-            type="range"
-            min="0"
-            step={0.5}
-            max="3"
-            value={borderWidth}
-          ></input>
-        </div>
-
-        <div style={{ display: "flex", gap: 15 }}>
           {fullData.classes.map((singleClass, i) => {
             return (
-              <div style={{ display: "flex", alignItems: "center" }} key={i}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                key={i}
+              >
                 <p
+                  className="classTitleBtn"
                   onClick={() => {
                     setViewingTable(i);
                     setSorted(false);
@@ -1079,7 +1266,7 @@ const Classes = () => {
                     });
                   }}
                   style={{
-                    fontSize: 18,
+                    fontSize: 16,
                     cursor: "pointer",
                     userSelect: "none",
                     borderBottom:
@@ -1096,15 +1283,17 @@ const Classes = () => {
                 </p>
                 {i === fullData.classes.length - 1 && (
                   <p
+                    className="addClassBtn"
                     style={{
                       cursor: "pointer",
                       userSelect: "none",
                       marginLeft: 15,
                       border: "none",
                       backgroundColor: "#555",
-                      padding: "4px 10px",
+                      padding: "5px 10px",
                       color: "#ffffff",
                       borderRadius: 5,
+                      fontSize: 14,
                     }}
                     onClick={() => {
                       history.push("/add-classes");
