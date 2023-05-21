@@ -39,7 +39,6 @@ const Marks = () => {
   // TODO Add the edit function for units
   // TODO You should be able to add a new project to a unit after the unit has been added
 
-  const [classes, setClasses] = useState([]);
   // Update these to be one object containing all the information in one
   const [classTitle, setClassTitle] = useState("");
   const [schoolYear, setSchoolYear] = useState("");
@@ -109,64 +108,10 @@ const Marks = () => {
 
   const [displayErr, setDisplayErr] = useState({ reveal: false, msg: "" });
 
-  const [viewingTable, setViewingTable] = useState(0);
-
-  const [decimal, setDecimal] = useState(false);
-  const [missingData, setMissingData] = useState({});
-
-  const [allStudents, setAllStudents] = useState([]);
-
-  function calculateAverage(grades, singleClass) {
-    let KU = [];
-    let A = [];
-    let TI = [];
-    let C = [];
-
-    grades.map((grade) => {
-      // Only push grades that are in specific classes
-      if (grade.letter == "K/U" && grade.classId === singleClass.id) {
-        KU.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-      if (grade.letter == "T/I" && grade.classId === singleClass.id) {
-        TI.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-      if (grade.letter == "A" && grade.classId === singleClass.id) {
-        A.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-      if (grade.letter == "C" && grade.classId === singleClass.id) {
-        C.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-    });
-
-    let sumOfKU = KU.reduce((total, grade) => total + grade.mark, 0);
-    let sumOfA = A.reduce((total, grade) => total + grade.mark, 0);
-    let sumOfTI = TI.reduce((total, grade) => total + grade.mark, 0);
-    let sumOfC = C.reduce((total, grade) => total + grade.mark, 0);
-
-    const average =
-      (sumOfKU ? sumOfKU : 0) +
-      (sumOfA ? sumOfA : 0) +
-      (sumOfTI ? sumOfTI : 0) +
-      (sumOfC ? sumOfC : 0);
-
-    return average.toFixed(decimal ? 2 : 0);
-  }
-
   const [addProject, setAddProject] = useState(false);
   const [addSingleClass, setAddSingleClass] = useState(false);
 
+  const [fullClass, setFullClass] = useState({});
   useEffect(() => {
     document.title = "Hershy - Add class";
   }, []);
@@ -178,23 +123,19 @@ const Marks = () => {
       setSingleProject({ title: "", criterias: [] });
       setAddProject(false);
     }
-    if (units.length > 0 && addSingleClass) {
-      let singleClass = {
+    if (addSingleClass) {
+      // Push table to DB
+      handleAddClass(fullClass);
+    }
+    if (units.length > 0) {
+      setFullClass({
         title: classTitle,
-        units,
         schoolYear,
         userId,
-      };
-
-      handleAddClass(singleClass);
-
-      setClasses([...classes, singleClass]);
-
-      setClassTitle("");
-      setUnits([]);
-      setAddSingleClass(false);
+        units,
+      });
     }
-  }, [singleProject, units]);
+  }, [singleProject, units, addSingleClass]);
 
   return (
     <div className="container mt-5">
@@ -515,58 +456,61 @@ const Marks = () => {
                     projects: projects,
                   },
                 ]);
-                setAddSingleClass(true);
                 setProjects([]);
                 setUnitTitle("");
                 setUnitThemeColor(tableProperties.colors[0]);
               }}
             >
-              Add Class
+              Add Unit
             </button>
           </section>
         )}
         {/* ------------ ----------- ---------- // ? PREVIEW/EDITING UNITS */}
-        {classes.length >= 1 && (
+        {fullClass && fullClass.units && fullClass.units.length >= 1 && (
           <section className="preview-units">
-            <h5>Your Classes</h5>
+            <h5>Your Class</h5>
+            <h1>{fullClass.title}</h1>
+            <h3>{fullClass.schoolYear}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {classes.length > 0 &&
-                classes.map((singleClass, i) => {
-                  return singleClass.units.map((unit, i) => {
-                    return (
-                      <div key={i}>
-                        <div>
-                          <h5>{singleClass.title}</h5>
-                          School year: <h5>{singleClass.schoolYear}</h5>
-                          <h5 style={{ color: unit.themeColor }}>
-                            Your theme color
-                          </h5>
-                        </div>
-                        {unit.projects.map((project, i) => {
-                          return (
-                            <div key={i}>
-                              <p style={{ margin: 0, fontSize: 18 }}>
-                                {project.title}
-                              </p>
-                              {project.criterias.map((criteria, i) => {
-                                return (
-                                  <p
-                                    key={i}
-                                    style={{ margin: 0, fontSize: 14 }}
-                                  >
-                                    Criteria #{i + 1}: {criteria.label}(
-                                    {criteria.letter}) {criteria.weight}%
-                                  </p>
-                                );
-                              })}
-                            </div>
-                          );
-                        })}
+              {fullClass.units.length > 0 &&
+                fullClass.units.map((singleUnit, i) => {
+                  console.log(singleUnit);
+                  return (
+                    <div key={i}>
+                      <div>
+                        <h5>{singleUnit.title}</h5>
+                        <h5 style={{ color: singleUnit.themeColor }}>
+                          Your theme color
+                        </h5>
                       </div>
-                    );
-                  });
+                      {singleUnit.projects.map((project, i) => {
+                        return (
+                          <div key={i}>
+                            <p style={{ margin: 0, fontSize: 18 }}>
+                              {project.title}
+                            </p>
+                            {project.criterias.map((criteria, i) => {
+                              return (
+                                <p key={i} style={{ margin: 0, fontSize: 14 }}>
+                                  Criteria #{i + 1}: {criteria.label}(
+                                  {criteria.letter}) {criteria.weight}%
+                                </p>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
                 })}
             </div>
+            <button
+              onClick={() => {
+                setAddSingleClass(true);
+              }}
+            >
+              Create Class
+            </button>
           </section>
         )}
       </form>

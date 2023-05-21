@@ -3,6 +3,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_DATA } from "../utils/queries";
 
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  PDFViewer,
+  PDFDownloadLink,
+} from "@react-pdf/renderer";
+
 import Auth from "../utils/auth";
 import { useHistory } from "react-router-dom";
 
@@ -85,6 +94,130 @@ const Classes = () => {
     }
   };
 
+  // ? This returns a single students organized FULL grades across multiple units and projects
+  const [studentReport, setStudentReport] = useState([]);
+
+  const extractSingleStudentReport = (student, classTitle, schoolYear) => {
+    const unitData = {};
+
+    student?.grades?.forEach((grade) => {
+      const { unit, project } = grade;
+
+      // Check if unit exists in unitData
+      if (!unitData[unit]) {
+        unitData[unit] = { grades: {} };
+      }
+
+      // Check if project exists in unitData[unit].grades
+      if (!unitData[unit].grades[project]) {
+        unitData[unit].grades[project] = [];
+      }
+
+      // Add grade to the corresponding project
+      unitData[unit].grades[project].push({ grade });
+    });
+
+    const unitGradesData = Object.entries(unitData).map(
+      ([unitTitle, data]) => ({
+        unitTitle,
+        grades: data.grades,
+      })
+    );
+
+    setStudentReport({
+      finalMark: student.finalMark,
+      studentName: student.name,
+      studentGrades: unitGradesData,
+      classTitle,
+      schoolYear,
+    });
+  };
+
+  // TODO Finalize this, copy the style from a traditional grade report
+  // TODO Using studentReport state, render the students grades here
+  const SingleStudentDocument = () => (
+    <Document>
+      <Page
+        style={{
+          width: "100%",
+          height: "100%",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            height: "100%",
+            border: "1px solid #333",
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "column",
+              marginBottom: 15,
+              marginTop: 10,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                textAlign: "center",
+              }}
+            >
+              Student Grade Report
+            </Text>
+            <Text
+              style={{
+                fontSize: 18,
+                textAlign: "center",
+                marginTop: 5,
+                paddingBottom: 10,
+                borderBottomWidth: 1,
+              }}
+            >
+              {studentReport && studentReport.schoolYear}
+            </Text>
+            <Text
+              style={{ fontSize: 16, marginVertical: 5, textAlign: "center" }}
+            >
+              Student: {studentReport && studentReport.studentName}
+            </Text>
+            <Text
+              style={{ fontSize: 20, marginVertical: 5, textAlign: "center" }}
+            >
+              Class: {studentReport && studentReport.classTitle}
+            </Text>
+            <Text
+              style={{ fontSize: 20, marginVertical: 5, textAlign: "center" }}
+            >
+              Final Mark: {studentReport && studentReport.finalMark}
+            </Text>
+            <Text
+              style={{ fontSize: 20, marginVertical: 5, textAlign: "center" }}
+            >
+              Units:
+            </Text>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  // ? The component for downloading the PDF
+  const DownloadSingleStudentPdf = () => (
+    <div>
+      <PDFDownloadLink
+        document={<SingleStudentDocument />}
+        fileName="table_data.pdf"
+      >
+        {({ blob, url, loading, error }) =>
+          loading ? "Loading document..." : "Download PDF"
+        }
+      </PDFDownloadLink>
+    </div>
+  );
+
   const [allStudents, setAllStudents] = useState([]);
 
   const [missingData, setMissingData] = useState({});
@@ -96,37 +229,31 @@ const Classes = () => {
   //      TODO Export a report for a single student
   //      TODO The download pdf button is really close to the project title if the table is small
 
-  // TODO RE-DO THE ENTIRE TABLE WIDTH PROPERTIES FOR EACH COLUMN
-  // TODO Horizontal spacing needs to be refined, also the table columns need to be adjusted
-  //      TODO Student names should always be long enough
   // TODO Create a local storage function that saves the borderWidth size and extracts it
   //      TODO Not worth pushing this data to database
 
   // TODO Fixed the position of the decimal button? Make the whole cell touchable
   const [borderWidth, setBorderWIdth] = useState(1);
-  const [horizontalPadding, setHorizontalPadding] = useState(5);
-  const [verticalPadding, setVerticalPadding] = useState(5);
   const [selectedFontSize, setSelectedFontSize] = useState(15);
 
   let tableProperties = {
     defaultColor: "#333",
-    padding: `${verticalPadding}px ${horizontalPadding}px`,
+    padding: `5px 8px`,
     border: `${borderWidth}px solid #333`,
     final: {
       top: "rgba(255, 255, 0, 0.2)",
-      topDark: "rgba(255, 255, 0, 0.35)",
+      topDark: "rgba(255, 255, 0, 0.4)",
       passing: "rgba(255, 255, 255, 0.2)",
-      passingDark: "rgba(255, 255, 255, 0.35)",
+      passingDark: "rgba(255, 255, 255, 0.4)",
       failing: "rgba(255, 0, 0, 0.2)",
-      failingDark: "rgba(255, 0, 0, 0.35)",
+      failingDark: "rgba(255, 0, 0, 0.4)",
     },
     brightnessRange: "100",
     colors: [
       "rgba(280,280,280,0.5)", // white
       "rgba(190,237,255,0.5)", // Light Blue
       "rgba(280,214,225,0.5)", // Light Pink
-      "rgba(280,237,25,0.5)", // Gold
-      "rgba(280,181,25,0.5)", // Orange
+      "rgba(210,181,25,0.5)", // Orange
       "rgba(159,262,159,0.5)", // Light Green
     ],
   };
@@ -158,9 +285,9 @@ const Classes = () => {
   const renderDefaultStudent = (singleClass) => {
     let defaultGrades = [];
 
-    singleClass.units.flatMap((unit) =>
-      unit.projects.flatMap((project) =>
-        project.criterias.map((criteria) => {
+    singleClass.units.map((unit) => {
+      return unit.projects.map((project) => {
+        return project.criterias.map((criteria) => {
           return defaultGrades.push({
             classId: singleClass._id,
             criteriaId: criteria._id,
@@ -171,9 +298,9 @@ const Classes = () => {
             letter: criteria.letter,
             mark: 0,
           });
-        })
-      )
-    );
+        });
+      });
+    });
 
     setStudentData((prevStudentData) => ({
       ...prevStudentData,
@@ -220,11 +347,11 @@ const Classes = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            margin: "5px 8px",
+            margin: "2px 4px",
           }}
         >
           <p
-            style={{ margin: 0, fontSize: parseInt(selectedFontSize) + 5 }}
+            style={{ margin: 0, fontSize: parseInt(selectedFontSize) }}
           >{`${singleClass.title} - ${singleClass.schoolYear}`}</p>
           <div
             style={{
@@ -235,12 +362,14 @@ const Classes = () => {
             }}
             className="downloadBtn"
           >
-            <p style={{ margin: 0, fontSize: 14 }}>Download report</p>
+            <p style={{ margin: 0, fontSize: parseInt(selectedFontSize) - 3 }}>
+              Download
+            </p>
             <img
               alt="download pdf button"
               style={{
-                width: 18,
-                height: 18,
+                width: parseInt(selectedFontSize) + 5,
+                height: parseInt(selectedFontSize) + 5,
                 filter: "invert(100%)",
               }}
               src="/pdf.png"
@@ -263,11 +392,11 @@ const Classes = () => {
           className="table-unit-title"
           colSpan={unitColSpan}
           style={{
+            padding: tableProperties.padding,
             backgroundColor: themeColor,
             border: tableProperties.border,
             textAlign: "center",
             color: tableProperties.defaultColor,
-            padding: tableProperties.padding,
             fontSize: parseInt(selectedFontSize) + 3,
           }}
         >
@@ -282,11 +411,11 @@ const Classes = () => {
             className="table-unit-title"
             colSpan={project.criterias.length}
             style={{
+              padding: tableProperties.padding,
               backgroundColor: themeColor,
               border: tableProperties.border,
               textAlign: "center",
               color: tableProperties.defaultColor,
-              padding: tableProperties.padding,
               fontSize: parseInt(selectedFontSize) + 2,
             }}
           >
@@ -299,11 +428,11 @@ const Classes = () => {
             <th
               key={criteria._id}
               style={{
+                padding: tableProperties.padding,
                 backgroundColor: themeColor,
                 border: tableProperties.border,
                 cursor: "pointer",
                 userSelect: "none",
-                padding: tableProperties.padding,
                 fontSize: parseInt(selectedFontSize),
               }}
               onClick={() => {
@@ -318,7 +447,7 @@ const Classes = () => {
                   position: "relative",
                 }}
               >
-                <p
+                <div
                   className="gradeLetter"
                   style={{ position: "relative", margin: 0 }}
                 >
@@ -339,7 +468,7 @@ const Classes = () => {
                   >
                     <span>Weight {criteria.weight}%</span>
                   </span>
-                </p>
+                </div>
               </div>
             </th>
           );
@@ -584,16 +713,16 @@ const Classes = () => {
     // ? This is the Add student function which renders a new row (pushes to studentRows) */
     rowData.push(
       <td
+        className="addBtn"
         key={i}
         colSpan={2}
         style={{
-          width: 50,
+          width: "7%",
           cursor: "pointer",
           fontSize: parseInt(selectedFontSize),
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           position: "relative",
-          padding: tableProperties.padding,
         }}
         onClick={() => {
           if (
@@ -632,10 +761,11 @@ const Classes = () => {
       <td
         key={i + 1}
         style={{
-          fontSize: parseInt(selectedFontSize),
+          fontSize: parseInt(selectedFontSize) - 2,
           borderBottom: `${borderWidth}px solid #333`,
           borderTop: `${borderWidth}px solid #333`,
           position: "relative",
+          width: "20%",
         }}
       >
         <input
@@ -658,6 +788,32 @@ const Classes = () => {
                 name: e.target.value,
               },
             }));
+          }}
+          onKeyDown={(e) => {
+            console.log(e.key);
+            if (e.key == "Enter") {
+              if (
+                !studentData[singleClass._id] ||
+                studentData[singleClass._id].name === undefined ||
+                studentData[singleClass._id].name == ""
+              ) {
+                return setMissingData({
+                  ...missingData,
+                  [singleClass._id]: {
+                    reveal: true,
+                    classId: singleClass._id,
+                  },
+                });
+              }
+              // Push student to DB
+              handleAddStudent(studentData[singleClass._id]);
+
+              // Remove the student that was added from studentData (which contains the blankRow data)
+              const updatedStudentData = { ...studentData };
+              delete updatedStudentData[singleClass._id];
+              setStudentData(updatedStudentData);
+              inputRef.current.focus();
+            }
           }}
           style={{
             width: "100%",
@@ -718,11 +874,14 @@ const Classes = () => {
             <td
               key={criteria._id}
               style={{
+                width: "7%",
+                padding: "6px 3px",
                 borderBottom: `${borderWidth}px solid #333`,
                 borderTop: `${borderWidth}px solid #333`,
               }}
             >
               <input
+                className="grades"
                 onChange={(e) => {
                   const mark = e.target.value;
                   if (grade) {
@@ -806,7 +965,7 @@ const Classes = () => {
           borderBottom: `${borderWidth}px solid #333`,
           borderTop: `${borderWidth}px solid #333`,
           borderRight: `${borderWidth}px solid #333`,
-          width: 100,
+          width: "10%",
           fontSize: parseInt(selectedFontSize),
         }}
       >
@@ -839,9 +998,10 @@ const Classes = () => {
       <th
         className="deleteBtn"
         style={{
-          width: "5%",
-          padding: "5px 8px",
-          border: tableProperties.border,
+          width: "4%",
+          borderLeft: tableProperties.border,
+          borderTop: tableProperties.border,
+          borderBottom: tableProperties.border,
           color: "#FFFFFF",
           textTransform: "uppercase",
           cursor: "pointer",
@@ -852,11 +1012,10 @@ const Classes = () => {
         }}
       >
         <img
-          className="deleteStudent"
           alt="delete student button"
           style={{
-            width: 14,
-            height: 14,
+            width: parseInt(selectedFontSize) + 5,
+            height: parseInt(selectedFontSize) + 5,
           }}
           src="/delete.png"
         ></img>
@@ -867,21 +1026,28 @@ const Classes = () => {
       <th
         className="pdfBtn"
         style={{
-          width: "5%",
-          padding: "5px 8px",
-          border: tableProperties.border,
+          width: "4%",
+          borderTop: tableProperties.border,
+          borderBottom: tableProperties.border,
+          borderRight: `${borderWidth}px solid #333`,
           color: "#FFFFFF",
           textTransform: "uppercase",
           cursor: "pointer",
           userSelect: "none",
         }}
-        onClick={() => {}}
+        onClick={() => {
+          extractSingleStudentReport(
+            student,
+            singleClass.title,
+            singleClass.schoolYear
+          );
+        }}
       >
         <img
           alt="download pdf button"
           style={{
-            width: parseInt(selectedFontSize) + 8,
-            height: parseInt(selectedFontSize) + 8,
+            width: parseInt(selectedFontSize) + 10,
+            height: parseInt(selectedFontSize) + 10,
           }}
           src="/pdf.png"
         ></img>
@@ -893,8 +1059,10 @@ const Classes = () => {
       <td
         key={student.name}
         style={{
+          width: "20%",
+          padding: "6px 1px",
           position: "relative",
-          fontSize: parseInt(selectedFontSize),
+          fontSize: parseInt(selectedFontSize) - 2,
           borderBottom: `${borderWidth}px solid #333`,
           borderTop: `${borderWidth}px solid #333`,
         }}
@@ -955,17 +1123,14 @@ const Classes = () => {
               style={{
                 backgroundColor:
                   grade.mark < 50
-                    ? isEvenRow
-                      ? tableProperties.final.failingDark
-                      : tableProperties.final.failing
+                    ? tableProperties.final.failing
                     : grade.mark > 80
-                    ? isEvenRow
-                      ? tableProperties.final.topDark
-                      : tableProperties.final.top
+                    ? tableProperties.final.top
                     : singleUnit.themeColor,
                 borderBottom: `${borderWidth}px solid #333`,
                 borderTop: `${borderWidth}px solid #333`,
-                width: "5%",
+                width: "7%",
+                position: "relative",
               }}
             >
               <input
@@ -1008,7 +1173,10 @@ const Classes = () => {
                     })
                   );
                 }}
+                className="grades"
                 style={{
+                  position: "relative",
+                  zIndex: 4,
                   width: "100%",
                   border: "none",
                   backgroundColor: "transparent",
@@ -1034,19 +1202,18 @@ const Classes = () => {
           borderBottom: `${borderWidth}px solid #333`,
           borderTop: `${borderWidth}px solid #333`,
           borderRight: `${borderWidth}px solid #333`,
-          backgroundColor:
-            grades === null || grades.length === 0
-              ? ""
-              : calculateAverage(grades, singleClass) < 50
-              ? isEvenRow
-                ? tableProperties.final.failingDark
-                : tableProperties.final.failing
-              : calculateAverage(grades, singleClass) > 80
-              ? isEvenRow
-                ? tableProperties.final.topDark
-                : tableProperties.final.top
-              : "",
-          padding: tableProperties.padding,
+          // backgroundColor:
+          //   grades === null || grades.length === 0
+          //     ? ""
+          //     : calculateAverage(grades, singleClass) < 50
+          //     ? isEvenRow
+          //       ? tableProperties.final.failingDark
+          //       : tableProperties.final.failing
+          //     : calculateAverage(grades, singleClass) > 80
+          //     ? isEvenRow
+          //       ? tableProperties.final.topDark
+          //       : tableProperties.final.top
+          //     : "",
           fontSize: parseInt(selectedFontSize),
         }}
       >
@@ -1142,6 +1309,10 @@ const Classes = () => {
       }}
       className="container mt-5"
     >
+      <PDFViewer>
+        <SingleStudentDocument />
+      </PDFViewer>
+      <DownloadSingleStudentPdf />
       <div>
         {fullData.classes.length !== 0 && (
           <div>
@@ -1169,50 +1340,7 @@ const Classes = () => {
                   value={borderWidth}
                 ></input>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "10px 0",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: 15 }}>Horizontal spacing</p>
-                <input
-                  style={{ cursor: "pointer" }}
-                  onChange={(e) => {
-                    setHorizontalPadding(e.target.value);
-                  }}
-                  type="range"
-                  min="5"
-                  step={1}
-                  max="15"
-                  value={horizontalPadding}
-                ></input>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "10px 0",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: 15 }}>Vertical spacing</p>
-                <input
-                  style={{ cursor: "pointer" }}
-                  onChange={(e) => {
-                    setVerticalPadding(e.target.value);
-                  }}
-                  type="range"
-                  min="3"
-                  step={1}
-                  max="9"
-                  value={verticalPadding}
-                ></input>
-              </div>
+
               <div
                 style={{
                   display: "flex",

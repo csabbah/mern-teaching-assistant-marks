@@ -12,6 +12,11 @@
   src: url(../../client/public/Poppins/Poppins-SemiBold.ttf);
 }
 
+@font-face {
+  font-family: "PoppinsRegular";
+  src: url(../../client/public/Poppins/Poppins-Regular.ttf);
+}
+
 body {
   font-family: "PoppinsSemiBold", Verdana, Geneva, Tahoma, sans-serif;
   color: #333;
@@ -139,7 +144,7 @@ h6 {
 }
 
 tr:hover {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(155, 155, 155, 0.25);
 }
 
 .table-unit-title {
@@ -177,7 +182,7 @@ tr:hover {
   padding: 2px 15px;
   border-radius: 10px;
   left: 50%;
-  bottom: -30px;
+  bottom: -25px;
   transform: translateX(-50%) translateY(-100%);
   backdrop-filter: blur(6px);
   box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.1);
@@ -189,17 +194,16 @@ tr:hover {
   transition: 0.2s all ease-in-out;
 }
 
-.deleteBtn {
-  background-color: #ff2e2e;
-}
 .deleteBtn:hover {
-  background-color: #ff5c5c;
+  background-color: #ff6d6d;
 }
-.pdfBtn {
-  background-color: #ffa42e;
-}
+
 .pdfBtn:hover {
-  background-color: #ffbe5c;
+  background-color: #ffc979;
+}
+
+.addBtn:hover {
+  background-color: #79baff;
 }
 
 .deleteStudent {
@@ -228,4 +232,8 @@ tr:hover {
 
 .addClassBtn:hover {
   transform: scale(0.95);
+}
+
+.grades {
+  font-family: "PoppinsMedium", Verdana, Geneva, Tahoma, sans-serif;
 }
