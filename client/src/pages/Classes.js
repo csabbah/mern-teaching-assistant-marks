@@ -7,6 +7,7 @@ import {
   Document,
   Page,
   Text,
+  Image,
   View,
   PDFViewer,
   PDFDownloadLink,
@@ -96,6 +97,7 @@ const Classes = () => {
 
   // ? This returns a single students organized FULL grades across multiple units and projects
   const [studentReport, setStudentReport] = useState([]);
+  const [showPdf, setShowPdf] = useState(false);
 
   const extractSingleStudentReport = (student, classTitle, schoolYear) => {
     const unitData = {};
@@ -117,24 +119,22 @@ const Classes = () => {
       unitData[unit].grades[project].push({ grade });
     });
 
-    const unitGradesData = Object.entries(unitData).map(
-      ([unitTitle, data]) => ({
-        unitTitle,
-        grades: data.grades,
-      })
-    );
+    const unitGradesData = Object.entries(unitData).map(([unit, data]) => ({
+      unit,
+      grades: data.grades,
+    }));
 
     setStudentReport({
       finalMark: student.finalMark,
       studentName: student.name,
-      studentGrades: unitGradesData,
+      grades: unitGradesData,
       classTitle,
       schoolYear,
     });
   };
 
-  // TODO Finalize this, copy the style from a traditional grade report
-  // TODO Using studentReport state, render the students grades here
+  const [teacherComment, setTeacherComment] = useState("");
+
   const SingleStudentDocument = () => (
     <Document>
       <Page
@@ -142,13 +142,13 @@ const Classes = () => {
           width: "100%",
           height: "100%",
           justifyContent: "center",
+          padding: "20px 20px",
         }}
       >
         <View
           style={{
             flexDirection: "row",
             height: "100%",
-            border: "1px solid #333",
           }}
         >
           <View
@@ -159,45 +159,187 @@ const Classes = () => {
               marginTop: 10,
             }}
           >
+            <Image
+              style={{
+                marginBottom: 10,
+                width: 65,
+                height: 65,
+                alignSelf: "center",
+              }}
+              src="./benedict.png"
+            ></Image>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: 24,
                 textAlign: "center",
+                marginBottom: 10,
               }}
             >
-              Student Grade Report
+              St. Benedict C.S.S.
             </Text>
-            <Text
+            <View
               style={{
-                fontSize: 18,
-                textAlign: "center",
-                marginTop: 5,
-                paddingBottom: 10,
-                borderBottomWidth: 1,
+                paddingVertical: 5,
+                backgroundColor: "#000066",
               }}
             >
-              {studentReport && studentReport.schoolYear}
-            </Text>
-            <Text
-              style={{ fontSize: 16, marginVertical: 5, textAlign: "center" }}
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 18,
+                  textAlign: "center",
+                }}
+              >
+                Student Grade Report
+              </Text>
+            </View>
+            <View
+              style={{
+                marginVertical: 15,
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-between",
+                paddingHorizontal: 25,
+              }}
             >
-              Student: {studentReport && studentReport.studentName}
-            </Text>
-            <Text
-              style={{ fontSize: 20, marginVertical: 5, textAlign: "center" }}
+              <View
+                style={{
+                  gap: 8,
+                }}
+              >
+                <View
+                  style={{
+                    gap: 5,
+                    flexDirection: "row",
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>Student Name :</Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {studentReport && studentReport.studentName}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    gap: 5,
+                    flexDirection: "row",
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>Term :</Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {studentReport && studentReport.schoolYear}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  gap: 8,
+                }}
+              >
+                <View style={{ gap: 5, flexDirection: "row" }}>
+                  <Text style={{ fontSize: 15 }}>Class :</Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {studentReport && studentReport.classTitle}
+                  </Text>
+                </View>
+                <View style={{ gap: 5, flexDirection: "row" }}>
+                  <Text style={{ fontSize: 15 }}>Final Mark :</Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {studentReport && studentReport.finalMark}%
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {studentReport &&
+              studentReport.grades &&
+              studentReport.grades.map((singleUnit) => {
+                // Extract the key from the singleUnit.grades array
+                const projectTitles = Object.keys(singleUnit.grades);
+
+                return (
+                  <>
+                    <View
+                      style={{
+                        paddingVertical: 5,
+                        backgroundColor: "#000066",
+                        color: "white",
+                        textAlign: "center",
+                      }}
+                    >
+                      <Text style={{ fontSize: 17 }}>{singleUnit.unit}</Text>
+                    </View>
+                    <View style={{ border: "1px solid #000066" }}>
+                      {projectTitles.map((project, i) => {
+                        return (
+                          <View
+                            style={{
+                              marginTop: 20,
+                              paddingHorizontal: 15,
+                              borderBottom:
+                                projectTitles.length > 1 &&
+                                i !== projectTitles.length - 1
+                                  ? "0.5px solid grey"
+                                  : "",
+                              paddingBottom: 10,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                bottom: 10,
+                                fontSize: 15,
+                                textAlign: "center",
+                              }}
+                            >
+                              {project}
+                            </Text>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                gap: 15,
+                              }}
+                            >
+                              {singleUnit.grades[projectTitles[i]].map(
+                                (singleGrade) => {
+                                  return (
+                                    <View style={{ gap: 5 }}>
+                                      <Text style={{ fontSize: 15 }}>
+                                        {singleGrade.grade.criteria} (
+                                        {singleGrade.grade.letter})
+                                      </Text>
+                                      <Text style={{ fontSize: 15 }}>
+                                        Weight: {singleGrade.grade.weight}%
+                                      </Text>
+                                      <Text style={{ fontSize: 15 }}>
+                                        Mark: {singleGrade.grade.mark}%
+                                      </Text>
+                                    </View>
+                                  );
+                                }
+                              )}
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </>
+                );
+              })}
+            <View
+              style={{
+                marginTop: 15,
+                paddingVertical: 5,
+                backgroundColor: "#000066",
+                color: "white",
+                paddingLeft: 5,
+              }}
             >
-              Class: {studentReport && studentReport.classTitle}
-            </Text>
-            <Text
-              style={{ fontSize: 20, marginVertical: 5, textAlign: "center" }}
-            >
-              Final Mark: {studentReport && studentReport.finalMark}
-            </Text>
-            <Text
-              style={{ fontSize: 20, marginVertical: 5, textAlign: "center" }}
-            >
-              Units:
-            </Text>
+              <Text>Teacher Comment : </Text>
+            </View>
+            <View style={{ border: "1px solid #000066", height: 100 }}>
+              <Text style={{ fontSize: 15, marginLeft: 5, marginTop: 5 }}>
+                {teacherComment}
+              </Text>
+            </View>
           </View>
         </View>
       </Page>
@@ -206,28 +348,43 @@ const Classes = () => {
 
   // ? The component for downloading the PDF
   const DownloadSingleStudentPdf = () => (
-    <div>
-      <PDFDownloadLink
-        document={<SingleStudentDocument />}
-        fileName="table_data.pdf"
-      >
-        {({ blob, url, loading, error }) =>
-          loading ? "Loading document..." : "Download PDF"
-        }
-      </PDFDownloadLink>
-    </div>
+    <PDFDownloadLink
+      style={{
+        textDecoration: "none",
+        height: 45,
+        width: 45,
+        color: "white",
+        backgroundColor: "#323639",
+        borderRadius: 2,
+      }}
+      document={<SingleStudentDocument />}
+      fileName={`${studentReport.studentName}_${studentReport.schoolYear}.pdf`}
+    >
+      <img
+        alt="download pdf button"
+        style={{
+          position: "relative",
+          left: "50%",
+          top: "50%",
+          transform: "translateX(-50%) translateY(-50%)",
+          width: 30,
+          height: 30,
+          filter: "invert(100%)",
+        }}
+        src="/download.png"
+      ></img>
+    </PDFDownloadLink>
   );
 
   const [allStudents, setAllStudents] = useState([]);
 
   const [missingData, setMissingData] = useState({});
   const inputRef = useRef(null);
+
   const [studentData, setStudentData] = useState({});
 
   // TODO Add the download pdf functionality
   //      TODO Export a single PDF of the entire table
-  //      TODO Export a report for a single student
-  //      TODO The download pdf button is really close to the project title if the table is small
 
   // TODO Create a local storage function that saves the borderWidth size and extracts it
   //      TODO Not worth pushing this data to database
@@ -790,7 +947,6 @@ const Classes = () => {
             }));
           }}
           onKeyDown={(e) => {
-            console.log(e.key);
             if (e.key == "Enter") {
               if (
                 !studentData[singleClass._id] ||
@@ -1041,6 +1197,7 @@ const Classes = () => {
             singleClass.title,
             singleClass.schoolYear
           );
+          setTeacherComment("");
         }}
       >
         <img
@@ -1133,59 +1290,63 @@ const Classes = () => {
                 position: "relative",
               }}
             >
-              <input
-                onBlur={(e) => {
-                  let singleGradeId = "";
-                  setAllStudents((prevStudents) =>
-                    prevStudents.map((singleStudent) => {
-                      if (singleStudent._id === student._id) {
-                        const updatedGrades = singleStudent.grades.map(
-                          (studentGrade) => {
-                            if (studentGrade.criteriaId === criteria._id) {
-                              singleGradeId = studentGrade._id;
-                              return {
-                                ...studentGrade,
-                                mark: parseInt(e.target.value),
-                              };
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  onBlur={(e) => {
+                    let singleGradeId = "";
+                    setAllStudents((prevStudents) =>
+                      prevStudents.map((singleStudent) => {
+                        if (singleStudent._id === student._id) {
+                          const updatedGrades = singleStudent.grades.map(
+                            (studentGrade) => {
+                              if (studentGrade.criteriaId === criteria._id) {
+                                singleGradeId = studentGrade._id;
+                                return {
+                                  ...studentGrade,
+                                  mark: parseInt(e.target.value),
+                                };
+                              }
+
+                              return studentGrade;
                             }
+                          );
 
-                            return studentGrade;
-                          }
-                        );
+                          handleUpdateStudentGrade(
+                            singleStudent._id,
+                            singleGradeId,
+                            parseInt(e.target.value),
+                            parseInt(
+                              calculateAverage(updatedGrades, singleClass)
+                            )
+                          );
 
-                        handleUpdateStudentGrade(
-                          singleStudent._id,
-                          singleGradeId,
-                          parseInt(e.target.value),
-                          parseInt(calculateAverage(updatedGrades, singleClass))
-                        );
+                          return {
+                            ...singleStudent,
+                            grades: updatedGrades,
+                            finalMark: parseInt(
+                              calculateAverage(updatedGrades, singleClass)
+                            ),
+                          };
+                        }
 
-                        return {
-                          ...singleStudent,
-                          grades: updatedGrades,
-                          finalMark: parseInt(
-                            calculateAverage(updatedGrades, singleClass)
-                          ),
-                        };
-                      }
-
-                      return singleStudent;
-                    })
-                  );
-                }}
-                className="grades"
-                style={{
-                  position: "relative",
-                  zIndex: 4,
-                  width: "100%",
-                  border: "none",
-                  backgroundColor: "transparent",
-                  outline: "none",
-                  textAlign: "center",
-                  fontSize: parseInt(selectedFontSize) - 1,
-                }}
-                defaultValue={grade ? grade.mark : 0}
-              ></input>
+                        return singleStudent;
+                      })
+                    );
+                  }}
+                  className="grades"
+                  style={{
+                    position: "relative",
+                    zIndex: 4,
+                    width: "100%",
+                    border: "none",
+                    backgroundColor: "transparent",
+                    outline: "none",
+                    textAlign: "center",
+                    fontSize: parseInt(selectedFontSize) - 1,
+                  }}
+                  defaultValue={grade ? grade.mark : 0}
+                ></input>
+              </div>
             </td>
           );
         }
@@ -1291,8 +1452,9 @@ const Classes = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          marginTop: 75,
         }}
-        className="container mt-5"
+        className="container"
       >
         <p>Loading...</p>
       </div>
@@ -1300,171 +1462,271 @@ const Classes = () => {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-      className="container mt-5"
-    >
-      <PDFViewer>
-        <SingleStudentDocument />
-      </PDFViewer>
-      <DownloadSingleStudentPdf />
-      <div>
-        {fullData.classes.length !== 0 && (
-          <div>
-            <h4 style={{ textAlign: "center" }}>Your Classes</h4>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "10px 0",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: 15 }}>Adjust border</p>
-                <input
-                  style={{ cursor: "pointer" }}
-                  onChange={(e) => {
-                    setBorderWIdth(e.target.value);
-                  }}
-                  type="range"
-                  min="0"
-                  step={0.5}
-                  max="3"
-                  value={borderWidth}
-                ></input>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "10px 0",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: 15 }}>Font size</p>
-                <input
-                  style={{ cursor: "pointer" }}
-                  onChange={(e) => {
-                    setSelectedFontSize(e.target.value);
-                  }}
-                  type="range"
-                  min="13"
-                  step={1}
-                  max="16"
-                  value={selectedFontSize}
-                ></input>
-              </div>
-            </div>
-          </div>
-        )}
-        {fullData.classes.length === 0 && (
-          <div
-            style={{
-              gap: 10,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <h5 style={{ margin: 0 }}>No Classes add yet</h5>
-            <button
-              style={{
-                marginLeft: 5,
-                border: "none",
-                backgroundColor: "#555",
-                padding: "4px 10px",
-                color: "#ffffff",
-                borderRadius: 5,
-              }}
-              onClick={() => {
-                history.push("/add-classes");
-              }}
-            >
-              Add Class +
-            </button>
-          </div>
-        )}
-
+    <div>
+      {studentReport.studentName && (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 15,
-            margin: "10px 0",
+            background: "rgba(255,255,255,0.5)",
+            backdropFilter: "blur(5px)",
+            position: "fixed",
+            width: "100vw",
+            height: "100vh",
+            zIndex: 50,
           }}
         >
-          {fullData.classes.map((singleClass, i) => {
-            return (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              bottom: "50%",
+              left: "50%",
+              transform: "translateX(-50%) translateY(50%)",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                right: -50,
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+              }}
+            >
+              <button
+                style={{
+                  border: "none",
+                  height: 45,
+                  width: 45,
+                  color: "white",
+                  backgroundColor: "#323639",
+                  fontSize: 20,
+                  borderRadius: 2,
+                }}
+                onClick={() => {
+                  // ? For some reason, with react-pdf, there needs to be a delay for resetting the state otherwise it says error when downloading file
+                  setTimeout(() => {
+                    setStudentReport([]);
+                  }, 15);
+                }}
+              >
+                <img
+                  alt="download pdf button"
+                  style={{
+                    width: 15,
+                    height: 15,
+                    filter: "invert(100%)",
+                  }}
+                  src="/close.png"
+                ></img>
+              </button>
+              <DownloadSingleStudentPdf />
+            </div>
+            <PDFViewer
+              className="pdfViewer"
+              style={{
+                border: "none",
+                boxShadow: "0 0 10px 0 rgba(0,0,0,0.4)",
+              }}
+            >
+              <SingleStudentDocument />
+            </PDFViewer>
+            <textarea
+              style={{
+                fontSize: 15,
+                border: "2px solid #323639",
+                resize: "none",
+                position: "absolute",
+                bottom: -110,
+                width: "100%",
+                left: "50%",
+                height: "100%",
+                maxHeight: 100,
+                transform: "translateX(-50%)",
+                paddingLeft: 5,
+                paddingTop: 5,
+                borderRadius: 5,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              placeholder="Add Teacher Comment (optional)"
+              onBlur={(e) => {
+                setTeacherComment(e.target.value);
+              }}
+            ></textarea>
+          </div>
+        </div>
+      )}
+      <div
+        style={{
+          paddingTop: 75,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        className="container"
+      >
+        <div>
+          {fullData.classes.length !== 0 && (
+            <div>
+              <h4 style={{ textAlign: "center" }}>Your Classes</h4>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
                 }}
-                key={i}
               >
-                <p
-                  className="classTitleBtn"
-                  onClick={() => {
-                    setViewingTable(i);
-                    setSorted(false);
-                    setSortedBy("");
-                    setStudentQuery((prevQuery) => {
-                      return (prevQuery = "");
-                    });
-                  }}
+                <div
                   style={{
-                    fontSize: 16,
-                    cursor: "pointer",
-                    userSelect: "none",
-                    borderBottom:
-                      viewingTable === i
-                        ? "2px solid rgba(1,75,255,0.5)"
-                        : "2px solid transparent",
-                    color:
-                      viewingTable === i
-                        ? "rgba(1,75,255,0.8)"
-                        : tableProperties.defaultColor,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "10px 0",
                   }}
                 >
-                  {singleClass.title}
-                </p>
-                {i === fullData.classes.length - 1 && (
+                  <p style={{ margin: 0, fontSize: 15 }}>Adjust border</p>
+                  <input
+                    style={{ cursor: "pointer" }}
+                    onChange={(e) => {
+                      setBorderWIdth(e.target.value);
+                    }}
+                    type="range"
+                    min="0"
+                    step={0.5}
+                    max="3"
+                    value={borderWidth}
+                  ></input>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "10px 0",
+                  }}
+                >
+                  <p style={{ margin: 0, fontSize: 15 }}>Font size</p>
+                  <input
+                    style={{ cursor: "pointer" }}
+                    onChange={(e) => {
+                      setSelectedFontSize(e.target.value);
+                    }}
+                    type="range"
+                    min="13"
+                    step={1}
+                    max="16"
+                    value={selectedFontSize}
+                  ></input>
+                </div>
+              </div>
+            </div>
+          )}
+          {fullData.classes.length === 0 && (
+            <div
+              style={{
+                gap: 10,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <h5 style={{ margin: 0 }}>No Classes add yet</h5>
+              <button
+                style={{
+                  marginLeft: 5,
+                  border: "none",
+                  backgroundColor: "#555",
+                  padding: "4px 10px",
+                  color: "#ffffff",
+                  borderRadius: 5,
+                }}
+                onClick={() => {
+                  history.push("/add-classes");
+                }}
+              >
+                Add Class +
+              </button>
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 15,
+              margin: "10px 0",
+            }}
+          >
+            {fullData.classes.map((singleClass, i) => {
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  key={i}
+                >
                   <p
-                    className="addClassBtn"
+                    className="classTitleBtn"
+                    onClick={() => {
+                      setViewingTable(i);
+                      setSorted(false);
+                      setSortedBy("");
+                      setStudentQuery((prevQuery) => {
+                        return (prevQuery = "");
+                      });
+                    }}
                     style={{
+                      fontSize: 16,
                       cursor: "pointer",
                       userSelect: "none",
-                      marginLeft: 15,
-                      border: "none",
-                      backgroundColor: "#555",
-                      padding: "5px 10px",
-                      color: "#ffffff",
-                      borderRadius: 5,
-                      fontSize: 14,
-                    }}
-                    onClick={() => {
-                      history.push("/add-classes");
+                      borderBottom:
+                        viewingTable === i
+                          ? "2px solid rgba(1,75,255,0.5)"
+                          : "2px solid transparent",
+                      color:
+                        viewingTable === i
+                          ? "rgba(1,75,255,0.8)"
+                          : tableProperties.defaultColor,
                     }}
                   >
-                    Add Class +
+                    {singleClass.title}
                   </p>
-                )}
-              </div>
-            );
-          })}
+                  {i === fullData.classes.length - 1 && (
+                    <p
+                      className="addClassBtn"
+                      style={{
+                        cursor: "pointer",
+                        userSelect: "none",
+                        marginLeft: 15,
+                        border: "none",
+                        backgroundColor: "#555",
+                        padding: "5px 10px",
+                        color: "#ffffff",
+                        borderRadius: 5,
+                        fontSize: 14,
+                      }}
+                      onClick={() => {
+                        history.push("/add-classes");
+                      }}
+                    >
+                      Add Class +
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-      <div style={{ boxShadow: "0 0 5px 1px rgba(0,0,0,0.2)" }}>
-        {fullData.classes.map(renderTable)}
+
+        <div style={{ boxShadow: "0 0 5px 1px rgba(0,0,0,0.2)" }}>
+          {fullData.classes.map(renderTable)}
+        </div>
       </div>
     </div>
   );

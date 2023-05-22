@@ -34,8 +34,9 @@ const Dashboard = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          marginTop: 75,
         }}
-        className="container mt-5"
+        className="container"
       >
         <p>Loading...</p>
       </div>
@@ -49,8 +50,9 @@ const Dashboard = () => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        marginTop: 75,
       }}
-      className="container mt-5"
+      className="container"
     >
       <div style={{ display: "flex", gap: 15 }}>
         {["Classes", "Students", "Reports"].map((item) => {

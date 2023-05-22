@@ -237,3 +237,18 @@ tr:hover {
 .grades {
   font-family: "PoppinsMedium", Verdana, Geneva, Tahoma, sans-serif;
 }
+
+.pdfViewer {
+  height: 600px;
+  width: 600px;
+}
+
+.pdfViewer .react-pdf__Document .react-pdf__toolbar {
+  display: none;
+}
+
+@media screen and (max-width: 700px) {
+  .pdfViewer {
+    width: 70vw;
+  }
+}

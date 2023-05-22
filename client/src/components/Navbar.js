@@ -11,9 +11,9 @@ const AppNavbar = () => {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <>
+    <div style={{ position: "fixed", top: 0, width: "100vw", zIndex: 100 }}>
       {Auth.loggedIn() && (
-        <Navbar bg="dark" variant="dark" expand="lg">
+        <Navbar bg="dark" variant="dark" expand="sm">
           <Container fluid>
             <Navbar.Brand as={Link} to={"your-classes"}>
               Hershy's Book
@@ -70,7 +70,7 @@ const AppNavbar = () => {
           </Modal.Body>
         </Tab.Container>
       </Modal>
-    </>
+    </div>
   );
 };
 
