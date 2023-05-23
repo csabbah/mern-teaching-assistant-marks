@@ -6,7 +6,6 @@ import { useHistory } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import { LOGIN_USER, ADD_USER } from "../utils/mutations";
 
-// TODO Need to make sure the errors show up (i.e. 'Incorrect credentials', 'Incorrect password')
 const Home = () => {
   const [formState, setFormState] = useState({ email: "", password: "" });
 
@@ -198,18 +197,8 @@ const Home = () => {
             onClick={() => {
               setHappyBirthday(false);
             }}
+            className="closeBirthday"
             alt="close button"
-            style={{
-              position: "fixed",
-              top: 25,
-              right: 25,
-              width: 25,
-              height: 25,
-              opacity: 0.7,
-              filter: "invert(100%)",
-              cursor: "pointer",
-              zIndex: 100,
-            }}
             src="/close.png"
           ></img>
           <div class="singleRow"></div>
