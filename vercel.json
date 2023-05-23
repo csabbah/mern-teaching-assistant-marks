@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "./server/server.js",
+      "user": "@vercel/node"
+    },
+    { "src": "./client/build", "use": "@vercel/static" }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/server/server.js"
+    }
+  ]
+}
