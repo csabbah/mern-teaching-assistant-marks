@@ -30,85 +30,90 @@ h4,
 h5,
 h6 {
   font-family: "PoppinsBold", Verdana, Geneva, Tahoma, sans-serif;
+  z-index: 1;
+}
+button {
+  padding: 3px 15px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.6);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+button:active {
+  transform: scale(0.97);
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0px 0px 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+input,
+textarea {
+  font-size: 18px;
+  resize: none;
+  color: #333;
+  padding-left: 10px;
+  border: none;
+  background-color: white;
+  z-index: 1;
+}
+
+select {
+  border: none;
+  border-radius: 5px;
 }
 
 .add-class-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: rgb(247, 168, 230);
+  background-color: rgb(220, 138, 138);
   padding: 30px;
+  position: relative;
 }
 
 .add-unit-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: rgb(168, 247, 247);
+  background-color: rgb(220, 176, 138);
   padding: 30px;
+  position: relative;
 }
 
-.add-project-title {
+.edit-project {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: yellow;
+  background-color: rgb(220, 209, 138);
   padding: 30px;
-}
-
-.add-criteria {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: greenyellow;
-  padding: 30px;
-}
-
-.preview-criteria {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: orange;
-  padding: 30px;
-}
-
-.add-project {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: fuchsia;
-  padding: 30px;
+  position: relative;
 }
 
 .preview-projects {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: lightsalmon;
+  background-color: rgb(150, 220, 138);
   padding: 30px;
-}
-.adding-unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: cadetblue;
-  padding: 30px;
+  position: relative;
 }
 
 .preview-units {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: darkseagreen;
+  background-color: rgb(138, 220, 197);
   padding: 30px;
-}
-
-.generate-table {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: rgb(242, 132, 92);
-  padding: 30px;
+  position: relative;
 }
 
 .student-names p:nth-child(even) {
@@ -120,6 +125,7 @@ h6 {
   flex-wrap: wrap;
   justify-content: center;
   gap: 7px;
+  padding: 12px 12px;
 }
 .color-btns-wrapper button {
   padding: 16px 24px;
