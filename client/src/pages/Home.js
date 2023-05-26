@@ -6,6 +6,7 @@ import { useHistory } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import { LOGIN_USER, ADD_USER } from "../utils/mutations";
 
+// TODO The music doesn't stop playing on the phone if the app is closed
 const Home = () => {
   const [formState, setFormState] = useState({ email: "", password: "" });
 
@@ -201,7 +202,7 @@ const Home = () => {
             alt="close button"
             src="/close.png"
           ></img>
-          <div class="singleRow"></div>
+          <div className="singleRow"></div>
 
           <audio ref={audioRef}>
             <source src="/forSarah/golden.mp3" type="audio/mpeg" />
@@ -219,13 +220,13 @@ const Home = () => {
               left: "50%",
               transform: "translateX(-50%)",
             }}
-            class="grid-container"
+            className="grid-container"
           >
             {images.map((image, i) => {
               return (
                 <div className="grid-item">
                   <img
-                    class="grid-item-2"
+                    className="grid-item-2"
                     src={`/forSarah/${image}.png`}
                     alt=""
                   />

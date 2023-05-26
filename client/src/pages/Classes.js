@@ -97,9 +97,16 @@ const Classes = () => {
 
   // ? This returns a single students organized FULL grades across multiple units and projects
   const [studentReport, setStudentReport] = useState([]);
-  const [showPdf, setShowPdf] = useState(false);
 
-  const extractSingleStudentReport = (student, classTitle, schoolYear) => {
+  const [classAverage, setClassAverage] = useState(0);
+
+  // Update this block
+  const extractSingleStudentReport = (
+    student,
+    classTitle,
+    schoolYear,
+    multipleStudents
+  ) => {
     const unitData = {};
 
     student?.grades?.forEach((grade) => {
@@ -123,6 +130,19 @@ const Classes = () => {
       unit,
       grades: data.grades,
     }));
+
+    if (multipleStudents) {
+      return setStudentReport((prevReport) => [
+        ...prevReport,
+        {
+          finalMark: student.finalMark,
+          studentName: student.name,
+          grades: unitGradesData,
+          classTitle,
+          schoolYear,
+        },
+      ]);
+    }
 
     setStudentReport({
       finalMark: student.finalMark,
@@ -346,6 +366,226 @@ const Classes = () => {
     </Document>
   );
 
+  // ? This will take an array and reduce its size based on a given number
+  function spliceArray(arr, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+      const chunk = arr.slice(i, i + chunkSize);
+      chunks.push(chunk);
+    }
+    return chunks;
+  }
+
+  // TODO Need to finalize the way this looks, simplify it, each row should be tiny and not take up a lot of space vertically
+
+  // TODO FINISH THE STYLE FIRST BEFORE PROCEEDING T NEXT NOTE
+  // TODO Need to find a median point to determine how many students to render per page
+
+  // TODO Minor issue when downloading class PDF and when calculate class average
+  // TODO     If the table is empty and you add a student, if you try to download class pdf, it doesn't load, you have to refresh page
+  // TODO     Refetch() not working? The fullData is not being updated, for student data as well
+
+  // TODO Update the class Average value (make sure it's correct)
+  const MultipleStudentDocument = () => (
+    <Document>
+      <Page
+        style={{
+          width: "100%",
+          height: "100%",
+          justifyContent: "center",
+          padding: "20px 20px",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            height: "100%",
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "column",
+              marginBottom: 15,
+              marginTop: 10,
+            }}
+          >
+            <Image
+              style={{
+                marginBottom: 10,
+                width: 65,
+                height: 65,
+                alignSelf: "center",
+              }}
+              src="./benedict.png"
+            ></Image>
+            <Text
+              style={{
+                fontSize: 24,
+                textAlign: "center",
+                marginBottom: 10,
+              }}
+            >
+              St. Benedict C.S.S.
+            </Text>
+            <View
+              style={{
+                paddingVertical: 5,
+                backgroundColor: "#000066",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 18,
+                  textAlign: "center",
+                }}
+              >
+                Student Grade Report
+              </Text>
+            </View>
+            {/* // ? Header to the document */}
+            <View
+              style={{
+                marginVertical: 15,
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-between",
+                paddingHorizontal: 25,
+              }}
+            >
+              <View
+                style={{
+                  gap: 8,
+                }}
+              >
+                <View
+                  style={{
+                    gap: 5,
+                    flexDirection: "row",
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>Students :</Text>
+                  <Text style={{ fontSize: 15 }}>{studentReport.length}</Text>
+                </View>
+                <View
+                  style={{
+                    gap: 5,
+                    flexDirection: "row",
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>Term :</Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {studentReport[0].schoolYear}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  gap: 8,
+                }}
+              >
+                <View style={{ gap: 5, flexDirection: "row" }}>
+                  <Text style={{ fontSize: 15 }}>Class :</Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {studentReport[0].classTitle}
+                  </Text>
+                </View>
+                <View style={{ gap: 5, flexDirection: "row" }}>
+                  <Text style={{ fontSize: 15 }}>Class Average : </Text>
+                  <Text style={{ fontSize: 15 }}>
+                    {(classAverage / studentReport.length).toFixed(2)}%
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Page>
+      {/* // ? Student Grades */}
+      <View style={{ border: "1px solid #000066" }}>
+        {spliceArray(studentReport, 3).map((studentArr, pageIndex) => {
+          return (
+            <Page
+              key={pageIndex}
+              style={{
+                width: "100%",
+                height: "100%",
+                justifyContent: "center",
+                padding: "20px 20px",
+              }}
+            >
+              {studentArr.map((student, i) => {
+                return student.grades.map((singleUnit) => {
+                  // Extract the key from the singleUnit.grades array
+                  const projectTitles = Object.keys(singleUnit.grades);
+
+                  return (
+                    <View style={{}}>
+                      <Text style={{ fontSize: 15, textAlign: "center" }}>
+                        {singleUnit.unit}
+                      </Text>
+                      <View
+                        style={{
+                          marginVertical: 15,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Text>{student.studentName}</Text>
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          {projectTitles.map((project, i) => {
+                            return (
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text style={{ marginLeft: 20 }}>
+                                  {project}
+                                </Text>
+                                <View style={{ alignItems: "flex-end" }}>
+                                  {singleUnit.grades[projectTitles[i]].map(
+                                    (singleGrade) => {
+                                      return (
+                                        <View
+                                          style={{
+                                            gap: 5,
+                                            flexDirection: "row",
+                                          }}
+                                        >
+                                          <Text style={{ fontSize: 15 }}>
+                                            {singleGrade.grade.letter}(
+                                            {singleGrade.grade.weight}%)
+                                          </Text>
+                                          <Text style={{ fontSize: 15 }}>
+                                            {singleGrade.grade.mark}%
+                                          </Text>
+                                        </View>
+                                      );
+                                    }
+                                  )}
+                                </View>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    </View>
+                  );
+                });
+              })}
+            </Page>
+          );
+        })}
+      </View>
+    </Document>
+  );
+
   // ? The component for downloading the PDF
   const DownloadSingleStudentPdf = () => (
     <PDFDownloadLink
@@ -382,9 +622,6 @@ const Classes = () => {
   const inputRef = useRef(null);
 
   const [studentData, setStudentData] = useState({});
-
-  // TODO Add the download pdf functionality
-  //      TODO Export a single PDF of the entire table
 
   // TODO Create a local storage function that saves the borderWidth size and extracts it
   //      TODO Not worth pushing this data to database
@@ -518,6 +755,28 @@ const Classes = () => {
               userSelect: "none",
             }}
             className="downloadBtn"
+            onClick={() => {
+              setClassAverage(0);
+              let allAssociatedStudents = [];
+
+              fullData.students.map((student) => {
+                return (
+                  student.classId === singleClass._id &&
+                  allAssociatedStudents.push(student)
+                );
+              });
+              allAssociatedStudents.map((studentData) => {
+                setClassAverage(
+                  (prevAverage) => prevAverage + studentData.finalMark
+                );
+                return extractSingleStudentReport(
+                  studentData,
+                  singleClass.title,
+                  singleClass.schoolYear,
+                  true
+                );
+              });
+            }}
           >
             <p style={{ margin: 0, fontSize: parseInt(selectedFontSize) - 3 }}>
               Download
@@ -1553,6 +1812,77 @@ const Classes = () => {
                 setTeacherComment(e.target.value);
               }}
             ></textarea>
+          </div>
+        </div>
+      )}
+      {studentReport.length > 0 && (
+        <div
+          style={{
+            background: "rgba(255,255,255,0.5)",
+            backdropFilter: "blur(5px)",
+            position: "fixed",
+            width: "100vw",
+            height: "100vh",
+            zIndex: 50,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              bottom: "50%",
+              left: "50%",
+              transform: "translateX(-50%) translateY(50%)",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                right: -50,
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+              }}
+            >
+              <button
+                style={{
+                  border: "none",
+                  height: 45,
+                  width: 45,
+                  color: "white",
+                  backgroundColor: "#323639",
+                  fontSize: 20,
+                  borderRadius: 2,
+                }}
+                onClick={() => {
+                  // ? For some reason, with react-pdf, there needs to be a delay for resetting the state otherwise it says error when downloading file
+                  setTimeout(() => {
+                    setStudentReport([]);
+                  }, 15);
+                }}
+              >
+                <img
+                  alt="download pdf button"
+                  style={{
+                    width: 15,
+                    height: 15,
+                    filter: "invert(100%)",
+                  }}
+                  src="/close.png"
+                ></img>
+              </button>
+              <DownloadSingleStudentPdf />
+            </div>
+            <PDFViewer
+              className="pdfViewer"
+              style={{
+                border: "none",
+                boxShadow: "0 0 10px 0 rgba(0,0,0,0.4)",
+              }}
+            >
+              <MultipleStudentDocument />
+            </PDFViewer>
           </div>
         </div>
       )}
