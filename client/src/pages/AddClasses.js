@@ -178,7 +178,15 @@ const Marks = () => {
           >
             CLASS
           </h5>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 20,
+            }}
+          >
             <div>
               <h5 style={{ textAlign: "center" }}>Class Title</h5>
               <input
@@ -276,8 +284,19 @@ const Marks = () => {
                   }}
                 ></hr>
                 <h5>Add grade weight:</h5>
-                <div style={{ display: "flex", gap: 15, alignItems: "center" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 15,
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div
+                    className="add-grade-weight-inner-container"
+                    style={{ display: "flex", flexDirection: "column" }}
+                  >
                     <label style={{ margin: 0 }} htmlFor="Label">
                       Label
                     </label>
@@ -311,7 +330,7 @@ const Marks = () => {
                     </label>
                     <div>
                       <input
-                        style={{ width: 50, height: 30 }}
+                        style={{ width: 60, height: 30 }}
                         id="Weight"
                         onChange={(e) => {
                           setSingleCriteria({
@@ -383,20 +402,20 @@ const Marks = () => {
                   {allCriterias.length > 0 &&
                     allCriterias.map((criteria, i) => {
                       return (
-                        <div
-                          key={i}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            margin: "5px 0",
-                            backgroundColor: "rgba(0,0,0,0.1)",
-                            padding: "5px 10px",
-                            width: 450,
-                            justifyContent: "space-between",
-                          }}
-                        >
+                        <div key={i} className="previewWeightsContainer">
                           <div style={{ marginRight: 20 }}>
-                            <p style={{ margin: 0 }}>{criteria.label}</p>
+                            <p
+                              className="previewGradeLabel"
+                              style={{ margin: 0 }}
+                            >
+                              {criteria.label}
+                            </p>
+                            <p
+                              className="previewGradeWeight"
+                              style={{ margin: 0 }}
+                            >
+                              {criteria.letter}
+                            </p>
                           </div>
                           <div>
                             <input
@@ -505,6 +524,7 @@ const Marks = () => {
                 marginBottom: 15,
                 opacity: 0.5,
                 marginTop: -5,
+                textAlign: "center",
               }}
             >
               To add more projects, enter new project title above
@@ -519,53 +539,19 @@ const Marks = () => {
             >
               {projects.map((project, i) => {
                 return (
-                  <div
-                    key={i}
-                    style={{
-                      position: "relative",
-                      backgroundColor: "rgba(0,0,0,0.10)",
-                      padding: "10px 0",
-                    }}
-                  >
+                  <div className="projects-container" key={i}>
                     <div
                       style={{
+                        padding: "0px 15px",
+                        marginTop: 3,
                         display: "flex",
-                        justifyContent: "space-between",
-                        margin: "0 16px",
-                        marginBottom: 15,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 15,
-                        }}
-                        onClick={() => {
-                          deleteProject(i);
-                        }}
-                      >
-                        Project #{i + 1}
-                      </div>
-                      <button
-                        style={{
-                          fontSize: 12,
-                        }}
-                        onClick={() => {
-                          deleteProject(i);
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
                         gap: 5,
                       }}
                     >
                       <input
+                        className="projects-container-input"
                         defaultValue={project.title}
                         onChange={(e) => {
                           const updatedProject = {
@@ -577,32 +563,49 @@ const Marks = () => {
                           setProjects(updatedProjects);
                         }}
                       ></input>
+                      <button
+                        style={{
+                          height: 28,
+                          fontSize: 12,
+                        }}
+                        onClick={() => {
+                          deleteProject(i);
+                        }}
+                      >
+                        Delete
+                      </button>
                     </div>
-                    <div
-                      style={{
-                        marginTop: 15,
-                        display: "flex",
-                        flexWrap: "wrap",
-                        justifyContent: "center",
-                        width: 250,
-                        gap: 15,
-                      }}
-                    >
+                    <div className="projects-inner-container">
                       {project.criterias.map((criteria, i) => {
                         return (
                           <div
+                            className="projects-inner-item"
                             style={{
+                              width: "92%",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
-                              width: 100,
+                              padding: "5px 8px",
+
+                              backgroundColor: "rgba(0,0,0,0.10)",
                             }}
                           >
                             <p
+                              className="projects-inner-container-label"
                               key={i}
                               style={{
                                 margin: 0,
-                                fontSize: 16,
+                                fontSize: 14,
+                              }}
+                            >
+                              {criteria.label}
+                            </p>
+                            <p
+                              className="projects-inner-container-letter"
+                              key={i}
+                              style={{
+                                margin: 0,
+                                fontSize: 14,
                               }}
                             >
                               {criteria.letter}
@@ -660,8 +663,8 @@ const Marks = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 marginBottom: 20,
-                backgroundColor: "rgba(200, 255, 200, 0.75)",
-                padding: "10px 20px",
+                backgroundColor: "rgba(200, 255, 200, 0.4)",
+                padding: "10px 13px",
               }}
             >
               <p style={{ marginBottom: 5 }}>Choose unit theme color</p>
@@ -724,32 +727,80 @@ const Marks = () => {
             >
               REVIEW CLASS
             </h5>
-            <h2>{fullClass.title}</h2>
-            <h5>{fullClass.schoolYear}</h5>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h5 style={{ marginRight: 5 }}>{fullClass.title}</h5>
+              <h5>-</h5>
+              <h5 style={{ marginLeft: 5 }}>{fullClass.schoolYear}</h5>
+            </div>
+            <span
+              style={{
+                fontSize: 12,
+                marginBottom: 15,
+                opacity: 0.5,
+                marginTop: -5,
+                textAlign: "center",
+              }}
+            >
+              To add more units, enter new unit title above
+            </span>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: 30,
+              }}
+            >
               {fullClass.units.length > 0 &&
                 fullClass.units.map((singleUnit, i) => {
                   return (
                     <div key={i}>
-                      <div style={{ backgroundColor: "rgba(0,0,0,0.2)" }}>
+                      <div
+                        style={{
+                          backgroundColor: "rgb(77, 202, 166)",
+                          padding: "10px 10px",
+                          boxShadow: "3px 3px 2px 0 rgba(0,0,0,0.2)",
+                        }}
+                      >
                         <h5>{singleUnit.title}</h5>
                         {singleUnit.projects.map((project, i) => {
                           return (
-                            <div key={i}>
+                            <div
+                              style={{
+                                backgroundColor: "rgba(0,0,0,0.1)",
+                                padding: "5px 10px",
+                                marginTop: 0,
+                              }}
+                              key={i}
+                            >
                               <p style={{ margin: 0, fontSize: 18 }}>
                                 {project.title}
                               </p>
-                              {project.criterias.map((criteria, i) => {
-                                return (
-                                  <p
-                                    key={i}
-                                    style={{ margin: 0, fontSize: 14 }}
-                                  >
-                                    Weights #{i + 1}: {criteria.label}(
-                                    {criteria.letter}) {criteria.weight}%
-                                  </p>
-                                );
-                              })}
+                              <hr style={{ margin: "5px 0" }}></hr>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 5,
+                                }}
+                              >
+                                {project.criterias.map((criteria, i) => {
+                                  return (
+                                    <div className="review-class-project-inner-container">
+                                      <p
+                                        key={i}
+                                        style={{ margin: 0, fontSize: 13 }}
+                                      >
+                                        {criteria.label}({criteria.letter})
+                                      </p>
+                                      <p style={{ margin: 0, fontSize: 13 }}>
+                                        {criteria.weight}%
+                                      </p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
                           );
                         })}

@@ -78,6 +78,7 @@ select {
   background-color: rgb(220, 138, 138);
   padding: 30px;
   position: relative;
+  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
 }
 
 .add-unit-title {
@@ -87,6 +88,7 @@ select {
   background-color: rgb(220, 176, 138);
   padding: 30px;
   position: relative;
+  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
 }
 
 .edit-project {
@@ -96,24 +98,28 @@ select {
   background-color: rgb(220, 209, 138);
   padding: 30px;
   position: relative;
+  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
 }
 
 .preview-projects {
   display: flex;
   flex-direction: column;
   align-items: center;
+
   background-color: rgb(150, 220, 138);
   padding: 30px;
   position: relative;
+  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
 }
 
 .preview-units {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: rgb(138, 220, 197);
+  background-color: rgb(107, 217, 186);
   padding: 30px;
   position: relative;
+  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
 }
 
 .student-names p:nth-child(even) {
@@ -333,6 +339,56 @@ img {
   z-index: 100;
 }
 
+.projects-container {
+  position: relative;
+  background-color: rgb(118, 198, 104);
+  padding: 10px 0;
+  box-shadow: 3px 3px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.previewGradeWeight {
+  display: none;
+}
+.previewGradeLabel {
+  display: unset;
+}
+
+.previewWeightsContainer {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 5px 10px;
+  width: 425px;
+  justify-content: space-between;
+}
+
+.projects-container-input {
+  width: 250px;
+}
+
+.projects-inner-container {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+.projects-inner-container-letter {
+  display: none;
+}
+.projects-inner-container-label {
+  display: flex;
+}
+
+.review-class-project-inner-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 340px;
+}
+
 @media screen and (max-width: 700px) {
   .grid-item img {
     filter: grayscale(0);
@@ -341,6 +397,31 @@ img {
     font-size: 27.5px;
     top: 20px !important;
     left: 20px !important;
+  }
+}
+
+@media screen and (max-width: 585px) {
+  .previewGradeWeight {
+    display: unset;
+  }
+  .previewGradeLabel {
+    display: none;
+  }
+
+  .previewWeightsContainer {
+    width: 250px;
+  }
+
+  .projects-inner-container-letter {
+    display: flex;
+  }
+
+  .projects-inner-container-label {
+    display: none;
+  }
+
+  .review-class-project-inner-container {
+    width: 85%;
   }
 }
 
@@ -354,5 +435,21 @@ img {
     right: 20px;
     width: 20px;
     height: 20px;
+  }
+
+  .add-grade-weight-inner-container {
+    width: 210px;
+  }
+
+  .projects-container {
+    width: 250px;
+  }
+
+  .projects-inner-item {
+    width: 220px;
+  }
+
+  .projects-container-input {
+    width: 150px;
   }
 }
