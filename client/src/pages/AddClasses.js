@@ -19,6 +19,7 @@ const Marks = () => {
   const [addClass] = useMutation(ADD_CLASS);
 
   const handleAddClass = async (singleClass) => {
+    console.log(singleClass);
     try {
       await addClass({
         variables: { classToSave: singleClass },
@@ -45,15 +46,8 @@ const Marks = () => {
   const [unitTitle, setUnitTitle] = useState("");
 
   let tableProperties = {
-    border: "1px solid #333",
-    final: {
-      top: "rgba(255, 255, 0, 0.3)",
-      passing: "rgba(255, 255, 255, 0.3)",
-      failing: "rgba(255, 0, 0, 0.3)",
-    },
-    brightnessRange: "100",
     colors: [
-      "rgba(280,280,280,0.5)", // white
+      "rgba(0,0,0,0.2)", // dark grey
       "rgba(190,237,255,0.5)", // Light Blue
       "rgba(280,214,225,0.5)", // Light Pink
       "rgba(280,237,25,0.5)", // Gold
@@ -268,7 +262,6 @@ const Marks = () => {
                       id="Label"
                       value={singleCriteria.label}
                       onChange={(e) => {
-                        const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
                         setSingleCriteria({
                           ...singleCriteria,
                           label: e.target.value,
@@ -314,7 +307,7 @@ const Marks = () => {
                   <button
                     style={{ marginTop: 20 }}
                     onClick={() => {
-                      const uniqueId = Math.floor(Math.random() * 9e9) + 1e9;
+                      const localId = Math.floor(Math.random() * 1e9);
 
                       if (
                         !singleCriteria.label ||
@@ -334,7 +327,7 @@ const Marks = () => {
                       setAllCriterias([
                         ...allCriterias,
                         {
-                          id: uniqueId,
+                          localId: localId,
                           label: singleCriteria.label,
                           letter: singleCriteria.letter,
                           weight: singleCriteria.weight,
@@ -390,7 +383,9 @@ const Marks = () => {
                               onChange={(e) => {
                                 const updated = allCriterias.map(
                                   (stateCriteria) => {
-                                    if (stateCriteria.id === criteria.id) {
+                                    if (
+                                      stateCriteria.localId === criteria.localId
+                                    ) {
                                       return {
                                         ...stateCriteria,
                                         weight: parseInt(e.target.value),
@@ -574,7 +569,10 @@ const Marks = () => {
                                 onChange={(e) => {
                                   const updatedCriterias =
                                     project.criterias.map((stateCriteria) => {
-                                      if (stateCriteria.id === criteria.id) {
+                                      if (
+                                        stateCriteria.localId ===
+                                        criteria.localId
+                                      ) {
                                         return {
                                           ...stateCriteria,
                                           weight: parseInt(e.target.value),

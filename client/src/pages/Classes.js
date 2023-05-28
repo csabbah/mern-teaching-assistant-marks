@@ -415,12 +415,9 @@ const Classes = () => {
     padding: `5px 8px`,
     border: `${borderWidth}px solid #333`,
     final: {
-      top: "rgba(255, 255, 0, 0.2)",
-      topDark: "rgba(255, 255, 0, 0.4)",
-      passing: "rgba(255, 255, 255, 0.2)",
-      passingDark: "rgba(255, 255, 255, 0.4)",
-      failing: "rgba(255, 0, 0, 0.2)",
-      failingDark: "rgba(255, 0, 0, 0.4)",
+      top: "rgba(0, 255, 0, 0.4)",
+      passing: "rgba(255, 255, 255, 0.4)",
+      failing: "rgba(255, 0, 0, 0.4)",
     },
     brightnessRange: "100",
     colors: [
@@ -428,7 +425,7 @@ const Classes = () => {
       "rgba(190,237,255,0.5)", // Light Blue
       "rgba(280,214,225,0.5)", // Light Pink
       "rgba(210,181,25,0.5)", // Orange
-      "rgba(159,262,159,0.5)", // Light Green
+      "rgba(12,213,150,0.5)", // Light Green
     ],
   };
 
@@ -1097,6 +1094,7 @@ const Classes = () => {
                   outline: "none",
                   textAlign: "center",
                   fontSize: parseInt(selectedFontSize) - 1,
+                  paddingLeft: 0,
                 }}
                 value={grade ? grade.mark : 0}
               />
@@ -1338,6 +1336,7 @@ const Classes = () => {
                     outline: "none",
                     textAlign: "center",
                     fontSize: parseInt(selectedFontSize) - 1,
+                    paddingLeft: 0,
                   }}
                   defaultValue={grade ? grade.mark : 0}
                 ></input>

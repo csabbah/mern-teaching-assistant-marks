@@ -23,6 +23,7 @@ const classSchema = new Schema(
             // TODO updates from 'criterias' to 'weights' - Need to also update all around the application
             criterias: [
               {
+                localId: { type: Number },
                 label: { type: String },
                 letter: { type: String },
                 weight: { type: Number },

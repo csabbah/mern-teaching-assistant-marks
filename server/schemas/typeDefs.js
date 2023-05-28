@@ -39,6 +39,7 @@ const typeDefs = gql`
 
   type Criterias {
     _id: ID
+    localId: Int
     label: String
     letter: String
     weight: Int
@@ -66,6 +67,7 @@ const typeDefs = gql`
   }
 
   input criteriasInput {
+    localId: Int
     label: String
     letter: String
     weight: Int
