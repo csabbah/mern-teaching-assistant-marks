@@ -29,12 +29,12 @@ const Marks = () => {
     }
   };
 
+  // TODO When reviewing classes, if you update the class title and year, it doesn't update it.
+  // TODO This is because the data we are viewing is from the fullClass object
+
   // TODO Create the function to allow users to send progress reports emails to students
 
   // TODO Instead of rendering using multiple single useState variables, make it one object completely
-
-  // TODO - IMPORTANT - Instead of rendering multiple nested for loops across multiple functions...
-  // TODO Take the one with ALL the data and simply render the rows in each nested loop
 
   // TODO Add the edit function for units
   // TODO You should be able to add a new project to a unit after the unit has been added
@@ -166,18 +166,6 @@ const Marks = () => {
       >
         {/* ------------ ----------- ---------- // ? ADDING CLASS AND SCHOOL YEAH */}{" "}
         <section className="add-class-title">
-          <h5
-            style={{
-              position: "absolute",
-              fontSize: 70,
-              opacity: 0.07,
-              zIndex: 0,
-              left: -2,
-              top: -17,
-            }}
-          >
-            CLASS
-          </h5>
           <div
             style={{
               display: "flex",
@@ -211,18 +199,6 @@ const Marks = () => {
         {/* ------------ ----------- ---------- // ? ADDING UNIT TITLE */}
         {classTitle && schoolYear && (
           <section className="add-unit-title">
-            <h5
-              style={{
-                position: "absolute",
-                fontSize: 70,
-                opacity: 0.07,
-                zIndex: 0,
-                left: -4,
-                top: -17,
-              }}
-            >
-              UNIT TITLE
-            </h5>
             <h5>Unit title</h5>
             <input
               onChange={(e) => {
@@ -245,18 +221,6 @@ const Marks = () => {
                   : 100,
             }}
           >
-            <h5
-              style={{
-                position: "absolute",
-                fontSize: 70,
-                opacity: 0.07,
-                zIndex: 0,
-                left: 0,
-                top: -17,
-              }}
-            >
-              ADD PROJECT
-            </h5>
             <div
               style={{
                 display: "flex",
@@ -280,10 +244,10 @@ const Marks = () => {
                 <hr
                   style={{
                     margin: "25px 0",
-                    width: "50%",
+                    width: "80%",
                   }}
                 ></hr>
-                <h5>Add grade weight:</h5>
+                <h5 style={{ textAlign: "center" }}>Add grade weight:</h5>
                 <div
                   style={{
                     display: "flex",
@@ -389,10 +353,12 @@ const Marks = () => {
                 <hr
                   style={{
                     margin: "25px 0",
-                    width: "50%",
+                    width: "80%",
                   }}
                 ></hr>
-                <h5>Grade weights for {singleProject.title}</h5>
+                <h5 style={{ textAlign: "center" }}>
+                  Weights for {singleProject.title}:
+                </h5>
                 <div
                   style={{
                     display: "flex",
@@ -505,18 +471,6 @@ const Marks = () => {
                 fullClass.units && fullClass.units.length >= 1 ? 0 : 100,
             }}
           >
-            <h5
-              style={{
-                position: "absolute",
-                fontSize: 70,
-                opacity: 0.07,
-                zIndex: 0,
-                left: -4,
-                top: -17,
-              }}
-            >
-              REVIEW UNIT
-            </h5>
             <h5>Projects for {unitTitle}</h5>
             <span
               style={{
@@ -667,7 +621,9 @@ const Marks = () => {
                 padding: "10px 13px",
               }}
             >
-              <p style={{ marginBottom: 5 }}>Choose unit theme color</p>
+              <p style={{ marginBottom: 5, textAlign: "center" }}>
+                Choose unit theme color
+              </p>
               <div className="color-btns-wrapper">
                 {tableProperties.colors.map((color, i) => {
                   return (
@@ -714,25 +670,11 @@ const Marks = () => {
         )}
         {/* ------------ ----------- ---------- // ? PREVIEW/EDITING UNITS */}
         {fullClass && fullClass.units && fullClass.units.length >= 1 && (
-          <section className="preview-units">
-            <h5
-              style={{
-                position: "absolute",
-                fontSize: 70,
-                opacity: 0.07,
-                zIndex: 0,
-                left: -4,
-                top: -17,
-              }}
-            >
-              REVIEW CLASS
+          <section style={{ marginBottom: 100 }} className="preview-units">
+            <h5>{fullClass.title}</h5>
+            <h5 style={{ fontSize: 15, marginTop: -5, opacity: 0.8 }}>
+              {fullClass.schoolYear}
             </h5>
-
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <h5 style={{ marginRight: 5 }}>{fullClass.title}</h5>
-              <h5>-</h5>
-              <h5 style={{ marginLeft: 5 }}>{fullClass.schoolYear}</h5>
-            </div>
             <span
               style={{
                 fontSize: 12,
@@ -757,24 +699,30 @@ const Marks = () => {
                   return (
                     <div key={i}>
                       <div
+                        className="preview-project-inner-container"
                         style={{
-                          backgroundColor: "rgb(77, 202, 166)",
+                          backgroundColor: singleUnit.themeColor,
                           padding: "10px 10px",
                           boxShadow: "3px 3px 2px 0 rgba(0,0,0,0.2)",
                         }}
                       >
-                        <h5>{singleUnit.title}</h5>
+                        <h5 style={{ textAlign: "center" }}>
+                          {singleUnit.title}
+                        </h5>
                         {singleUnit.projects.map((project, i) => {
                           return (
                             <div
                               style={{
                                 backgroundColor: "rgba(0,0,0,0.1)",
                                 padding: "5px 10px",
-                                marginTop: 0,
+                                marginTop: 10,
                               }}
                               key={i}
                             >
-                              <p style={{ margin: 0, fontSize: 18 }}>
+                              <p
+                                className="preview-project"
+                                style={{ margin: 0, fontSize: 18 }}
+                              >
                                 {project.title}
                               </p>
                               <hr style={{ margin: "5px 0" }}></hr>
@@ -782,18 +730,34 @@ const Marks = () => {
                                 style={{
                                   display: "flex",
                                   flexDirection: "column",
-                                  gap: 5,
+                                  gap: 2,
                                 }}
                               >
                                 {project.criterias.map((criteria, i) => {
                                   return (
-                                    <div className="review-class-project-inner-container">
-                                      <p
-                                        key={i}
-                                        style={{ margin: 0, fontSize: 13 }}
+                                    <div className="review-classes-project-inner-container">
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: 10,
+                                        }}
                                       >
-                                        {criteria.label}({criteria.letter})
-                                      </p>
+                                        <p
+                                          className="review-class-project-label"
+                                          key={i}
+                                          style={{ margin: 0, fontSize: 13 }}
+                                        >
+                                          {criteria.label}
+                                        </p>
+                                        <p
+                                          className="review-class-project-letter"
+                                          key={i}
+                                          style={{ margin: 0, fontSize: 13 }}
+                                        >
+                                          {criteria.letter}
+                                        </p>
+                                      </div>
                                       <p style={{ margin: 0, fontSize: 13 }}>
                                         {criteria.weight}%
                                       </p>
