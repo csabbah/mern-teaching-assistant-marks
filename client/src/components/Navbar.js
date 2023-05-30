@@ -11,11 +11,25 @@ const AppNavbar = () => {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <div style={{ position: "fixed", top: 0, width: "100vw", zIndex: 100 }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        width: "100vw",
+        zIndex: 100,
+        backgroundColor: "rgba(0,0,0,0.8)",
+        backdropFilter: "blur(10px)",
+        boxShadow: "0 5px 10px 0 rgba(0,0,0,0.3)",
+      }}
+    >
       {Auth.loggedIn() && (
-        <Navbar bg="dark" variant="dark" expand="sm">
+        <Navbar expand="sm">
           <Container fluid>
-            <Navbar.Brand as={Link} to={"your-classes"}>
+            <Navbar.Brand
+              style={{ color: "rgba(255,255,255,0.9)" }}
+              as={Link}
+              to={"your-classes"}
+            >
               Hershy's Book
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="navbar" />
@@ -24,13 +38,26 @@ const AppNavbar = () => {
                 {/* if user is logged in show saved books and logout */}
 
                 <>
-                  <Nav.Link as={Link} to="/your-classes">
+                  <Nav.Link
+                    style={{ color: "rgba(255,255,255,0.9)" }}
+                    as={Link}
+                    to="/your-classes"
+                  >
                     Your Classes
                   </Nav.Link>
-                  <Nav.Link as={Link} to="/dashboard">
+                  <Nav.Link
+                    style={{ color: "rgba(255,255,255,0.9)" }}
+                    as={Link}
+                    to="/dashboard"
+                  >
                     Dashboard
                   </Nav.Link>
-                  <Nav.Link onClick={Auth.logout}>Logout</Nav.Link>
+                  <Nav.Link
+                    style={{ color: "rgba(255,255,255,0.9)" }}
+                    onClick={Auth.logout}
+                  >
+                    Logout
+                  </Nav.Link>
                 </>
               </Nav>
             </Navbar.Collapse>

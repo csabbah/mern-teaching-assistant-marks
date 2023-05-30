@@ -19,7 +19,6 @@ const Marks = () => {
   const [addClass] = useMutation(ADD_CLASS);
 
   const handleAddClass = async (singleClass) => {
-    console.log(singleClass);
     try {
       await addClass({
         variables: { classToSave: singleClass },
@@ -31,7 +30,9 @@ const Marks = () => {
   };
 
   // TODO When reviewing classes, if you update the class title and year, it doesn't update it.
-  // TODO This is because the data we are viewing is from the fullClass object
+  // TODO       This is because the data we are viewing is from the fullClass object
+
+  // TODO Make the nav bar transparent with a blur backdrop
 
   // TODO Create the function to allow users to send progress reports emails to students
 
@@ -40,9 +41,8 @@ const Marks = () => {
   // TODO Add the edit function for units
   // TODO You should be able to add a new project to a unit after the unit has been added
 
-  // Update these to be one object containing all the information in one
-  const [classTitle, setClassTitle] = useState("");
-  const [schoolYear, setSchoolYear] = useState("");
+  const [fullClass, setFullClass] = useState({ title: "", schoolYear: "" });
+
   const [unitTitle, setUnitTitle] = useState("");
 
   let tableProperties = {
@@ -62,8 +62,6 @@ const Marks = () => {
   );
 
   const [units, setUnits] = useState([]);
-
-  const [studentData, setStudentData] = useState({});
 
   const [singleCriteria, setSingleCriteria] = useState({
     label: "",
@@ -87,11 +85,16 @@ const Marks = () => {
   const [allCriterias, setAllCriterias] = useState([]);
 
   const deleteProject = (projectIndex) => {
-    const updateProjects = projects.filter((_, i) => i !== projectIndex);
-    setProjects(updateProjects);
+    const updatedProjects = projects.filter((_, i) => i !== projectIndex);
+    setProjects(updatedProjects);
   };
 
-  const inputRef = useRef(null);
+  const deleteUnit = (unitId) => {
+    const updatedUnits = fullClass.units.filter(
+      (unit) => unit.localId !== unitId
+    );
+    setFullClass({ ...fullClass, units: updatedUnits });
+  };
 
   const [singleProject, setSingleProject] = useState({
     title: "",
@@ -104,8 +107,6 @@ const Marks = () => {
 
   const [addProject, setAddProject] = useState(false);
   const [addSingleClass, setAddSingleClass] = useState(false);
-
-  const [fullClass, setFullClass] = useState({});
 
   const [revealUnitBtn, setRevealUnitBtn] = useState(false);
 
@@ -120,7 +121,6 @@ const Marks = () => {
           criteria.label !== ""
       )
     );
-    console.log(projects);
 
     setRevealUnitBtn(!hasEmptyTitle && allProjectsHaveValidCriterias);
   }, [projects]);
@@ -141,8 +141,7 @@ const Marks = () => {
     }
     if (units.length > 0) {
       setFullClass({
-        title: classTitle,
-        schoolYear,
+        ...fullClass,
         userId,
         units,
       });
@@ -173,9 +172,9 @@ const Marks = () => {
               <h5 style={{ textAlign: "center" }}>Class Title</h5>
               <input
                 onChange={(e) => {
-                  setClassTitle(e.target.value);
+                  setFullClass({ ...fullClass, title: e.target.value });
                 }}
-                value={classTitle}
+                value={fullClass.title}
                 placeholder="Biology"
               ></input>
             </div>
@@ -184,14 +183,14 @@ const Marks = () => {
               <input
                 type="date"
                 onChange={(e) => {
-                  setSchoolYear(e.target.value);
+                  setFullClass({ ...fullClass, schoolYear: e.target.value });
                 }}
               ></input>
             </div>
           </div>
         </section>
         {/* ------------ ----------- ---------- // ? ADDING UNIT TITLE */}
-        {classTitle && schoolYear && (
+        {fullClass.title && fullClass.schoolYear && (
           <section className="add-unit-title">
             <h5>Unit title</h5>
             <input
@@ -277,7 +276,11 @@ const Marks = () => {
                     >
                       <option value="">Select weight</option>
                       {criteriaOptions.map((criteria) => {
-                        return <option value={criteria}>{criteria}</option>;
+                        return (
+                          <option key={criteria} value={criteria}>
+                            {criteria}
+                          </option>
+                        );
                       })}
                     </select>
                   </div>
@@ -361,7 +364,10 @@ const Marks = () => {
                   {allCriterias.length > 0 &&
                     allCriterias.map((criteria, i) => {
                       return (
-                        <div key={i} className="previewWeightsContainer">
+                        <div
+                          key={criteria.localId}
+                          className="previewWeightsContainer"
+                        >
                           <div style={{ marginRight: 20 }}>
                             <p
                               className="previewGradeLabel"
@@ -407,16 +413,7 @@ const Marks = () => {
                                 deleteCriteria(i, criteria.label);
                               }}
                             >
-                              <img
-                                style={{
-                                  width: 12,
-                                  height: 12,
-                                  filter: "invert(100%)",
-                                  objectFit: "contain",
-                                }}
-                                src="/close.png"
-                                alt="close button"
-                              ></img>
+                              X
                             </button>
                           </div>
                         </div>
@@ -428,11 +425,14 @@ const Marks = () => {
                     <button
                       style={{ marginTop: 20 }}
                       onClick={() => {
+                        const localId = Math.floor(Math.random() * 1e9);
+
                         if (allCriterias.length < 1 || !singleProject.title) {
                           setDisplayErr([true, "Missing Project title"]);
                           return;
                         }
                         setSingleProject((prevProject) => ({
+                          localId: localId,
                           ...prevProject,
                           criterias: allCriterias,
                         }));
@@ -446,7 +446,7 @@ const Marks = () => {
                         ]);
                       }}
                     >
-                      Add project to {unitTitle}
+                      Add {singleProject.title} to {unitTitle}
                     </button>
                   )}
               </>
@@ -488,15 +488,14 @@ const Marks = () => {
             >
               {projects.map((project, i) => {
                 return (
-                  <div className="projects-container" key={i}>
+                  <div className="projects-container" key={project.localId}>
                     <div
                       style={{
                         padding: "0px 15px",
                         marginTop: 3,
                         display: "flex",
                         justifyContent: "center",
-                        alignItems: "center",
-                        gap: 5,
+                        gap: 10,
                       }}
                     >
                       <input
@@ -514,20 +513,20 @@ const Marks = () => {
                       ></input>
                       <button
                         style={{
-                          height: 28,
-                          fontSize: 12,
+                          height: 30,
                         }}
                         onClick={() => {
                           deleteProject(i);
                         }}
                       >
-                        Delete
+                        X
                       </button>
                     </div>
                     <div className="projects-inner-container">
                       {project.criterias.map((criteria, i) => {
                         return (
                           <div
+                            key={criteria.localId}
                             className="projects-inner-item"
                             style={{
                               width: "92%",
@@ -541,7 +540,6 @@ const Marks = () => {
                           >
                             <p
                               className="projects-inner-container-label"
-                              key={i}
                               style={{
                                 margin: 0,
                                 fontSize: 14,
@@ -551,7 +549,6 @@ const Marks = () => {
                             </p>
                             <p
                               className="projects-inner-container-letter"
-                              key={i}
                               style={{
                                 margin: 0,
                                 fontSize: 14,
@@ -643,10 +640,7 @@ const Marks = () => {
             {revealUnitBtn && (
               <button
                 onClick={() => {
-                  if (projects.length < 1 || !unitTitle) {
-                    // TODO UPDATE DISPLAY ERR HERE
-                    return;
-                  }
+                  const localId = Math.floor(Math.random() * 1e9);
 
                   setUnits((prevUnits) => [
                     ...prevUnits,
@@ -654,6 +648,7 @@ const Marks = () => {
                       title: unitTitle,
                       themeColor: unitThemeColor,
                       projects: projects,
+                      localId: localId,
                     },
                   ]);
                   setProjects([]);
@@ -661,7 +656,7 @@ const Marks = () => {
                   setUnitThemeColor(tableProperties.colors[0]);
                 }}
               >
-                Add Unit
+                Add {unitTitle} to {fullClass.title}
               </button>
             )}
           </section>
@@ -695,18 +690,35 @@ const Marks = () => {
               {fullClass.units.length > 0 &&
                 fullClass.units.map((singleUnit, i) => {
                   return (
-                    <div key={i}>
+                    <div
+                      style={{ position: "relative" }}
+                      key={singleUnit.localId}
+                    >
                       <div
                         className="preview-project-inner-container"
                         style={{
                           backgroundColor: singleUnit.themeColor,
                           padding: "10px 10px",
-                          boxShadow: "3px 3px 2px 0 rgba(0,0,0,0.2)",
+                          boxShadow: "3px 3px 1px 0 rgba(0,0,0,0.2)",
                         }}
                       >
-                        <h5 style={{ textAlign: "center" }}>
-                          {singleUnit.title}
-                        </h5>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: "100%",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <h5 style={{ margin: 0 }}>{singleUnit.title}</h5>
+                          <button
+                            onClick={() => {
+                              deleteUnit(singleUnit.localId);
+                            }}
+                          >
+                            X
+                          </button>
+                        </div>
                         {singleUnit.projects.map((project, i) => {
                           return (
                             <div
@@ -715,14 +727,22 @@ const Marks = () => {
                                 padding: "5px 10px",
                                 marginTop: 10,
                               }}
-                              key={i}
+                              key={project.localId}
                             >
-                              <p
-                                className="preview-project"
-                                style={{ margin: 0, fontSize: 18 }}
+                              <div
+                                style={{
+                                  width: "100%",
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                }}
                               >
-                                {project.title}
-                              </p>
+                                <p
+                                  className="preview-project"
+                                  style={{ margin: 0, fontSize: 18 }}
+                                >
+                                  {project.title}
+                                </p>
+                              </div>
                               <hr style={{ margin: "5px 0" }}></hr>
                               <div
                                 style={{
@@ -733,7 +753,10 @@ const Marks = () => {
                               >
                                 {project.criterias.map((criteria, i) => {
                                   return (
-                                    <div className="review-classes-project-inner-container">
+                                    <div
+                                      key={criteria.localId}
+                                      className="review-classes-project-inner-container"
+                                    >
                                       <div
                                         style={{
                                           display: "flex",
@@ -743,14 +766,12 @@ const Marks = () => {
                                       >
                                         <p
                                           className="review-class-project-label"
-                                          key={i}
                                           style={{ margin: 0, fontSize: 13 }}
                                         >
                                           {criteria.label}
                                         </p>
                                         <p
                                           className="review-class-project-letter"
-                                          key={i}
                                           style={{ margin: 0, fontSize: 13 }}
                                         >
                                           {criteria.letter}

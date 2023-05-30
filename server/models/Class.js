@@ -17,6 +17,7 @@ const classSchema = new Schema(
         themeColor: {
           type: String,
         },
+        localId: { type: Number },
         projects: [
           {
             title: { type: String },

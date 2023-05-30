@@ -78,7 +78,7 @@ select {
   background-color: rgb(220, 138, 138);
   padding: 30px;
   position: relative;
-  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .add-unit-title {
@@ -88,7 +88,7 @@ select {
   background-color: rgb(220, 176, 138);
   padding: 30px;
   position: relative;
-  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .edit-project {
@@ -98,7 +98,7 @@ select {
   background-color: rgb(220, 209, 138);
   padding: 30px;
   position: relative;
-  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .preview-projects {
@@ -109,17 +109,17 @@ select {
   background-color: rgb(150, 220, 138);
   padding: 30px;
   position: relative;
-  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .preview-units {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: rgb(107, 217, 186);
+  background-color: rgba(98, 207, 193, 0.796);
   padding: 30px;
   position: relative;
-  box-shadow: 2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 .student-names p:nth-child(even) {
@@ -364,7 +364,7 @@ img {
 }
 
 .projects-container-input {
-  width: 250px;
+  width: 285px;
 }
 
 .projects-inner-container {
@@ -388,7 +388,7 @@ img {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 250px;
+  width: 320px;
 }
 
 @media screen and (max-width: 700px) {

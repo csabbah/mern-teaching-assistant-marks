@@ -47,12 +47,14 @@ const typeDefs = gql`
 
   type Projects {
     _id: ID
+    localId: Int
     title: String
     criterias: [Criterias]
   }
 
   type Unit {
     _id: ID
+    localId: Int
     title: String
     themeColor: String
     projects: [Projects]
@@ -74,11 +76,13 @@ const typeDefs = gql`
   }
 
   input projectInput {
+    localId: Int
     title: String
     criterias: [criteriasInput]
   }
 
   input unitInput {
+    localId: Int
     title: String
     themeColor: String
     projects: [projectInput]
