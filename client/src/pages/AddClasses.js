@@ -29,11 +29,6 @@ const Marks = () => {
     }
   };
 
-  // TODO When reviewing classes, if you update the class title and year, it doesn't update it.
-  // TODO       This is because the data we are viewing is from the fullClass object
-
-  // TODO Make the nav bar transparent with a blur backdrop
-
   // TODO Create the function to allow users to send progress reports emails to students
 
   // TODO Instead of rendering using multiple single useState variables, make it one object completely

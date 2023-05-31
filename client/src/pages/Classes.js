@@ -524,6 +524,19 @@ const Classes = () => {
           <p
             style={{ margin: 0, fontSize: parseInt(selectedFontSize) }}
           >{`${singleClass.title} - ${singleClass.schoolYear}`}</p>
+          <p
+            onClick={() => {
+              history.push("/dashboard", { classId: singleClass._id });
+            }}
+            style={{
+              userSelect: "none",
+              cursor: "pointer",
+              margin: 0,
+              fontSize: parseInt(selectedFontSize),
+            }}
+          >
+            Edit Class
+          </p>
         </div>
       </th>
     );
@@ -1647,7 +1660,6 @@ const Classes = () => {
               </button>
             </div>
           )}
-
           <div
             style={{
               display: "flex",

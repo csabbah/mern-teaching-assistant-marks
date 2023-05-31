@@ -49,6 +49,14 @@ export const ADD_CLASS = gql`
   }
 `;
 
+export const DELETE_CLASS = gql`
+  mutation deleteClass($classId: String) {
+    deleteClass(classId: $classId) {
+      _id
+    }
+  }
+`;
+
 export const ADD_STUDENT = gql`
   mutation addStudent($studentToSave: studentInput) {
     addStudent(studentToSave: $studentToSave) {

@@ -53,6 +53,15 @@ const resolvers = {
 
       return singleClass;
     },
+    deleteClass: async (parent, { classId }) => {
+      const deleteClass = await Class.findByIdAndDelete(classId);
+
+      if (!deleteClass) {
+        throw new Error("Class not found");
+      }
+
+      return deleteClass;
+    },
     addStudent: async (parent, { studentToSave }) => {
       const singleStudent = await Student.create(studentToSave);
 
