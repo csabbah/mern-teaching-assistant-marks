@@ -85,6 +85,11 @@ textarea {
   z-index: 1;
 }
 
+input[type="range"] {
+  width: 100px;
+  padding-left: 0;
+}
+
 select {
   border: none;
   border-radius: 5px;

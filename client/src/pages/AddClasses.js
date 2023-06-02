@@ -42,12 +42,11 @@ const Marks = () => {
 
   let tableProperties = {
     colors: [
-      "rgba(0,0,0,0.2)", // dark grey
-      "rgba(190,237,255,0.5)", // Light Blue
-      "rgba(280,214,225,0.5)", // Light Pink
-      "rgba(280,237,25,0.5)", // Gold
-      "rgba(280,181,25,0.5)", // Orange
-      "rgba(159,262,159,0.5)", // Light Green
+      "rgba(150,150,160,0.475)", // dark grey
+      "rgba(190,237,255,0.475)", // Light Blue
+      "rgba(280,214,225,0.475)", // Light Pink
+      "rgba(210,181,25,0.475)", // Orange
+      "rgba(110,180,120,0.475)", // Light Green
     ],
   };
 

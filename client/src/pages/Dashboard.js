@@ -9,7 +9,6 @@ import { useMutation } from "@apollo/client";
 import { DELETE_CLASS } from "../utils/mutations";
 import { useLocation } from "react-router-dom";
 
-// TODO Allow users to update Classes here and also students? (Maybe that's not necessary?)
 const Dashboard = () => {
   const location = useLocation();
   const receivedData = location.state;

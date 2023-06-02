@@ -403,34 +403,42 @@ const Classes = () => {
 
   const [studentData, setStudentData] = useState({});
 
-  // TODO Create a local storage function that saves the borderWidth size and extracts it
-  //      TODO Not worth pushing this data to database
+  function storeToLocal(key, object) {
+    const objectString = JSON.stringify(object);
+    localStorage.setItem(key, objectString);
+  }
 
-  // TODO Fixed the position of the decimal button? Make the whole cell touchable
-  const [borderWidth, setBorderWIdth] = useState(1);
-  const [selectedFontSize, setSelectedFontSize] = useState(15);
+  function retrieveLocal(key) {
+    const objectString = localStorage.getItem(key);
+    return JSON.parse(objectString);
+  }
+
+  const [tableCustomProps, setTableCustomProps] = useState({
+    borderWidth: retrieveLocal("tableProperties").borderWidth
+      ? retrieveLocal("tableProperties").borderWidth
+      : 1,
+    fontSize: retrieveLocal("tableProperties").fontSize
+      ? retrieveLocal("tableProperties").fontSize
+      : 15,
+  });
+
+  useEffect(() => {
+    storeToLocal("tableProperties", tableCustomProps);
+  }, [tableCustomProps]);
 
   let tableProperties = {
     defaultColor: "#333",
     padding: `5px 8px`,
-    border: `${borderWidth}px solid #333`,
+    border: `${tableCustomProps.borderWidth}px solid #333`,
     final: {
-      top: "rgba(0, 255, 0, 0.4)",
+      top: "rgba(0, 255, 0, 0.6)",
       passing: "rgba(255, 255, 255, 0.4)",
       failing: "rgba(255, 0, 0, 0.4)",
     },
     brightnessRange: "100",
-    colors: [
-      "rgba(280,280,280,0.5)", // white
-      "rgba(190,237,255,0.5)", // Light Blue
-      "rgba(280,214,225,0.5)", // Light Pink
-      "rgba(210,181,25,0.5)", // Orange
-      "rgba(12,213,150,0.5)", // Light Green
-    ],
   };
 
   const [viewingTable, setViewingTable] = useState(0);
-
   const [decimal, setDecimal] = useState(false);
 
   useEffect(() => {
@@ -510,7 +518,7 @@ const Classes = () => {
         colSpan={4 + classesColSpan}
         style={{
           backgroundColor: tableProperties.defaultColor,
-          border: `${borderWidth}px solid #333`,
+          border: `${tableCustomProps.borderWidth}px solid #333`,
         }}
       >
         <div
@@ -522,7 +530,7 @@ const Classes = () => {
           }}
         >
           <p
-            style={{ margin: 0, fontSize: parseInt(selectedFontSize) }}
+            style={{ margin: 0, fontSize: parseInt(tableCustomProps.fontSize) }}
           >{`${singleClass.title} - ${singleClass.schoolYear}`}</p>
           <p
             onClick={() => {
@@ -532,7 +540,7 @@ const Classes = () => {
               userSelect: "none",
               cursor: "pointer",
               margin: 0,
-              fontSize: parseInt(selectedFontSize),
+              fontSize: parseInt(tableCustomProps.fontSize),
             }}
           >
             Edit Class
@@ -559,7 +567,7 @@ const Classes = () => {
             border: tableProperties.border,
             textAlign: "center",
             color: tableProperties.defaultColor,
-            fontSize: parseInt(selectedFontSize) + 3,
+            fontSize: parseInt(tableCustomProps.fontSize) + 3,
           }}
         >
           {unit.title}
@@ -578,7 +586,7 @@ const Classes = () => {
               border: tableProperties.border,
               textAlign: "center",
               color: tableProperties.defaultColor,
-              fontSize: parseInt(selectedFontSize) + 2,
+              fontSize: parseInt(tableCustomProps.fontSize) + 2,
             }}
           >
             {project.title}
@@ -595,7 +603,7 @@ const Classes = () => {
                 border: tableProperties.border,
                 cursor: "pointer",
                 userSelect: "none",
-                fontSize: parseInt(selectedFontSize),
+                fontSize: parseInt(tableCustomProps.fontSize),
               }}
               onClick={() => {
                 handleSort(criteria.letter, singleClass);
@@ -625,7 +633,7 @@ const Classes = () => {
                     className="gradeWeight"
                     style={{
                       pointerEvents: "none",
-                      fontSize: parseInt(selectedFontSize),
+                      fontSize: parseInt(tableCustomProps.fontSize),
                     }}
                   >
                     <span>Weight {criteria.weight}%</span>
@@ -687,7 +695,7 @@ const Classes = () => {
                   border: "none",
                   color: "white",
                   backgroundColor: "#777",
-                  fontSize: parseInt(selectedFontSize),
+                  fontSize: parseInt(tableCustomProps.fontSize),
                 }}
                 placeholder="Search student"
               ></input>
@@ -705,13 +713,15 @@ const Classes = () => {
                   border: "none",
                   backgroundColor: "transparent",
                   color: "#ffffff",
+                  width: "100%",
+                  padding: "5px 0",
                 }}
                 onClick={() => setDecimal(!decimal)}
               >
                 {!decimal ? (
                   <h5
                     style={{
-                      fontSize: parseInt(selectedFontSize),
+                      fontSize: parseInt(tableCustomProps.fontSize),
                       margin: 0,
                       alignSelf: "center",
                     }}
@@ -720,7 +730,10 @@ const Classes = () => {
                   </h5>
                 ) : (
                   <h5
-                    style={{ fontSize: parseInt(selectedFontSize), margin: 0 }}
+                    style={{
+                      fontSize: parseInt(tableCustomProps.fontSize),
+                      margin: 0,
+                    }}
                   >
                     0
                   </h5>
@@ -745,7 +758,7 @@ const Classes = () => {
                 textTransform: "uppercase",
                 cursor: "pointer",
                 userSelect: "none",
-                fontSize: parseInt(selectedFontSize),
+                fontSize: parseInt(tableCustomProps.fontSize),
               }}
               onClick={() => handleSort("studentName", singleClass)}
             >
@@ -769,7 +782,7 @@ const Classes = () => {
                 textTransform: "uppercase",
                 cursor: "pointer",
                 userSelect: "none",
-                fontSize: parseInt(selectedFontSize),
+                fontSize: parseInt(tableCustomProps.fontSize),
                 padding: "2px 5px",
               }}
               onClick={() => handleSort("finalMark", singleClass)}
@@ -881,7 +894,7 @@ const Classes = () => {
         style={{
           width: "7%",
           cursor: "pointer",
-          fontSize: parseInt(selectedFontSize),
+          fontSize: parseInt(tableCustomProps.fontSize),
           // backgroundColor: tableProperties.final.failing,
           border: tableProperties.border,
           position: "relative",
@@ -923,9 +936,9 @@ const Classes = () => {
       <td
         key={i + 1}
         style={{
-          fontSize: parseInt(selectedFontSize) - 2,
-          borderBottom: `${borderWidth}px solid #333`,
-          borderTop: `${borderWidth}px solid #333`,
+          fontSize: parseInt(tableCustomProps.fontSize) - 2,
+          borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
+          borderTop: `${tableCustomProps.borderWidth}px solid #333`,
           position: "relative",
           width: "20%",
         }}
@@ -982,7 +995,7 @@ const Classes = () => {
             backgroundColor: "transparent",
             outline: "none",
             textAlign: "center",
-            fontSize: parseInt(selectedFontSize),
+            fontSize: parseInt(tableCustomProps.fontSize),
           }}
           value={
             studentData[singleClass._id] && studentData[singleClass._id].name
@@ -1001,7 +1014,7 @@ const Classes = () => {
                 right: "50%",
                 transform: "translateX(50%) translateY(50%)",
                 color: "red",
-                fontSize: parseInt(selectedFontSize) - 2,
+                fontSize: parseInt(tableCustomProps.fontSize) - 2,
                 pointerEvents: "none",
               }}
             >
@@ -1037,8 +1050,8 @@ const Classes = () => {
               style={{
                 width: "7%",
                 padding: "6px 3px",
-                borderBottom: `${borderWidth}px solid #333`,
-                borderTop: `${borderWidth}px solid #333`,
+                borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
+                borderTop: `${tableCustomProps.borderWidth}px solid #333`,
               }}
             >
               <input
@@ -1106,7 +1119,7 @@ const Classes = () => {
                   backgroundColor: "transparent",
                   outline: "none",
                   textAlign: "center",
-                  fontSize: parseInt(selectedFontSize) - 1,
+                  fontSize: parseInt(tableCustomProps.fontSize) - 1,
                   paddingLeft: 0,
                 }}
                 value={grade ? grade.mark : 0}
@@ -1124,11 +1137,11 @@ const Classes = () => {
       <td
         key={i + 2}
         style={{
-          borderBottom: `${borderWidth}px solid #333`,
-          borderTop: `${borderWidth}px solid #333`,
-          borderRight: `${borderWidth}px solid #333`,
+          borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
+          borderTop: `${tableCustomProps.borderWidth}px solid #333`,
+          borderRight: `${tableCustomProps.borderWidth}px solid #333`,
           width: "10%",
-          fontSize: parseInt(selectedFontSize),
+          fontSize: parseInt(tableCustomProps.fontSize),
         }}
       >
         {grades === undefined || grades.length === 0
@@ -1176,8 +1189,8 @@ const Classes = () => {
         <img
           alt="delete student button"
           style={{
-            width: parseInt(selectedFontSize) + 5,
-            height: parseInt(selectedFontSize) + 5,
+            width: parseInt(tableCustomProps.fontSize) + 5,
+            height: parseInt(tableCustomProps.fontSize) + 5,
           }}
           src="/delete.png"
         ></img>
@@ -1191,7 +1204,7 @@ const Classes = () => {
           width: "4%",
           borderTop: tableProperties.border,
           borderBottom: tableProperties.border,
-          borderRight: `${borderWidth}px solid #333`,
+          borderRight: `${tableCustomProps.borderWidth}px solid #333`,
           color: "#FFFFFF",
           textTransform: "uppercase",
           cursor: "pointer",
@@ -1209,8 +1222,8 @@ const Classes = () => {
         <img
           alt="download pdf button"
           style={{
-            width: parseInt(selectedFontSize) + 10,
-            height: parseInt(selectedFontSize) + 10,
+            width: parseInt(tableCustomProps.fontSize) + 10,
+            height: parseInt(tableCustomProps.fontSize) + 10,
           }}
           src="/pdf.png"
         ></img>
@@ -1225,9 +1238,9 @@ const Classes = () => {
           width: "20%",
           padding: "6px 1px",
           position: "relative",
-          fontSize: parseInt(selectedFontSize) - 2,
-          borderBottom: `${borderWidth}px solid #333`,
-          borderTop: `${borderWidth}px solid #333`,
+          fontSize: parseInt(tableCustomProps.fontSize) - 2,
+          borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
+          borderTop: `${tableCustomProps.borderWidth}px solid #333`,
         }}
       >
         <input
@@ -1290,8 +1303,8 @@ const Classes = () => {
                     : grade.mark > 80
                     ? tableProperties.final.top
                     : singleUnit.themeColor,
-                borderBottom: `${borderWidth}px solid #333`,
-                borderTop: `${borderWidth}px solid #333`,
+                borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
+                borderTop: `${tableCustomProps.borderWidth}px solid #333`,
                 width: "7%",
                 position: "relative",
               }}
@@ -1348,7 +1361,7 @@ const Classes = () => {
                     backgroundColor: "transparent",
                     outline: "none",
                     textAlign: "center",
-                    fontSize: parseInt(selectedFontSize) - 1,
+                    fontSize: parseInt(tableCustomProps.fontSize) - 1,
                     paddingLeft: 0,
                   }}
                   defaultValue={grade ? grade.mark : 0}
@@ -1367,22 +1380,18 @@ const Classes = () => {
       <td
         key={student.name + student._id}
         style={{
-          borderBottom: `${borderWidth}px solid #333`,
-          borderTop: `${borderWidth}px solid #333`,
-          borderRight: `${borderWidth}px solid #333`,
-          // backgroundColor:
-          //   grades === null || grades.length === 0
-          //     ? ""
-          //     : calculateAverage(grades, singleClass) < 50
-          //     ? isEvenRow
-          //       ? tableProperties.final.failingDark
-          //       : tableProperties.final.failing
-          //     : calculateAverage(grades, singleClass) > 80
-          //     ? isEvenRow
-          //       ? tableProperties.final.topDark
-          //       : tableProperties.final.top
-          //     : "",
-          fontSize: parseInt(selectedFontSize),
+          borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
+          borderTop: `${tableCustomProps.borderWidth}px solid #333`,
+          borderRight: `${tableCustomProps.borderWidth}px solid #333`,
+          backgroundColor:
+            grades === null || grades.length === 0
+              ? ""
+              : calculateAverage(grades, singleClass) < 50
+              ? tableProperties.final.failing
+              : calculateAverage(grades, singleClass) > 80
+              ? tableProperties.final.top
+              : "",
+          fontSize: parseInt(tableCustomProps.fontSize),
         }}
       >
         {grades === null || grades.length === 0
@@ -1598,13 +1607,16 @@ const Classes = () => {
                   <input
                     style={{ cursor: "pointer" }}
                     onChange={(e) => {
-                      setBorderWIdth(e.target.value);
+                      setTableCustomProps({
+                        ...tableCustomProps,
+                        borderWidth: e.target.value,
+                      });
                     }}
                     type="range"
                     min="0"
                     step={0.5}
                     max="3"
-                    value={borderWidth}
+                    value={tableCustomProps.borderWidth}
                   ></input>
                 </div>
 
@@ -1621,13 +1633,16 @@ const Classes = () => {
                   <input
                     style={{ cursor: "pointer" }}
                     onChange={(e) => {
-                      setSelectedFontSize(e.target.value);
+                      setTableCustomProps({
+                        ...tableCustomProps,
+                        fontSize: e.target.value,
+                      });
                     }}
                     type="range"
                     min="13"
                     step={1}
                     max="16"
-                    value={selectedFontSize}
+                    value={tableCustomProps.fontSize}
                   ></input>
                 </div>
               </div>
