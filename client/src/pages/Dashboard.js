@@ -6,10 +6,13 @@ import { GET_DATA } from "../utils/queries";
 import Auth from "../utils/auth";
 
 import { useMutation } from "@apollo/client";
-import { DELETE_CLASS } from "../utils/mutations";
+import { DELETE_CLASS, DELETE_UNIT } from "../utils/mutations";
 import { useLocation } from "react-router-dom";
 
+import { useHistory } from "react-router-dom";
 const Dashboard = () => {
+  const history = useHistory();
+
   const location = useLocation();
   const receivedData = location.state;
   const [showSingleClass, setShowSingleClass] = useState(
@@ -43,15 +46,79 @@ const Dashboard = () => {
     }
   };
 
+  const [unitIds, setUnitIds] = useState([]);
+  const [deleteUnit] = useMutation(DELETE_UNIT);
+
+  // TODO THIS IS GOOD THE WAY IT IS
+  const handlePreUnitDelete = async (classId, unitId) => {
+    try {
+      unitIds.push(unitId);
+
+      const updatedClasses = fullData.classes.map((singleClass) => {
+        if (singleClass._id === classId) {
+          const updatedUnits = singleClass.units.filter(
+            (unit) => unit._id !== unitId
+          );
+          return { ...singleClass, units: updatedUnits };
+        }
+        return singleClass;
+      });
+
+      setFullData({
+        ...fullData,
+        classes: updatedClasses,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // TODO When adding new student, if you press enter, it should add the user (similar function from the student name block)
+  // TODO         Make sure the missing name is still executing if they you try to press enter on a row with an empty name
+
+  // TODO IMPORTANT - WHEN DELETING UNITS, THE PREVIOUS FINAL MARK DOESN'T GET UPDATED?? FIX THIS, MAKE SURE ALL STUDENT MODEL FINAL MARKS ARE UPDATED
+
+  // TODO THIS NEEDS TO BE UNIVERSAL BECAUSE, WHEN CONFIRMING, USERS MIGHT ALSO UPDATE CLASS TITLE, PROJECT ETC.
+  // TODO Rename to 'handleConfirm', the resolver should be 'updateClass'
+  const handleDeleteUnit = async (classId) => {
+    // reset unit ids
+    setUnitIds([]);
+
+    try {
+      await deleteUnit({
+        variables: { classId, unitIds },
+      });
+
+      // ? Since we are using the filter method...
+      const updatedClasses = fullData.classes.filter((singleClass) => {
+        if (singleClass._id === classId) {
+          // ? If the result returns false, it removes it from the array
+          return singleClass.units.length > 0;
+        }
+        // ? Otherwise, if true, it keeps that class
+        return true; // Keep other classes
+      });
+
+      setFullData({
+        ...fullData,
+        classes: updatedClasses,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const [editMode, setEditMode] = useState([false, 0]);
 
+  const [cancelledChanges, setCancelledChanges] = useState(false);
   useEffect(() => {
     refetch();
+    setCancelledChanges(false);
 
     if (data && data.fullData) {
       setFullData(data.fullData);
     }
-  }, [data, refetch]);
+  }, [data, refetch, cancelledChanges]);
 
   useEffect(() => {
     document.title = "Hershy - Dashboard";
@@ -113,7 +180,6 @@ const Dashboard = () => {
                 fontSize: 18,
                 cursor: "pointer",
                 userSelect: "none",
-
                 borderBottom:
                   viewing === item
                     ? "2px solid rgba(1,75,255,0.5)"
@@ -126,7 +192,16 @@ const Dashboard = () => {
           );
         })}
       </div>
-
+      {viewing === "Classes" && (
+        <button
+          onClick={() => {
+            history.push("/add-classes");
+          }}
+          style={{ marginBottom: 15 }}
+        >
+          Add new class
+        </button>
+      )}
       {viewing === "Classes" && !showSingleClass && (
         <div
           style={{
@@ -134,17 +209,24 @@ const Dashboard = () => {
             flexWrap: "wrap",
             width: "100vw",
             justifyContent: "center",
-            gap: 40,
+            gap: 30,
+            marginBottom: 100,
           }}
         >
           {fullData.classes.map((singleClass, i) => {
             return (
               <div
+                className={`classWrapper ${
+                  editMode[0] && editMode[1] === singleClass._id
+                    ? "active"
+                    : !editMode[0]
+                    ? ""
+                    : "inactive"
+                }`}
                 key={i}
                 style={{
-                  borderRadius: 10,
-                  border: "2px solid rgba(0,0,0,0.2)",
-                  boxShadow: "2px 2px 5px 0 rgba(0,0,0,0.3)",
+                  borderRadius: 5,
+                  boxShadow: "2px 2px 2px 0 rgba(0,0,0,0.1)",
                   padding: 20,
                   display: "flex",
                   flexDirection: "column",
@@ -155,26 +237,23 @@ const Dashboard = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    marginBottom: "15px",
                   }}
                 >
                   {editMode[0] && editMode[1] === singleClass._id ? (
-                    <input defaultValue={singleClass.title}></input>
+                    <input
+                      style={{ width: "100%" }}
+                      defaultValue={singleClass.title}
+                    ></input>
                   ) : (
                     <h5 style={{ margin: 0 }}>{singleClass.title}</h5>
                   )}
-                  {editMode[0] && editMode[1] === singleClass._id ? (
-                    <button
-                      onClick={() => handleDeleteClass(singleClass._id)}
-                      style={{ fontSize: 14 }}
-                    >
-                      Delete Class
-                    </button>
-                  ) : (
+                  {!editMode[0] && (
                     <button
                       onClick={() => setEditMode([true, singleClass._id])}
                       style={{ fontSize: 14 }}
                     >
-                      Edit Class
+                      Edit
                     </button>
                   )}
                 </div>
@@ -183,11 +262,11 @@ const Dashboard = () => {
                     <div
                       style={{
                         position: "relative",
-                        margin: "15px 0",
+                        margin: "0",
                         marginBottom:
                           i === singleClass.units.length - 1 ? 0 : 15,
                         backgroundColor: "rgba(255,255,255,0.5)",
-                        boxShadow: "2px 2px 2px 0 rgba(0,0,0,0.3)",
+                        boxShadow: "2px 2px 2px 0 rgba(0,0,0,0.)",
                       }}
                       key={unit._id}
                     >
@@ -202,20 +281,34 @@ const Dashboard = () => {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            width: "100%",
                             justifyContent: "space-between",
                           }}
                         >
                           {editMode[0] && editMode[1] === singleClass._id ? (
-                            <>
-                              <input defaultValue={unit.title}></input>
+                            <div
+                              style={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                gap: 10,
+                              }}
+                            >
+                              <input
+                                style={{ width: "100%" }}
+                                defaultValue={unit.title}
+                              ></input>
                               <button
                                 style={{ fontSize: 14 }}
-                                onClick={() => {}}
+                                onClick={() => {
+                                  handlePreUnitDelete(
+                                    singleClass._id,
+                                    unit._id
+                                  );
+                                }}
                               >
                                 X
                               </button>
-                            </>
+                            </div>
                           ) : (
                             <p style={{ margin: 0 }}>{unit.title}</p>
                           )}
@@ -236,11 +329,31 @@ const Dashboard = () => {
                                     width: "100%",
                                     display: "flex",
                                     justifyContent: "space-between",
+                                    marginTop: 3,
+                                    marginBottom: 9,
                                   }}
                                 >
                                   {editMode[0] &&
                                   editMode[1] === singleClass._id ? (
-                                    <input defaultValue={project.title}></input>
+                                    <div
+                                      style={{
+                                        width: "100%",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        gap: 10,
+                                      }}
+                                    >
+                                      <input
+                                        style={{ width: "100%" }}
+                                        defaultValue={project.title}
+                                      ></input>
+                                      <button
+                                        style={{ fontSize: 14 }}
+                                        onClick={() => {}}
+                                      >
+                                        X
+                                      </button>
+                                    </div>
                                   ) : (
                                     <p
                                       className="preview-project"
@@ -304,14 +417,41 @@ const Dashboard = () => {
                   );
                 })}
                 {editMode[0] && editMode[1] === singleClass._id && (
-                  <button
-                    onClick={() => {
-                      setEditMode([false, 0]);
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginTop: 15,
+                      width: "100%",
+                      justifyContent: "space-between",
                     }}
-                    style={{ alignSelf: "center", marginTop: 15 }}
                   >
-                    Confirm Changes
-                  </button>
+                    <button
+                      onClick={() => {
+                        handleDeleteUnit(singleClass._id);
+                        setEditMode([false, 0]);
+                      }}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCancelledChanges(true);
+                        setEditMode([false, 0]);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="redVariant"
+                      onClick={() => {
+                        handleDeleteClass(singleClass._id);
+                        setEditMode([false, 0]);
+                      }}
+                    >
+                      Delete Class
+                    </button>
+                  </div>
                 )}
               </div>
             );
@@ -330,13 +470,19 @@ const Dashboard = () => {
             Show all other classes
           </button>
           <div
+            className={`classWrapper ${
+              editMode[0] && editMode[1] === editClassClicked._id
+                ? "active"
+                : !editMode[0]
+                ? ""
+                : "inactive"
+            }`}
             style={{
-              borderRadius: 10,
-              border: "2px solid rgba(0,0,0,0.2)",
-              boxShadow: "2px 2px 5px 0 rgba(0,0,0,0.3)",
+              borderRadius: 5,
               padding: 20,
               display: "flex",
               flexDirection: "column",
+              boxShadow: "2px 2px 2px 0 rgba(0,0,0,0.1)",
             }}
           >
             <div
@@ -344,26 +490,23 @@ const Dashboard = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
+                marginBottom: "15px",
               }}
             >
               {editMode[0] && editMode[1] === editClassClicked._id ? (
-                <input defaultValue={editClassClicked.title}></input>
+                <input
+                  style={{ width: "100%" }}
+                  defaultValue={editClassClicked.title}
+                ></input>
               ) : (
                 <h5 style={{ margin: 0 }}>{editClassClicked.title}</h5>
               )}
-              {editMode[0] && editMode[1] === editClassClicked._id ? (
-                <button
-                  onClick={() => handleDeleteClass(editClassClicked._id)}
-                  style={{ fontSize: 14 }}
-                >
-                  Delete Class
-                </button>
-              ) : (
+              {!editMode[0] && (
                 <button
                   onClick={() => setEditMode([true, editClassClicked._id])}
                   style={{ fontSize: 14 }}
                 >
-                  Edit Class
+                  Edit
                 </button>
               )}
             </div>
@@ -372,17 +515,20 @@ const Dashboard = () => {
                 <div
                   style={{
                     position: "relative",
-                    margin: "15px 0",
+                    margin: "0",
                     marginBottom:
                       i === editClassClicked.units.length - 1 ? 0 : 15,
                     backgroundColor: "rgba(255,255,255,0.5)",
-                    boxShadow: "2px 2px 2px 0 rgba(0,0,0,0.3)",
                   }}
                   key={unit._id}
                 >
                   <div
                     className="preview-project-inner-container"
                     style={{
+                      width:
+                        editMode[0] && editMode[1] === editClassClicked._id
+                          ? "100%"
+                          : "",
                       backgroundColor: unit.themeColor,
                       padding: "10px 10px",
                     }}
@@ -396,12 +542,30 @@ const Dashboard = () => {
                       }}
                     >
                       {editMode[0] && editMode[1] === editClassClicked._id ? (
-                        <>
-                          <input defaultValue={unit.title}></input>
-                          <button style={{ fontSize: 14 }} onClick={() => {}}>
+                        <div
+                          style={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 10,
+                          }}
+                        >
+                          <input
+                            style={{ width: "100%" }}
+                            defaultValue={unit.title}
+                          ></input>
+                          <button
+                            style={{ fontSize: 14 }}
+                            onClick={() => {
+                              handlePreUnitDelete(
+                                editClassClicked._id,
+                                unit._id
+                              );
+                            }}
+                          >
                             X
                           </button>
-                        </>
+                        </div>
                       ) : (
                         <p style={{ margin: 0 }}>{unit.title}</p>
                       )}
@@ -422,11 +586,31 @@ const Dashboard = () => {
                                 width: "100%",
                                 display: "flex",
                                 justifyContent: "space-between",
+                                marginTop: 3,
+                                marginBottom: 9,
                               }}
                             >
                               {editMode[0] &&
                               editMode[1] === editClassClicked._id ? (
-                                <input defaultValue={project.title}></input>
+                                <div
+                                  style={{
+                                    width: "100%",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    gap: 10,
+                                  }}
+                                >
+                                  <input
+                                    style={{ width: "100%" }}
+                                    defaultValue={project.title}
+                                  ></input>
+                                  <button
+                                    style={{ fontSize: 14 }}
+                                    onClick={() => {}}
+                                  >
+                                    X
+                                  </button>
+                                </div>
                               ) : (
                                 <p
                                   className="preview-project"
@@ -490,14 +674,38 @@ const Dashboard = () => {
               );
             })}
             {editMode[0] && editMode[1] === editClassClicked._id && (
-              <button
-                onClick={() => {
-                  setEditMode([false, 0]);
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginTop: 15,
+                  width: "100%",
+                  justifyContent: "space-between",
                 }}
-                style={{ alignSelf: "center", marginTop: 15 }}
               >
-                Confirm Changes
-              </button>
+                <button
+                  onClick={() => {
+                    handleDeleteUnit(editClassClicked._id);
+                    setEditMode([false, 0]);
+                  }}
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => {
+                    setCancelledChanges(true);
+                    setEditMode([false, 0]);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="redVariant"
+                  onClick={() => handleDeleteClass(editClassClicked._id)}
+                >
+                  Delete Class
+                </button>
+              </div>
             )}
           </div>
         </>

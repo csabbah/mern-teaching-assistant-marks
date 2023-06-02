@@ -7,6 +7,8 @@ import { useHistory } from "react-router-dom";
 
 import Auth from "../utils/auth";
 
+// TODO Update the unit theme colors, not aesthetically pleasing.
+
 // TODO IMPORTANT - MAKE THIS ENTIRE PAGE A MODAL
 // TODO THAT WAY WHEN YOU HIT ADD CLASS IN YOUR CLASSES IT'S A SMOOTHER EXPERIENCE)
 const Marks = () => {
@@ -693,7 +695,7 @@ const Marks = () => {
                         style={{
                           backgroundColor: singleUnit.themeColor,
                           padding: "10px 10px",
-                          boxShadow: "3px 3px 1px 0 rgba(0,0,0,0.2)",
+                          boxShadow: "3px 3px 1px 0 rgba(0,0,0,0.1)",
                         }}
                       >
                         <div

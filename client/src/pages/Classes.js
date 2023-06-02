@@ -414,12 +414,18 @@ const Classes = () => {
   }
 
   const [tableCustomProps, setTableCustomProps] = useState({
-    borderWidth: retrieveLocal("tableProperties").borderWidth
-      ? retrieveLocal("tableProperties").borderWidth
-      : 1,
-    fontSize: retrieveLocal("tableProperties").fontSize
-      ? retrieveLocal("tableProperties").fontSize
-      : 15,
+    borderWidth:
+      retrieveLocal("tableProperties") &&
+      retrieveLocal("tableProperties").borderWidth !== null &&
+      retrieveLocal("tableProperties").borderWidth
+        ? retrieveLocal("tableProperties").borderWidth
+        : 1,
+    fontSize:
+      retrieveLocal("tableProperties") &&
+      retrieveLocal("tableProperties").fontSize !== null &&
+      retrieveLocal("tableProperties").fontSize
+        ? retrieveLocal("tableProperties").fontSize
+        : 15,
   });
 
   useEffect(() => {
@@ -925,7 +931,7 @@ const Classes = () => {
       >
         <img
           alt="add student button"
-          style={{ width: 15, height: 15 }}
+          style={{ width: 15, height: 15, userSelect: "none" }}
           src="/add.png"
         ></img>
       </td>
@@ -1018,7 +1024,7 @@ const Classes = () => {
                 pointerEvents: "none",
               }}
             >
-              Missing Student Name
+              Missing name
             </span>
           )}
       </td>

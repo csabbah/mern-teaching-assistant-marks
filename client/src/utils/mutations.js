@@ -57,6 +57,14 @@ export const DELETE_CLASS = gql`
   }
 `;
 
+export const DELETE_UNIT = gql`
+  mutation deleteUnit($classId: String!, $unitIds: [String]) {
+    deleteUnit(classId: $classId, unitIds: $unitIds) {
+      _id
+    }
+  }
+`;
+
 export const ADD_STUDENT = gql`
   mutation addStudent($studentToSave: studentInput) {
     addStudent(studentToSave: $studentToSave) {

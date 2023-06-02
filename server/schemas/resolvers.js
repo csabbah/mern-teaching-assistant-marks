@@ -62,6 +62,26 @@ const resolvers = {
 
       return deleteClass;
     },
+    deleteUnit: async (parent, { classId, unitIds }) => {
+      const updateResult = await Class.updateOne(
+        { _id: classId },
+        { $pull: { units: { _id: { $in: unitIds } } } }
+      );
+
+      if (updateResult.nModified === 0) {
+        throw new Error("Class or units not found");
+      }
+
+      // Check if the class has any remaining units
+      const classWithUnits = await Class.findById(classId);
+      if (classWithUnits.units.length === 0) {
+        // Remove the class if no units remaining
+        await Class.findByIdAndDelete(classId);
+        return "Units and class deleted successfully";
+      }
+
+      return "Units deleted successfully";
+    },
     addStudent: async (parent, { studentToSave }) => {
       const singleStudent = await Student.create(studentToSave);
 

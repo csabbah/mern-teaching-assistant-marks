@@ -118,6 +118,7 @@ const typeDefs = gql`
     addUser(email: String!, password: String!): Auth
     addClass(classToSave: classInput): Class
     deleteClass(classId: String): Class
+    deleteUnit(classId: String, unitIds: [String]): Class
     addStudent(studentToSave: studentInput): Student
     deleteStudent(studentId: String): Student
     updateStudentGrade(
