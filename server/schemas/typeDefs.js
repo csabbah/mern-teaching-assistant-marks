@@ -66,6 +66,7 @@ const typeDefs = gql`
     title: String
     userId: String
     units: [Unit]
+    studentIds: [String]
   }
 
   input criteriasInput {
@@ -93,6 +94,7 @@ const typeDefs = gql`
     title: String
     userId: String
     units: [unitInput]
+    studentIds: [String]
   }
 
   input gradesInput {
@@ -120,7 +122,7 @@ const typeDefs = gql`
     deleteClass(classId: String): Class
     deleteUnit(classId: String, unitIds: [String]): Class
     addStudent(studentToSave: studentInput): Student
-    deleteStudent(studentId: String): Student
+    deleteStudent(studentId: String, classId: String): Student
     updateStudentGrade(
       studentId: String
       mark: Int

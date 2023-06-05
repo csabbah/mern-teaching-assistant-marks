@@ -54,13 +54,16 @@ const resolvers = {
       return singleClass;
     },
     deleteClass: async (parent, { classId }) => {
-      const deleteClass = await Class.findByIdAndDelete(classId);
+      const deletedClass = await Class.findByIdAndDelete(classId);
 
-      if (!deleteClass) {
+      // Remove all student models associated with the deleted class
+      await Student.deleteMany({ _id: { $in: deletedClass.studentIds } });
+
+      if (!deletedClass) {
         throw new Error("Class not found");
       }
 
-      return deleteClass;
+      return deletedClass;
     },
     deleteUnit: async (parent, { classId, unitIds }) => {
       const updateResult = await Class.updateOne(
@@ -83,13 +86,26 @@ const resolvers = {
       return "Units deleted successfully";
     },
     addStudent: async (parent, { studentToSave }) => {
+      // Create the student
       const singleStudent = await Student.create(studentToSave);
+      // Add them to the associated class
+      await Class.findOneAndUpdate(
+        { _id: studentToSave.classId },
+        { $push: { studentIds: singleStudent._id } },
+        { new: true }
+      );
 
       return singleStudent;
     },
 
-    deleteStudent: async (parent, { studentId }) => {
+    deleteStudent: async (parent, { studentId, classId }) => {
       const deletedStudent = await Student.findByIdAndDelete(studentId);
+
+      await Class.findOneAndUpdate(
+        { _id: classId },
+        { $pull: { studentIds: studentId } },
+        { new: true }
+      );
 
       if (!deletedStudent) {
         throw new Error("Student not found");

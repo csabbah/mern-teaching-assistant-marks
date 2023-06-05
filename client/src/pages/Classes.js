@@ -80,10 +80,10 @@ const Classes = () => {
   };
 
   const [deleteStudent] = useMutation(DELETE_STUDENT);
-  const handleDeleteStudent = async (studentId) => {
+  const handleDeleteStudent = async (studentId, classId) => {
     try {
       await deleteStudent({
-        variables: { userId, studentId },
+        variables: { userId, studentId, classId },
       });
 
       const updatedStudents = allStudents.filter(
@@ -721,6 +721,7 @@ const Classes = () => {
                   color: "#ffffff",
                   width: "100%",
                   padding: "5px 0",
+                  boxShadow: "none",
                 }}
                 onClick={() => setDecimal(!decimal)}
               >
@@ -942,7 +943,6 @@ const Classes = () => {
       <td
         key={i + 1}
         style={{
-          fontSize: parseInt(tableCustomProps.fontSize) - 2,
           borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
           borderTop: `${tableCustomProps.borderWidth}px solid #333`,
           position: "relative",
@@ -1189,7 +1189,7 @@ const Classes = () => {
           userSelect: "none",
         }}
         onClick={() => {
-          handleDeleteStudent(student._id);
+          handleDeleteStudent(student._id, singleClass._id);
         }}
       >
         <img
@@ -1244,7 +1244,6 @@ const Classes = () => {
           width: "20%",
           padding: "6px 1px",
           position: "relative",
-          fontSize: parseInt(tableCustomProps.fontSize) - 2,
           borderBottom: `${tableCustomProps.borderWidth}px solid #333`,
           borderTop: `${tableCustomProps.borderWidth}px solid #333`,
         }}
@@ -1256,6 +1255,7 @@ const Classes = () => {
             backgroundColor: "transparent",
             outline: "none",
             textAlign: "center",
+            fontSize: parseInt(tableCustomProps.fontSize),
           }}
           onBlur={(e) => {
             setAllStudents((prevStudents) =>

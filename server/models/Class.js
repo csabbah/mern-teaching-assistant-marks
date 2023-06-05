@@ -34,6 +34,7 @@ const classSchema = new Schema(
         ],
       },
     ],
+    studentIds: [{ type: String }],
   },
   {
     toJSON: {

@@ -88,8 +88,8 @@ export const ADD_STUDENT = gql`
 `;
 
 export const DELETE_STUDENT = gql`
-  mutation deleteStudent($studentId: String) {
-    deleteStudent(studentId: $studentId) {
+  mutation deleteStudent($studentId: String, $classId: String) {
+    deleteStudent(studentId: $studentId, classId: $classId) {
       _id
     }
   }
