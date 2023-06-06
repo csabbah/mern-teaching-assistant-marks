@@ -76,17 +76,19 @@ const Dashboard = () => {
   // TODO When adding new student, if you press enter, it should add the user (similar function from the student name block)
   // TODO         Make sure the missing name is still executing if they you try to press enter on a row with an empty name
 
-  // TODO IMPORTANT - WHEN DELETING UNITS, THE PREVIOUS FINAL MARK DOESN'T GET UPDATED?? FIX THIS, MAKE SURE ALL STUDENT MODEL FINAL MARKS ARE UPDATED
-
   // TODO THIS NEEDS TO BE UNIVERSAL BECAUSE, WHEN CONFIRMING, USERS MIGHT ALSO UPDATE CLASS TITLE, PROJECT ETC.
   // TODO Rename to 'handleConfirm', the resolver should be 'updateClass'
-  const handleDeleteUnit = async (classId) => {
+  const handleDeleteUnit = async (classId, allUnits, studentIds) => {
     // reset unit ids
     setUnitIds([]);
 
+    const allOtherUnitIds = allUnits.map((unit) => {
+      return unit._id;
+    });
+
     try {
       await deleteUnit({
-        variables: { classId, unitIds },
+        variables: { classId, unitIds, allUnits: allOtherUnitIds, studentIds },
       });
 
       // ? Since we are using the filter method...
@@ -199,7 +201,7 @@ const Dashboard = () => {
           }}
           style={{ marginBottom: 15 }}
         >
-          Add new class
+          Add class +
         </button>
       )}
       {viewing === "Classes" && !showSingleClass && (
@@ -428,7 +430,11 @@ const Dashboard = () => {
                   >
                     <button
                       onClick={() => {
-                        handleDeleteUnit(singleClass._id);
+                        handleDeleteUnit(
+                          singleClass._id,
+                          singleClass.units,
+                          singleClass.studentIds
+                        );
                         setEditMode([false, 0]);
                       }}
                     >

@@ -16,6 +16,7 @@ export const GET_DATA = gql`
         _id
         schoolYear
         title
+        studentIds
         units {
           _id
           themeColor

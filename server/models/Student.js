@@ -15,6 +15,7 @@ const studentSchema = new Schema(
         mark: { type: Number },
         project: { type: String },
         unit: { type: String },
+        unitId: { type: String },
         weight: { type: Number },
       },
     ],

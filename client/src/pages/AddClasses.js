@@ -462,7 +462,7 @@ const Marks = () => {
                 fullClass.units && fullClass.units.length >= 1 ? 0 : 100,
             }}
           >
-            <h5>Projects for {unitTitle}</h5>
+            <h5 style={{ textAlign: "center" }}>Projects for {unitTitle}</h5>
             <span
               style={{
                 fontSize: 12,
@@ -480,6 +480,7 @@ const Marks = () => {
                 gap: 25,
                 flexWrap: "wrap",
                 justifyContent: "center",
+                width: 425,
               }}
             >
               {projects.map((project, i) => {
@@ -487,11 +488,11 @@ const Marks = () => {
                   <div className="projects-container" key={project.localId}>
                     <div
                       style={{
-                        padding: "0px 15px",
+                        padding: "0px 10px",
                         marginTop: 3,
                         display: "flex",
-                        justifyContent: "center",
-                        gap: 10,
+                        justifyContent: "space-between",
+                        gap: 15,
                       }}
                     >
                       <input
@@ -510,12 +511,13 @@ const Marks = () => {
                       <button
                         style={{
                           height: 30,
+                          fontSize: 14,
                         }}
                         onClick={() => {
                           deleteProject(i);
                         }}
                       >
-                        X
+                        Del Project
                       </button>
                     </div>
                     <div className="projects-inner-container">
@@ -525,12 +527,10 @@ const Marks = () => {
                             key={criteria.localId}
                             className="projects-inner-item"
                             style={{
-                              width: "92%",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
                               padding: "5px 8px",
-
                               backgroundColor: "rgba(0,0,0,0.10)",
                             }}
                           >
@@ -712,7 +712,7 @@ const Marks = () => {
                               deleteUnit(singleUnit.localId);
                             }}
                           >
-                            X
+                            Del Unit
                           </button>
                         </div>
                         {singleUnit.projects.map((project, i) => {

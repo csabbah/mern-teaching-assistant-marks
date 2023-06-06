@@ -228,6 +228,8 @@ tr:hover {
 }
 
 .gradeWeight {
+  position: relative;
+  z-index: 100;
   user-select: none;
   opacity: 0;
   position: absolute;
@@ -401,13 +403,15 @@ img {
   align-items: center;
   margin: 5px 0;
   background-color: rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 3px 2px 0 rgba(0, 0, 0, 0.1);
   padding: 5px 10px;
   width: 425px;
   justify-content: space-between;
 }
 
 .projects-container-input {
-  width: 285px;
+  width: 60%;
 }
 
 .projects-inner-container {
@@ -438,6 +442,10 @@ img {
   border: 2px solid rgba(0, 0, 0, 0.2);
 }
 
+.projects-inner-item {
+  width: 400px;
+}
+
 @media screen and (max-width: 700px) {
   .grid-item img {
     filter: grayscale(0);
@@ -463,10 +471,7 @@ img {
   }
 
   .projects-inner-container {
-    width: 100%;
-  }
-  .projects-inner-item {
-    width: 20%;
+    padding: 0 10px;
   }
 
   .projects-inner-container-letter,
@@ -513,12 +518,8 @@ img {
     width: 75vw;
   }
 
-  .projects-inner-item {
-    width: 220px;
-  }
-
   .projects-container-input {
-    width: 100%;
+    width: 50%;
   }
 }
 

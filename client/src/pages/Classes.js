@@ -98,6 +98,7 @@ const Classes = () => {
   // ? This returns a single students organized FULL grades across multiple units and projects
   const [studentReport, setStudentReport] = useState([]);
 
+  // TODO Get all grades and return a class average, on the report, show median
   const [classAverage, setClassAverage] = useState(0);
 
   // Update this block
@@ -477,6 +478,7 @@ const Classes = () => {
             classId: singleClass._id,
             criteriaId: criteria._id,
             unit: unit.title,
+            unitId: unit._id,
             project: project.title,
             criteria: criteria.label,
             weight: parseInt(criteria.weight),
@@ -844,31 +846,49 @@ const Classes = () => {
     let C = [];
 
     grades.map((grade) => {
-      // Only push grades that are in specific classes
-      if (grade.letter == "K/U" && grade.classId === singleClass._id) {
-        KU.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-      if (grade.letter == "T/I" && grade.classId === singleClass._id) {
-        TI.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-      if (grade.letter == "A" && grade.classId === singleClass._id) {
-        A.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
-      if (grade.letter == "C" && grade.classId === singleClass._id) {
-        C.push({
-          weight: grade.weight / 100,
-          mark: parseInt(grade.mark) * (grade.weight / 100),
-        });
-      }
+      singleClass.units.map((unit) => {
+        // Only push grades that are in specific classes and units
+        if (
+          grade.letter === "K/U" &&
+          grade.classId === singleClass._id &&
+          grade.unit === unit.title
+        ) {
+          KU.push({
+            weight: grade.weight / 100,
+            mark: parseInt(grade.mark) * (grade.weight / 100),
+          });
+        }
+        if (
+          grade.letter === "T/I" &&
+          grade.classId === singleClass._id &&
+          grade.unit === unit.title
+        ) {
+          TI.push({
+            weight: grade.weight / 100,
+            mark: parseInt(grade.mark) * (grade.weight / 100),
+          });
+        }
+        if (
+          grade.letter === "A" &&
+          grade.classId === singleClass._id &&
+          grade.unit === unit.title
+        ) {
+          A.push({
+            weight: grade.weight / 100,
+            mark: parseInt(grade.mark) * (grade.weight / 100),
+          });
+        }
+        if (
+          grade.letter === "C" &&
+          grade.classId === singleClass._id &&
+          grade.unit === unit.title
+        ) {
+          C.push({
+            weight: grade.weight / 100,
+            mark: parseInt(grade.mark) * (grade.weight / 100),
+          });
+        }
+      });
     });
 
     let sumOfKU = KU.reduce((total, grade) => total + grade.mark, 0);
@@ -1102,6 +1122,7 @@ const Classes = () => {
                             classId: singleClass._id,
                             criteriaId: criteria._id,
                             unit: singleUnit.title,
+                            unitId: singleUnit._id,
                             project: project.title,
                             criteria: criteria.label,
                             weight: criteria.weight,
@@ -1380,7 +1401,6 @@ const Classes = () => {
     }
 
     const grades = student.grades ? student.grades : null;
-
     // ? Render this last (this is the final mark column)
     rowData.push(
       <td

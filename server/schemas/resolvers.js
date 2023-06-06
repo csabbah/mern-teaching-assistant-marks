@@ -65,11 +65,20 @@ const resolvers = {
 
       return deletedClass;
     },
-    deleteUnit: async (parent, { classId, unitIds }) => {
+    deleteUnit: async (parent, { classId, unitIds, studentIds, allUnits }) => {
       const updateResult = await Class.updateOne(
         { _id: classId },
         { $pull: { units: { _id: { $in: unitIds } } } }
       );
+
+      const students = await Student.find({ _id: { $in: studentIds } });
+
+      for (const student of students) {
+        student.grades = student.grades.filter((grade) =>
+          allUnits.some((unitId) => unitId === grade.unitId)
+        );
+        await student.save();
+      }
 
       if (updateResult.nModified === 0) {
         throw new Error("Class or units not found");
@@ -80,6 +89,7 @@ const resolvers = {
       if (classWithUnits.units.length === 0) {
         // Remove the class if no units remaining
         await Class.findByIdAndDelete(classId);
+        await Student.deleteMany({ _id: { $in: studentIds } });
         return "Units and class deleted successfully";
       }
 

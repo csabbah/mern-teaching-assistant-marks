@@ -26,6 +26,7 @@ const typeDefs = gql`
     weight: Int
     project: String
     unit: String
+    unitId: String
   }
 
   type Student {
@@ -70,6 +71,7 @@ const typeDefs = gql`
   }
 
   input criteriasInput {
+    _id: ID
     localId: Int
     label: String
     letter: String
@@ -77,12 +79,14 @@ const typeDefs = gql`
   }
 
   input projectInput {
+    _id: ID
     localId: Int
     title: String
     criterias: [criteriasInput]
   }
 
   input unitInput {
+    _id: ID
     localId: Int
     title: String
     themeColor: String
@@ -106,6 +110,7 @@ const typeDefs = gql`
     weight: Int
     project: String
     unit: String
+    unitId: String
   }
   input studentInput {
     userId: String
@@ -120,7 +125,12 @@ const typeDefs = gql`
     addUser(email: String!, password: String!): Auth
     addClass(classToSave: classInput): Class
     deleteClass(classId: String): Class
-    deleteUnit(classId: String, unitIds: [String]): Class
+    deleteUnit(
+      classId: String
+      unitIds: [String]
+      studentIds: [String]
+      allUnits: [String]
+    ): Class
     addStudent(studentToSave: studentInput): Student
     deleteStudent(studentId: String, classId: String): Student
     updateStudentGrade(

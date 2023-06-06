@@ -58,8 +58,18 @@ export const DELETE_CLASS = gql`
 `;
 
 export const DELETE_UNIT = gql`
-  mutation deleteUnit($classId: String!, $unitIds: [String]) {
-    deleteUnit(classId: $classId, unitIds: $unitIds) {
+  mutation deleteUnit(
+    $classId: String!
+    $unitIds: [String]
+    $studentIds: [String]
+    $allUnits: [String]
+  ) {
+    deleteUnit(
+      classId: $classId
+      unitIds: $unitIds
+      studentIds: $studentIds
+      allUnits: $allUnits
+    ) {
       _id
     }
   }
