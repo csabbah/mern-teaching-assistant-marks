@@ -33,6 +33,7 @@ h6 {
   z-index: 1;
 }
 button {
+  user-select: none;
   padding: 3px 15px;
   border: none;
   border-radius: 4px;

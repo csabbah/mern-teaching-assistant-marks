@@ -7,8 +7,6 @@ import { useHistory } from "react-router-dom";
 
 import Auth from "../utils/auth";
 
-// TODO Update the unit theme colors, not aesthetically pleasing.
-
 // TODO IMPORTANT - MAKE THIS ENTIRE PAGE A MODAL
 // TODO THAT WAY WHEN YOU HIT ADD CLASS IN YOUR CLASSES IT'S A SMOOTHER EXPERIENCE)
 const Marks = () => {
@@ -35,20 +33,22 @@ const Marks = () => {
 
   // TODO Instead of rendering using multiple single useState variables, make it one object completely
 
-  // TODO Add the edit function for units
-  // TODO You should be able to add a new project to a unit after the unit has been added
-
   const [fullClass, setFullClass] = useState({ title: "", schoolYear: "" });
 
   const [unitTitle, setUnitTitle] = useState("");
 
   let tableProperties = {
     colors: [
-      "rgba(150,150,160,0.475)", // dark grey
-      "rgba(190,237,255,0.475)", // Light Blue
-      "rgba(280,214,225,0.475)", // Light Pink
-      "rgba(210,181,25,0.475)", // Orange
-      "rgba(110,180,120,0.475)", // Light Green
+      "rgba(255, 255, 0, 0.475)", // Yellow
+      "rgba(255, 165, 0, 0.475)", // Orange
+      "rgba(210, 181, 25, 0.475)",
+      "rgba(280, 214, 225, 0.475)",
+      "rgba(255, 105, 180, 0.475)", // Pink
+      "rgba(160, 10, 255, 0.475)",
+      "rgba(190, 237, 255, 0.475)",
+      "rgba(70, 190, 240, 0.475)", // Steel Blue
+      "rgba(110, 180, 120, 0.475)",
+      "rgba(0, 150, 140, 0.475)", // Teal
     ],
   };
 
@@ -89,8 +89,11 @@ const Marks = () => {
     const updatedUnits = fullClass.units.filter(
       (unit) => unit.localId !== unitId
     );
+    setUnits(updatedUnits);
     setFullClass({ ...fullClass, units: updatedUnits });
   };
+
+  console.log(fullClass);
 
   const [singleProject, setSingleProject] = useState({
     title: "",
@@ -520,7 +523,10 @@ const Marks = () => {
                         Del Project
                       </button>
                     </div>
-                    <div className="projects-inner-container">
+                    <div
+                      style={{ padding: "0px 10px" }}
+                      className="projects-inner-container"
+                    >
                       {project.criterias.map((criteria, i) => {
                         return (
                           <div
@@ -608,7 +614,7 @@ const Marks = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 marginBottom: 20,
-                backgroundColor: "rgba(200, 255, 200, 0.4)",
+                backgroundColor: "rgba(200, 255, 200, 0.8)",
                 padding: "10px 13px",
               }}
             >
